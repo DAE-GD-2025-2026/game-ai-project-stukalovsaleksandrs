@@ -224,13 +224,17 @@ void ALevel_SteeringBehaviors::SetAgentBehavior(ImGui_Agent& Agent)
 	Agent.Behavior.reset();
 
 	// NOTE: In MSVC switch with no cases is a compilation error
+	// TODO: Use a map instead of switch case 
 	switch (static_cast<BehaviorTypes>(Agent.SelectedBehavior))
 	{
 	case BehaviorTypes::Seek:
 		Agent.Behavior = std::make_unique<Seek>();
 		break;
+	case BehaviorTypes::Flee:
+		Agent.Behavior = std::make_unique<Flee>();
+		break;
 	default:
-		assert(false); // Incorrect Agent Behavior gotten during SetAgentBehavior()	
+		assert(false && "Incorrect Agent Behavior gotten during SetAgentBehavior()");
 	}
 
 	UpdateTarget(Agent);

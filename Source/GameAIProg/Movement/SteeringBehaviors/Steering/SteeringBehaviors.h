@@ -34,3 +34,12 @@ public:
 
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
 };
+
+class Flee : public ISteeringBehavior
+{
+public:
+	Flee() = default;
+	virtual ~Flee() = default;
+
+	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+};
