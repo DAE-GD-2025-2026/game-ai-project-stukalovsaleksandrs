@@ -18,7 +18,7 @@ SteeringOutput BlendedSteering::CalculateSteering(float DeltaT, ASteeringAgent& 
 		DrawDebugDirectionalArrow(
 			Agent.GetWorld(),
 			Agent.GetActorLocation(),
-			Agent.GetActorLocation() + FVector{BlendedSteering.LinearVelocity, 0} * (Agent.GetMaxLinearSpeed() * DeltaT),
+			Agent.GetActorLocation() + FVector{BlendedSteering.Direction, 0} * (Agent.GetMaxLinearSpeed() * DeltaT),
 			30.f, FColor::Red
 			);
 

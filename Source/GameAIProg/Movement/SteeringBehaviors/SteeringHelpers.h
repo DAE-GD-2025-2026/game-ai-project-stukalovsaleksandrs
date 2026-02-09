@@ -49,6 +49,7 @@ struct FSteeringParams final //Also used as Target for SteeringBehaviors
 
 	FSteeringParams& operator=(const FSteeringParams& other)
 	{
+		if (other == *this) return *this;
 		Position = other.Position;
 		Orientation = other.Orientation;
 		LinearVelocity = other.LinearVelocity;
@@ -73,19 +74,19 @@ using FTargetData = FSteeringParams; //Alias for SteeringBehavior usage ( Bit cl
 
 struct SteeringOutput final
 {
-	FVector2D LinearVelocity{};
+	FVector2D Direction{};
 	float AngularVelocity{0.f};
 	bool IsValid{true};
 
-	SteeringOutput(const FVector2D& linearVelocity = {0.f, 0.f}, float angularVelocity = {0.f})
+	SteeringOutput(const FVector2D& linearVelocity = {0.f, 0.f}, float const angularVelocity = 0.f)
 	{
-		LinearVelocity = linearVelocity;
+		Direction = linearVelocity;
 		AngularVelocity = angularVelocity;
 	}
 
 	SteeringOutput& operator=(const SteeringOutput& other)
 	{
-		LinearVelocity = other.LinearVelocity;
+		Direction = other.Direction;
 		AngularVelocity = other.AngularVelocity;
 		IsValid = other.IsValid;
 
@@ -94,7 +95,7 @@ struct SteeringOutput final
 
 	SteeringOutput& operator+(const SteeringOutput& other)
 	{
-		LinearVelocity += other.LinearVelocity;
+		Direction += other.Direction;
 		AngularVelocity += other.AngularVelocity;
 
 		return *this;
@@ -102,7 +103,7 @@ struct SteeringOutput final
 
 	SteeringOutput& operator*=(const SteeringOutput& other)
 	{
-		LinearVelocity = LinearVelocity * other.LinearVelocity;
+		Direction = Direction * other.Direction;
 		AngularVelocity = AngularVelocity * other.AngularVelocity;
 
 		return *this;
@@ -110,7 +111,7 @@ struct SteeringOutput final
 
 	SteeringOutput& operator*=(float f)
 	{
-		LinearVelocity = f * LinearVelocity;
+		Direction = f * Direction;
 		AngularVelocity = f * AngularVelocity;
 
 		return *this;
@@ -118,7 +119,7 @@ struct SteeringOutput final
 
 	SteeringOutput& operator/=(float f)
 	{
-		LinearVelocity = LinearVelocity / f;
+		Direction = Direction / f;
 		AngularVelocity = AngularVelocity / f;
 
 		return *this;

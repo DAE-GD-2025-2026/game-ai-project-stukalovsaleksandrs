@@ -222,10 +222,13 @@ void ALevel_SteeringBehaviors::RemoveAgent(unsigned int Index)
 void ALevel_SteeringBehaviors::SetAgentBehavior(ImGui_Agent& Agent)
 {
 	Agent.Behavior.reset();
-	
+
+	// NOTE: In MSVC switch with no cases is a compilation error
 	switch (static_cast<BehaviorTypes>(Agent.SelectedBehavior))
 	{
-	//TODO; Implement behaviors setting here
+	case BehaviorTypes::Seek:
+		Agent.Behavior = std::make_unique<Seek>();
+		break;
 	default:
 		assert(false); // Incorrect Agent Behavior gotten during SetAgentBehavior()	
 	}
@@ -271,7 +274,7 @@ void ALevel_SteeringBehaviors::UpdateTarget(ImGui_Agent& Agent)
 
 void ALevel_SteeringBehaviors::RefreshAgentTargets(unsigned int IndexRemoved)
 {
-	for (UINT i = 0; i < SteeringAgents.size(); ++i)
+	for (unsigned int i = 0; i < SteeringAgents.size(); ++i)
 	{
 		if (i >= IndexRemoved)
 		{
