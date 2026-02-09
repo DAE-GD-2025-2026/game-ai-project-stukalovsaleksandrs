@@ -26,20 +26,44 @@ protected:
 };
 
 // Your own SteeringBehaviors should follow here...
-class Seek : public ISteeringBehavior
+class Seek final : public ISteeringBehavior
 {
 public:
-	Seek() = default;
-	virtual ~Seek() = default;
+	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+};
 
+class Flee final : public ISteeringBehavior
+{
+public:
+	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+};
+
+class Arrive final : public ISteeringBehavior
+{
+public:
+	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+};
+
+class Face final : public ISteeringBehavior
+{
+public:
+	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+};
+
+class Pursuit final : public ISteeringBehavior
+{
+public:
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
 };
 
-class Flee : public ISteeringBehavior
+class Evade final : public ISteeringBehavior
 {
 public:
-	Flee() = default;
-	virtual ~Flee() = default;
+	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+};
 
+class Wander final : public ISteeringBehavior
+{
+public:
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
 };
