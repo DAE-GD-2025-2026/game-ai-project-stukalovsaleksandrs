@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Movement/SteeringBehaviors/SteeringHelpers.h>
-#include "Kismet/KismetMathLibrary.h"
 
 class ASteeringAgent;
 
@@ -42,6 +41,12 @@ class Arrive final : public ISteeringBehavior
 {
 public:
 	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+	
+private:
+	float SlowRadius{400}, TargetRadius{100},
+	MaxSpeed{ -1.f };// Speed cannot be negative,
+	// it's initial value that will be overridden immediately.
+	
 };
 
 class Face final : public ISteeringBehavior

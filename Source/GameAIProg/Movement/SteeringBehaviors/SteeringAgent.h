@@ -52,9 +52,11 @@ public:
 	// Sets default values for this character's properties
 	ASteeringAgent();
 
+	float OldSpeed{};// Used by SetAgentBehavior to restore the maximal speed after it got changed by the Arrive behavior.
+
 protected:
 
-	ISteeringBehavior* SteeringBehavior{nullptr}; // non-owning
+	ISteeringBehavior* SteeringBehavior{}; // non-owning
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

@@ -83,7 +83,7 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 	for (int i{0}; i < SteeringAgents.size(); ++i)
 	{
 		ImGui::PushID(i);
-		ImGui_Agent& a = SteeringAgents[i];
+		ImGui_Agent& Agent = SteeringAgents[i];
 		
 		std::string agentHeader{std::format("Agent {}:", i)};
 		if (ImGui::CollapsingHeader(agentHeader.c_str()))
@@ -92,17 +92,17 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 			//Actor Props
 			if (ImGui::CollapsingHeader("Properties"))
 			{
-				float v = a.Agent->GetMaxLinearSpeed();
+				float v = Agent.Agent->GetMaxLinearSpeed();
 				if (ImGui::SliderFloat("Lin", &v, 0.f, 600.f, "%.2f"))
-					a.Agent->SetMaxLinearSpeed(v);
+					Agent.Agent->SetMaxLinearSpeed(v);
 
-				v = a.Agent->GetMaxAngularSpeed();
+				v = Agent.Agent->GetMaxAngularSpeed();
 				if (ImGui::SliderFloat("Ang", &v, 0.f, 360.f, "%.2f"))
-					a.Agent->SetMaxAngularSpeed(v);
+					Agent.Agent->SetMaxAngularSpeed(v);
 
-				v = a.Agent->GetMass();
+				v = Agent.Agent->GetMass();
 				if (ImGui::SliderFloat("Mass ", &v, 0.f, 100.f, "%.2f"))
-					a.Agent->SetMass(v);
+					Agent.Agent->SetMass(v);
 			}
 			
 			bool bBehaviourModified = false;
@@ -114,7 +114,7 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 			ImGui::PushItemWidth(100);
 
 			// Add the names of your steering behaviors
-			if (ImGui::Combo("", &a.SelectedBehavior, "Seek\0Wander\0Flee\0Arrive\0Evade\0Pursuit", 4))
+			if (ImGui::Combo("", &Agent.SelectedBehavior, "Seek\0Flee\0Arrive\0Face\0Pursuit\0Evade\0Wander", 4))
 			{
 				bBehaviourModified = true;
 			}
@@ -128,7 +128,7 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 			ImGui::SameLine();
 			ImGui::PushItemWidth(100);
 			
-			int selectedTargetOffset = a.SelectedTarget + 1;
+			int selectedTargetOffset = Agent.SelectedTarget + 1;
 			std::string const Label{""};
 			std::string Targets{};
 			for (auto const & Target : TargetLabels)
@@ -138,7 +138,7 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 			}
 			if (ImGui::Combo(Label.c_str(), &selectedTargetOffset, Targets.c_str()))
 			{
-				a.SelectedTarget = selectedTargetOffset - 1;
+				Agent.SelectedTarget = selectedTargetOffset - 1;
 				bBehaviourModified = true;
 			}
 			
@@ -149,7 +149,9 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 			
 			
 			if (bBehaviourModified)
-				SetAgentBehavior(a);
+			{
+				SetAgentBehavior(Agent);
+			}
 
 			if (ImGui::Button("x"))
 			{
@@ -158,10 +160,10 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 
 			ImGui::SameLine(0, 20);
 
-			bool isChecked = a.Agent->GetDebugRenderingEnabled();
+			bool isChecked = Agent.Agent->GetDebugRenderingEnabled();
 			if (ImGui::Checkbox("Debug Rendering", &isChecked))
 			{
-				a.Agent->SetDebugRenderingEnabled(isChecked);
+				Agent.Agent->SetDebugRenderingEnabled(isChecked);
 			}
 
 			ImGui::Unindent();
