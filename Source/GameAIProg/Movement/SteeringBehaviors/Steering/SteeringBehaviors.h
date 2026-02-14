@@ -25,15 +25,17 @@ protected:
 };
 
 // Your own SteeringBehaviors should follow here...
-class Seek final : public ISteeringBehavior
+class Seek : public ISteeringBehavior
 {
 public:
+	~Seek() = default;
 	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
 };
 
-class Flee final : public ISteeringBehavior
+class Flee : public ISteeringBehavior
 {
 public:
+	~Flee() = default;
 	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
 };
 
@@ -64,13 +66,14 @@ private:
 	
 };
 
-class Pursuit final : public ISteeringBehavior
+class Pursuit final : public Seek
 {
 public:
+	// Moves and rotates towards the predicted location of the target 
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
 };
 
-class Evade final : public ISteeringBehavior
+class Evade final : public Flee
 {
 public:
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
@@ -80,4 +83,14 @@ class Wander final : public ISteeringBehavior
 {
 public:
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+
+private:
+	// Radius of a circle for selecting random target points,
+	// where center is the agent's center + agent's front vector times the offset.
+	float const m_TargetCircleRadius{ 200 },
+		m_TargetCircleOffset{ 400 }, 
+		// Max offset between 2 consecutive random angles
+		// NOTE: Added for smoothness
+		m_MaxTargetDegreesOffset{ 1.f };
+	float m_LastTargetDegrees{};
 };

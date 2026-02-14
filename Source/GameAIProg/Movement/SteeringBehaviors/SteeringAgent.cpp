@@ -29,7 +29,7 @@ void ASteeringAgent::Tick(float DeltaSec)
 	if (SteeringBehavior)
 	{
 		SteeringOutput const Output{ SteeringBehavior->CalculateSteering(DeltaSec, *this) };
-		AddMovementInput(FVector{ Output.Direction, 0.f });
+		AddMovementInput(FVector{ Output.Velocity, 0.f });
 		AddAngularVelocity(DeltaSec, Output.DegreesPerSec);
 	}
 }
