@@ -43,8 +43,8 @@ public:
 	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
 	
 private:
-	float SlowRadius{400}, TargetRadius{100},
-	MaxSpeed{ -1.f };// Speed cannot be negative,
+	float m_SlowRadius{400}, m_TargetRadius{100},
+	m_MaxSpeed{ -1.f };// Speed cannot be negative,
 	// it's initial value that will be overridden immediately.
 	
 };
@@ -52,7 +52,16 @@ private:
 class Face final : public ISteeringBehavior
 {
 public:
+	// Rotates the agent to look at the target position by using
+	// AngularVelocity instead of pAgent->SetRotation().
 	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+	
+private:
+	// NOTE: Regardless of the angle, the rotation will take the same time,
+	// which arguably is more realistic than having a fixed angular speed,
+	// because in reality, we turn around with a larger speed than when we turn slightly.
+	float const m_SecToRotate{ .25f };// How many seconds it takes to perform any rotation.
+	
 };
 
 class Pursuit final : public ISteeringBehavior

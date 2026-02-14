@@ -22,14 +22,15 @@ void ASteeringAgent::BeginDestroy()
 }
 
 // Called every frame
-void ASteeringAgent::Tick(float DeltaTime)
+void ASteeringAgent::Tick(float DeltaSec)
 {
-	Super::Tick(DeltaTime);
+	Super::Tick(DeltaSec);
 
 	if (SteeringBehavior)
 	{
-		SteeringOutput output = SteeringBehavior->CalculateSteering(DeltaTime, *this);
-		AddMovementInput(FVector{output.Direction, 0.f});
+		SteeringOutput const Output{ SteeringBehavior->CalculateSteering(DeltaSec, *this) };
+		AddMovementInput(FVector{ Output.Direction, 0.f });
+		AddAngularVelocity(DeltaSec, Output.DegreesPerSec);
 	}
 }
 
@@ -42,5 +43,12 @@ void ASteeringAgent::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 void ASteeringAgent::SetSteeringBehavior(ISteeringBehavior* NewSteeringBehavior)
 {
 	SteeringBehavior = NewSteeringBehavior;
+}
+
+void ASteeringAgent::AddAngularVelocity(float const DeltaSec, float const DegreesPerSec)
+{
+	FRotator Rotator{ GetActorRotation() };
+	Rotator.Yaw += DegreesPerSec * DeltaSec;
+	SetActorRotation(Rotator);
 }
 

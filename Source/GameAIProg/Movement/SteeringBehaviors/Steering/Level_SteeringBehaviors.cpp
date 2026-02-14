@@ -96,7 +96,7 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 				if (ImGui::SliderFloat("Lin", &v, 0.f, 600.f, "%.2f"))
 					Agent.Agent->SetMaxLinearSpeed(v);
 
-				v = Agent.Agent->GetMaxAngularSpeed();
+				v = Agent.Agent->GetMaxDegreesPerSec();
 				if (ImGui::SliderFloat("Ang", &v, 0.f, 360.f, "%.2f"))
 					Agent.Agent->SetMaxAngularSpeed(v);
 
