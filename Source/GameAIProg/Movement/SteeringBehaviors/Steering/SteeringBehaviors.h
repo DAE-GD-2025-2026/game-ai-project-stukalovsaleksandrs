@@ -79,7 +79,7 @@ public:
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
 };
 
-class Wander final : public ISteeringBehavior
+class Wander final : public Seek 
 {
 public:
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
