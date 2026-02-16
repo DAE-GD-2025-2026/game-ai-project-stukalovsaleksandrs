@@ -287,7 +287,7 @@ void ALevel_SteeringBehaviors::UpdateTarget(ImGui_Agent& Agent)
 		ASteeringAgent* const TargetAgent = SteeringAgents[Agent.SelectedTarget].Agent_Steering;
 
 		FTargetData Target;
-		Target.Position = TargetAgent->GetPosition();
+		Target.Position = TargetAgent->GetLocation();
 		Target.Orientation = TargetAgent->GetRotation();
 		Target.LinearVelocity = TargetAgent->GetLinearVelocity();
 		Target.AngularVelocity = TargetAgent->GetAngularVelocity();

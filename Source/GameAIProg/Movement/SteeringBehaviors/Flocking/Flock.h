@@ -17,12 +17,12 @@ class Flock final
 {
 public:
 	Flock(
-	UWorld* pWorld,
-	TSubclassOf<ASteeringAgent> AgentClass,
-	int FlockSize = 10, 
-	float WorldSize = 100.f, 
-	ASteeringAgent* const pAgentToEvade = nullptr, 
-	bool bTrimWorld = false);
+		UWorld* pWorld,
+		TSubclassOf<ASteeringAgent> AgentClass,
+		int FlockSize = 10, 
+		float WorldSize = 100.f, 
+		ASteeringAgent* const pAgentToEvade = nullptr, 
+		bool bTrimWorld = false);
 
 	~Flock();
 
@@ -34,34 +34,51 @@ public:
 	//const TArray<ASteeringAgent*>& GetNeighbors() const { return pPartitionedSpace->GetNeighbors(); }
 	//int GetNrOfNeighbors() const { return pPartitionedSpace->GetNrOfNeighbors(); }
 #else // No space partitioning
-	void RegisterNeighbors(ASteeringAgent* const Agent);
-	int GetNrOfNeighbors() const { return NrOfNeighbors; }
-	const TArray<ASteeringAgent*>& GetNeighbors() const { return Neighbors; }
+	/**
+	 * @def Populates the m_Neighbors with the
+	 * neighbors of the input agent
+	 */
+	void RegisterNeighbors(ASteeringAgent const* Agent);
+	int GetNeighborCount() const { return m_NeighborCount; }
+	const TArray<ASteeringAgent*>& GetNeighbors() const { return m_Neighbors; }
 #endif // USE_SPACE_PARTITIONING
 
-	FVector2D GetAverageNeighborPos() const;
+	/**
+	 * @def Returns the arithmetical average
+	 * between locations of all the given agent's
+	 * neighbors
+	 */
+	FVector2D GetAverageNeighborLocation() const;
+	/**
+	* @def Returns the arithmetical average
+	 * between velocities of all the given agent's
+	 * neighbors
+	 */
 	FVector2D GetAverageNeighborVelocity() const;
 
 	void SetTarget_Seek(FSteeringParams const & Target);
 
 private:
 	// For debug rendering purposes
-	UWorld* pWorld{nullptr};
+	UWorld* m_pWorld{};
 	
-	int FlockSize{0};
-	TArray<ASteeringAgent*> Agents{};
+	int m_FlockSize{};
+	// All the boids in the flock
+	TArray<ASteeringAgent*> m_Agents{};
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
 	//std::unique_ptr<CellSpace> pPartitionedSpace{};
 	//int NrOfCellsX{ 10 };
 	//TArray<FVector2D> OldPositions{};
 #else // No space partitioning
-	TArray<ASteeringAgent*> Neighbors{};
+	// Array re-used between different agents to keep track of their neighbors
+	TArray<ASteeringAgent*> m_Neighbors{};
 #endif // USE_SPACE_PARTITIONING
-	
-	float NeighborhoodRadius{200.f};
-	int NrOfNeighbors{0};
 
-	ASteeringAgent* pAgentToEvade{nullptr};
+	// Radius of the furthest distance between boids for them to get considered neighbors.
+	float m_NeighborhoodRadius{ 200.f };
+	int m_NeighborCount{};
+
+	ASteeringAgent* m_pAgentToEvade{};
 	
 	//Steering Behaviors
 	//std::unique_ptr<Separation> pSeparationBehavior{};
@@ -70,14 +87,13 @@ private:
 	//std::unique_ptr<Seek> pSeekBehavior{};
 	//std::unique_ptr<Wander> pWanderBehavior{};
 	//std::unique_ptr<Evade> pEvadeBehavior{};
-	
-	std::unique_ptr<BlendedSteering> pBlendedSteering{};
-	std::unique_ptr<PrioritySteering> pPrioritySteering{};
+	std::unique_ptr<BlendedSteering> m_pBlendedSteering{};
+	std::unique_ptr<PrioritySteering> m_pPrioritySteering{};
 
 	// UI and rendering
-	bool DebugRenderSteering{false};
-	bool DebugRenderNeighborhood{true};
-	bool DebugRenderPartitions{true};
+	bool m_DebugRenderSteering{};
+	bool m_DebugRenderNeighborhood{true};
+	bool m_DebugRenderPartitions{true};
 
 	void RenderNeighborhood();
 };

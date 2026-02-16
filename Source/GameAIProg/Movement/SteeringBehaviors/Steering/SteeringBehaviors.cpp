@@ -7,7 +7,7 @@ SteeringOutput Seek::CalculateSteering(float const DeltaTime, ASteeringAgent& Ag
 {
 	SteeringOutput Steering{};
 	// NOTE: There is no need to normalize since AddMovementInput already normalizes the vector.
-	Steering.Direction = Target.Position - Agent.GetPosition();
+	Steering.LinearVelocity = Target.Position - Agent.GetLocation();
 	return Steering;
 }
 
@@ -15,7 +15,7 @@ SteeringOutput Seek::CalculateSteering(float const DeltaTime, ASteeringAgent& Ag
 SteeringOutput Flee::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
 	SteeringOutput Steering{};
-	Steering.Direction = Agent.GetPosition() - Target.Position;
+	Steering.LinearVelocity = Agent.GetLocation() - Target.Position;
 	return Steering;
 }
 
@@ -34,8 +34,8 @@ SteeringOutput Arrive::CalculateSteering(float const DeltaTime, ASteeringAgent& 
 
 	SteeringOutput Steering{};
 	// Performing steering logic
-	Steering.Direction = Target.Position - Agent.GetPosition();// Norm is distance
-	double const Distance{ Steering.Direction.Length() };
+	Steering.LinearVelocity = Target.Position - Agent.GetLocation();// Norm is distance
+	double const Distance{ Steering.LinearVelocity.Length() };
 	
 	// Clamping the distance between the target and slow radii
 	// NOTE: The clamping is performed in a way that the distances smaller or equal to TargetRadius get equated to 0 and values after slow radius are clamped to 1.
@@ -62,7 +62,7 @@ SteeringOutput Face::CalculateSteering(float const DeltaTime, ASteeringAgent& Ag
 	SteeringOutput Steering{};
 
 	// From Agent to Target
-	FVector2D const DistanceVector{ Target.Position - Agent.GetPosition() };
+	FVector2D const DistanceVector{ Target.Position - Agent.GetLocation() };
 
 	// Early returning if target is the agent's position
 	if (FMath::IsNearlyZero(DistanceVector.SquaredLength()))
@@ -110,7 +110,7 @@ SteeringOutput Pursuit::CalculateSteering(float const DeltaTime, ASteeringAgent&
 {
 	// Calculating how much time it will take for the agent to reach the target
 	// considering that target stands still.
-	double const Distance{ (Target.Position - Agent.GetPosition()).Length() },
+	double const Distance{ (Target.Position - Agent.GetLocation()).Length() },
 		SecToReachTarget{ Distance / Agent.GetMaxLinearSpeed() };// t = d / v
 
 	// Calculating location of the target after the time calculated previously elapses
@@ -125,7 +125,7 @@ SteeringOutput Pursuit::CalculateSteering(float const DeltaTime, ASteeringAgent&
 SteeringOutput Evade::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
 	// NOTE: Identical to Pursuit except that it moves away(Flees) from the target
-	double const Distance{ (Target.Position - Agent.GetPosition()).Length() },
+	double const Distance{ (Target.Position - Agent.GetLocation()).Length() },
 		SecToReachTarget{ Distance / Agent.GetMaxLinearSpeed() };
 	
 	FVector2D const NewTargetPosition{ Target.Position + Target.LinearVelocity * SecToReachTarget };
@@ -150,7 +150,7 @@ SteeringOutput Wander::CalculateSteering(float const DeltaTime, ASteeringAgent& 
 	//// Saving the angle
 	m_LastTargetDegrees = NewTargetDegrees;
 	//// Calculating new target's coordinates
-	FVector2D const NewTargetPosition{ Agent.GetPosition() + m_TargetCircleOffset  * AgentForwardVector + m_TargetCircleRadius * FVector2D(FMath::Cos(NewTargetDegrees), FMath::Sin(NewTargetDegrees) ) };
+	FVector2D const NewTargetPosition{ Agent.GetLocation() + m_TargetCircleOffset  * AgentForwardVector + m_TargetCircleRadius * FVector2D(FMath::Cos(NewTargetDegrees), FMath::Sin(NewTargetDegrees) ) };
 	Target.Position = NewTargetPosition;
 	
 	// Debug output

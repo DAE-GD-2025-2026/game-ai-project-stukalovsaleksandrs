@@ -37,7 +37,7 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	
 	// BaseAgent Interface
-	FVector2D GetPosition() const { return FVector2D{GetActorLocation().X, GetActorLocation().Y}; }
+	FVector2D GetLocation() const { return FVector2D{GetActorLocation().X, GetActorLocation().Y}; }
 	float GetRotation() const { return GetActorRotation().Yaw; }
 	
 	float GetMaxLinearSpeed() const { return GetCharacterMovement()->GetMaxSpeed(); }

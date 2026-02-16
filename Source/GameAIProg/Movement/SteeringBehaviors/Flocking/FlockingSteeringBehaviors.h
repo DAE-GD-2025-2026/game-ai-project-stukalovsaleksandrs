@@ -13,7 +13,7 @@ public:
 	SteeringOutput CalculateSteering(float deltaT, ASteeringAgent& pAgent) override;
 
 private:
-	Flock* pFlock = nullptr;
+	Flock* pFlock{};
 };
 
 //SEPARATION - FLOCKING
