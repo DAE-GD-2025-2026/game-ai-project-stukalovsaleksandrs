@@ -9,8 +9,10 @@ class Cohesion final : public Seek
 public:
 	Cohesion(Flock* const pFlock) :pFlock(pFlock) {};
 
-	//Cohesion Behavior
-	SteeringOutput CalculateSteering(float deltaT, ASteeringAgent& pAgent) override;
+	/**
+	 * @def Moves towards the average position of all neighbors 
+	 */
+	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& Agent) override;
 
 private:
 	Flock* pFlock{};
@@ -18,16 +20,26 @@ private:
 
 //SEPARATION - FLOCKING
 //*********************
-class Separation final : public Flee
+class Separation final : public ISteeringBehavior
 {
 public:
 	Separation(Flock* const pFlock) :pFlock(pFlock) {};
 
-	//Cohesion Behavior
-	SteeringOutput CalculateSteering(float deltaT, ASteeringAgent& pAgent) override;
+	/**
+	 * @def Moving away from neighbors within a certain radius
+	 * with a velocity equal to the sum of the inverses of the distance 
+	 * to each boid. The distance is later divided by the avoided boid count to
+	 * make the value independent of this count. Then it is also scaled by a
+	 * separation factor, which thus controls how fast boids move away from each other.
+	*/
+	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& Agent) override;
 
 private:
 	Flock* pFlock{};
+
+	float constexpr AvoidanceRadius{ 200.f },
+		SeparationFactor{ 1.2f };
+	
 };
 
 //VELOCITY MATCH - FLOCKING
@@ -37,10 +49,8 @@ class VelocityMatch final : public Seek
 public:
 	VelocityMatch(Flock* const pFlock) : pFlock(pFlock) {};
 
-	//Cohesion Behavior
-	SteeringOutput CalculateSteering(float deltaT, ASteeringAgent& pAgent) override;
+	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& Agent) override;
 
 private:
 	Flock* pFlock{};
 };
-
