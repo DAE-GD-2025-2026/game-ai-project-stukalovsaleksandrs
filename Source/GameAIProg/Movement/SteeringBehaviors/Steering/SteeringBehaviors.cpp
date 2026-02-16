@@ -7,7 +7,7 @@ SteeringOutput Seek::CalculateSteering(float const DeltaTime, ASteeringAgent& Ag
 {
 	SteeringOutput Steering{};
 	// NOTE: There is no need to normalize since AddMovementInput already normalizes the vector.
-	Steering.Velocity = Target.Position - Agent.GetPosition();
+	Steering.Direction = Target.Position - Agent.GetPosition();
 	return Steering;
 }
 
@@ -15,7 +15,7 @@ SteeringOutput Seek::CalculateSteering(float const DeltaTime, ASteeringAgent& Ag
 SteeringOutput Flee::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
 	SteeringOutput Steering{};
-	Steering.Velocity = Agent.GetPosition() - Target.Position;
+	Steering.Direction = Agent.GetPosition() - Target.Position;
 	return Steering;
 }
 
@@ -34,8 +34,8 @@ SteeringOutput Arrive::CalculateSteering(float const DeltaTime, ASteeringAgent& 
 
 	SteeringOutput Steering{};
 	// Performing steering logic
-	Steering.Velocity = Target.Position - Agent.GetPosition();// Norm is distance
-	double const Distance{ Steering.Velocity.Length() };
+	Steering.Direction = Target.Position - Agent.GetPosition();// Norm is distance
+	double const Distance{ Steering.Direction.Length() };
 	
 	// Clamping the distance between the target and slow radii
 	// NOTE: The clamping is performed in a way that the distances smaller or equal to TargetRadius get equated to 0 and values after slow radius are clamped to 1.

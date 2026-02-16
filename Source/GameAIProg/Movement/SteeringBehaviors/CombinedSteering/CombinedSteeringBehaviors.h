@@ -3,8 +3,6 @@
 
 #include "../Steering/SteeringBehaviors.h"
 
-class Flock;
-
 //****************
 //BLENDED STEERING
 class BlendedSteering final: public ISteeringBehavior
@@ -12,8 +10,8 @@ class BlendedSteering final: public ISteeringBehavior
 public:
 	struct WeightedBehavior
 	{
-		ISteeringBehavior* pBehavior = nullptr;
-		float Weight = 0.f;
+		ISteeringBehavior* pBehavior{};
+		float Weight{};
 
 		WeightedBehavior(ISteeringBehavior* const pBehavior, float Weight) :
 			pBehavior(pBehavior),
@@ -23,14 +21,16 @@ public:
 
 	BlendedSteering(const std::vector<WeightedBehavior>& WeightedBehaviors);
 
-	void AddBehaviour(const WeightedBehavior& WeightedBehavior) { WeightedBehaviors.push_back(WeightedBehavior); }
-	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+	void AddBehaviour(const WeightedBehavior& WeightedBehavior) { m_WeightedBehaviors.push_back(WeightedBehavior); }
+	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& SteeringAgent) override;
 
+	float* GetWeight(ISteeringBehavior* const SteeringBehavior);
+	
 	// returns a reference to the weighted behaviors, can be used to adjust weighting. Is not intended to alter the behaviors themselves.
-	std::vector<WeightedBehavior>& GetWeightedBehaviorsRef() { return WeightedBehaviors; }
+	std::vector<WeightedBehavior>& GetWeightedBehaviorsRef() { return m_WeightedBehaviors; }
 
 private:
-	std::vector<WeightedBehavior> WeightedBehaviors = {};
+	std::vector<WeightedBehavior> m_WeightedBehaviors = {};
 
 	// using ISteeringBehavior::SetTarget; // made private because targets need to be set on the individual behaviors, not the combined behavior
 };

@@ -74,19 +74,19 @@ using FTargetData = FSteeringParams; //Alias for SteeringBehavior usage ( Bit cl
 
 struct SteeringOutput final
 {
-	FVector2D Velocity{};
+	FVector2D Direction{};
 	float DegreesPerSec{0.f};
 	bool IsValid{true};
 
 	SteeringOutput(const FVector2D& linearVelocity = {0.f, 0.f}, float const angularVelocity = 0.f)
 	{
-		Velocity = linearVelocity;
+		Direction = linearVelocity;
 		DegreesPerSec = angularVelocity;
 	}
 
 	SteeringOutput& operator=(const SteeringOutput& other)
 	{
-		Velocity = other.Velocity;
+		Direction = other.Direction;
 		DegreesPerSec = other.DegreesPerSec;
 		IsValid = other.IsValid;
 
@@ -95,7 +95,7 @@ struct SteeringOutput final
 
 	SteeringOutput& operator+(const SteeringOutput& other)
 	{
-		Velocity += other.Velocity;
+		Direction += other.Direction;
 		DegreesPerSec += other.DegreesPerSec;
 
 		return *this;
@@ -103,7 +103,7 @@ struct SteeringOutput final
 
 	SteeringOutput& operator*=(const SteeringOutput& other)
 	{
-		Velocity = Velocity * other.Velocity;
+		Direction = Direction * other.Direction;
 		DegreesPerSec = DegreesPerSec * other.DegreesPerSec;
 
 		return *this;
@@ -111,7 +111,7 @@ struct SteeringOutput final
 
 	SteeringOutput& operator*=(float f)
 	{
-		Velocity = f * Velocity;
+		Direction = f * Direction;
 		DegreesPerSec = f * DegreesPerSec;
 
 		return *this;
@@ -119,7 +119,7 @@ struct SteeringOutput final
 
 	SteeringOutput& operator/=(float f)
 	{
-		Velocity = Velocity / f;
+		Direction = Direction / f;
 		DegreesPerSec = DegreesPerSec / f;
 
 		return *this;
