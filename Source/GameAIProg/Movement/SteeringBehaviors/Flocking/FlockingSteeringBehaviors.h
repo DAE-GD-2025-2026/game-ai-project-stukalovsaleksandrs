@@ -23,22 +23,21 @@ private:
 class Separation final : public ISteeringBehavior
 {
 public:
-	Separation(Flock* const pFlock) :pFlock(pFlock) {};
+	Separation(Flock* const pFlock) :m_pFlock(pFlock) {};
 
 	/**
-	 * @def Moving away from neighbors within a certain radius
-	 * with a velocity equal to the sum of the inverses of the distance 
-	 * to each boid. The distance is later divided by the avoided boid count to
+	 * @def Moving away from neighbors with a velocity equal to the
+	 * sum of the inverses of the distance to each boid.
+	 * The distance is later divided by the avoided boid count to
 	 * make the value independent of this count. Then it is also scaled by a
 	 * separation factor, which thus controls how fast boids move away from each other.
 	*/
 	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& Agent) override;
 
 private:
-	Flock* pFlock{};
+	Flock* m_pFlock{};
 
-	float constexpr m_AvoidanceRadius{ 200.f },
-		m_SeparationFactor{ 1.2f };
+	float constexpr m_SeparationFactor{ 1.2f };
 	
 };
 

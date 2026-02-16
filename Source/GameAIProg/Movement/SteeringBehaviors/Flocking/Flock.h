@@ -58,6 +58,11 @@ public:
 
 	void SetTarget_Seek(FSteeringParams const & Target);
 
+	float GetNeighborhoodRadius() const
+	{
+		return m_NeighborhoodRadius;
+	}
+
 private:
 	// For debug rendering purposes
 	UWorld* m_pWorld{};

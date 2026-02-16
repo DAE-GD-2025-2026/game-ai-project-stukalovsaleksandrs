@@ -19,31 +19,22 @@ SteeringOutput Cohesion::CalculateSteering(float const DeltaTime, ASteeringAgent
 SteeringOutput Separation::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
 	SteeringOutput Steering{};
-	uint32_t EvadedBoidCount{};
-	for (ASteeringAgent* const pNeighbor : pFlock->GetNeighbors())
+	for (ASteeringAgent const* const pNeighbor : m_pFlock->GetNeighbors())
 	{
 		FVector2D const NeighborToAgent{ Agent.GetLocation() - pNeighbor->GetLocation() };
-		if (double const Distance{ NeighborToAgent.Length() };
-			Distance < m_AvoidanceRadius)
-		{
-			// 1. Normalizing the NeighborToAgent vector and dividing it by distance, then adding to the result
-			Steering.LinearVelocity += NeighborToAgent.GetSafeNormal() / Distance;
-			++EvadedBoidCount;
-		}
+		// 1. Normalizing the NeighborToAgent vector and dividing it by distance, then adding to the result
+		Steering.LinearVelocity += NeighborToAgent.GetSafeNormal() / NeighborToAgent.Length();
 	}
-	// 2. Dividing the weightedVelocity by the boid count to make the velocity boid count-independent
-	if (EvadedBoidCount > 0)
-	{
-		Steering.LinearVelocity /= EvadedBoidCount;
-		Steering.LinearVelocity *= m_SeparationFactor;
-	}
-
+		
+	// 2. Dividing the weightedVelocity by the neighbor count to make the velocity neighbor count-independent
+	Steering.LinearVelocity /= m_pFlock->GetNeighborCount();
+	Steering.LinearVelocity *= m_SeparationFactor;
 
 	// 3. Debug output
 	if (Agent.GetDebugRenderingEnabled())
 	{
 		// 3.1. Avoidance radius
-		DrawDebugCircle(Agent.GetWorld(), Agent.GetActorLocation(), m_AvoidanceRadius, 32, FColor::Blue, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false);
+		DrawDebugCircle(Agent.GetWorld(), Agent.GetActorLocation(), m_pFlock->GetNeighborhoodRadius(), 32, FColor::Blue, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false);
 		// 3.2. Direction vector
 		DrawDebugLine(
 			Agent.GetWorld(),
