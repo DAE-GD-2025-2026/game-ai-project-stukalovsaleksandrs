@@ -20,7 +20,7 @@ void ALevel_SteeringBehaviors::BeginPlay()
 	Super::BeginPlay();
 
 	AddAgent(BehaviorTypes::Seek);
-	SteeringAgents[0].Agent->SetDebugRenderingEnabled(true);
+	SteeringAgents[0].Agent_Steering->SetDebugRenderingEnabled(true);
 }
 
 void ALevel_SteeringBehaviors::BeginDestroy()
@@ -92,17 +92,17 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 			//Actor Props
 			if (ImGui::CollapsingHeader("Properties"))
 			{
-				float v = Agent.Agent->GetMaxLinearSpeed();
+				float v = Agent.Agent_Steering->GetMaxLinearSpeed();
 				if (ImGui::SliderFloat("Lin", &v, 0.f, 600.f, "%.2f"))
-					Agent.Agent->SetMaxLinearSpeed(v);
+					Agent.Agent_Steering->SetMaxLinearSpeed(v);
 
-				v = Agent.Agent->GetMaxDegreesPerSec();
+				v = Agent.Agent_Steering->GetMaxDegreesPerSec();
 				if (ImGui::SliderFloat("Ang", &v, 0.f, 360.f, "%.2f"))
-					Agent.Agent->SetMaxAngularSpeed(v);
+					Agent.Agent_Steering->SetMaxAngularSpeed(v);
 
-				v = Agent.Agent->GetMass();
+				v = Agent.Agent_Steering->GetMass();
 				if (ImGui::SliderFloat("Mass ", &v, 0.f, 100.f, "%.2f"))
-					Agent.Agent->SetMass(v);
+					Agent.Agent_Steering->SetMass(v);
 			}
 			
 			bool bBehaviourModified = false;
@@ -160,10 +160,10 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 
 			ImGui::SameLine(0, 20);
 
-			bool isChecked = Agent.Agent->GetDebugRenderingEnabled();
+			bool isChecked = Agent.Agent_Steering->GetDebugRenderingEnabled();
 			if (ImGui::Checkbox("Debug Rendering", &isChecked))
 			{
-				Agent.Agent->SetDebugRenderingEnabled(isChecked);
+				Agent.Agent_Steering->SetDebugRenderingEnabled(isChecked);
 			}
 
 			ImGui::Unindent();
@@ -184,7 +184,7 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 
 	for (ImGui_Agent& a : SteeringAgents)
 	{
-		if (a.Agent)
+		if (a.Agent_Steering)
 		{
 			UpdateTarget(a);
 		}
@@ -194,8 +194,8 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 bool ALevel_SteeringBehaviors::AddAgent(BehaviorTypes BehaviorType, bool AutoOrient)
 {
 	ImGui_Agent ImGuiAgent = {};
-	ImGuiAgent.Agent = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, FVector{0,0,90}, FRotator::ZeroRotator);
-	if (IsValid(ImGuiAgent.Agent))
+	ImGuiAgent.Agent_Steering = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, FVector{0,0,90}, FRotator::ZeroRotator);
+	if (IsValid(ImGuiAgent.Agent_Steering))
 	{
 		ImGuiAgent.SelectedBehavior = static_cast<int>(BehaviorType);
 		ImGuiAgent.SelectedTarget = -1; // Mouse
@@ -214,49 +214,56 @@ bool ALevel_SteeringBehaviors::AddAgent(BehaviorTypes BehaviorType, bool AutoOri
 
 void ALevel_SteeringBehaviors::RemoveAgent(unsigned int Index)
 {
-	SteeringAgents[Index].Agent->Destroy();
+	SteeringAgents[Index].Agent_Steering->Destroy();
 	SteeringAgents.erase(SteeringAgents.begin() + Index);
 
 	RefreshTargetLabels();
 	RefreshAgentTargets(Index);
 }
 
-void ALevel_SteeringBehaviors::SetAgentBehavior(ImGui_Agent& Agent)
+void ALevel_SteeringBehaviors::SetAgentBehavior(ImGui_Agent& Agent_ImGui)
 {
-	Agent.Behavior.reset();
+	Agent_ImGui.Behavior.reset();
 
+	// If after arrive, restoring the speed to its original state
+	if (float& OldSpeed{ Agent_ImGui.Agent_Steering->OldSpeed }; OldSpeed > 0.f)
+	{
+		Agent_ImGui.Agent_Steering->SetMaxLinearSpeed( OldSpeed );
+		OldSpeed = -1.f;
+	}
+	
 	// NOTE: In MSVC switch with no cases is a compilation error
 	// TODO: Use a map instead of switch case 
-	switch (static_cast<BehaviorTypes>(Agent.SelectedBehavior))
+	switch (static_cast<BehaviorTypes>(Agent_ImGui.SelectedBehavior))
 	{
 	case BehaviorTypes::Seek:
-		Agent.Behavior = std::make_unique<Seek>();
+		Agent_ImGui.Behavior = std::make_unique<Seek>();
 		break;
 	case BehaviorTypes::Flee:
-		Agent.Behavior = std::make_unique<Flee>();
+		Agent_ImGui.Behavior = std::make_unique<Flee>();
 		break;
 	case BehaviorTypes::Arrive:
-		Agent.Behavior = std::make_unique<Arrive>();
+		Agent_ImGui.Behavior = std::make_unique<Arrive>();
 		break;
 	case BehaviorTypes::Face:
-		Agent.Behavior = std::make_unique<Face>();
+		Agent_ImGui.Behavior = std::make_unique<Face>();
 		break;
 	case BehaviorTypes::Pursuit:
-		Agent.Behavior = std::make_unique<Pursuit>();
+		Agent_ImGui.Behavior = std::make_unique<Pursuit>();
 		break;
 	case BehaviorTypes::Evade:
-		Agent.Behavior = std::make_unique<Evade>();
+		Agent_ImGui.Behavior = std::make_unique<Evade>();
 		break;
 	case BehaviorTypes::Wander:
-		Agent.Behavior = std::make_unique<Wander>();
+		Agent_ImGui.Behavior = std::make_unique<Wander>();
 		break;
 	default:
 		assert(false && "Incorrect Agent Behavior gotten during SetAgentBehavior()");
 	}
 
-	UpdateTarget(Agent);
+	UpdateTarget(Agent_ImGui);
 	
-	Agent.Agent->SetSteeringBehavior(Agent.Behavior.get());
+	Agent_ImGui.Agent_Steering->SetSteeringBehavior(Agent_ImGui.Behavior.get());
 }
 
 void ALevel_SteeringBehaviors::RefreshTargetLabels()
@@ -277,7 +284,7 @@ void ALevel_SteeringBehaviors::UpdateTarget(ImGui_Agent& Agent)
 	bool const bUseMouseAsTarget = Agent.SelectedTarget < 0;
 	if (!bUseMouseAsTarget)
 	{
-		ASteeringAgent* const TargetAgent = SteeringAgents[Agent.SelectedTarget].Agent;
+		ASteeringAgent* const TargetAgent = SteeringAgents[Agent.SelectedTarget].Agent_Steering;
 
 		FTargetData Target;
 		Target.Position = TargetAgent->GetPosition();

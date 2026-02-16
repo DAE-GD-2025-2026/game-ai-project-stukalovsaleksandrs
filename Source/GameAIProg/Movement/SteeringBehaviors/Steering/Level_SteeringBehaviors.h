@@ -46,7 +46,7 @@ private:
 
 	struct ImGui_Agent final
 	{
-		ASteeringAgent* Agent{nullptr};
+		ASteeringAgent* Agent_Steering{nullptr};
 		std::unique_ptr<ISteeringBehavior> Behavior{nullptr};
 		int SelectedBehavior{static_cast<int>(BehaviorTypes::Arrive)};
 		int SelectedTarget = -1;
@@ -59,7 +59,7 @@ private:
 	
 	bool AddAgent(BehaviorTypes BehaviorType = BehaviorTypes::Wander, bool AutoOrient = true);
 	void RemoveAgent(unsigned int Index);
-	void SetAgentBehavior(ImGui_Agent& Agent);
+	void SetAgentBehavior(ImGui_Agent& Agent_ImGui);
 
 	void RefreshTargetLabels();
 	void UpdateTarget(ImGui_Agent& Agent);

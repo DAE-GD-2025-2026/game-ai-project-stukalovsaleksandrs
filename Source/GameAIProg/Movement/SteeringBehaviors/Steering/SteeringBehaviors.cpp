@@ -33,23 +33,13 @@ SteeringOutput Arrive::CalculateSteering(float const DeltaTime, ASteeringAgent& 
 	}
 
 	SteeringOutput Steering{};
-	// Returning early if the target is in the origin
-	if (Target.Position.Length() < 1.f) return Steering;// Not updating
 	// Performing steering logic
 	Steering.Velocity = Target.Position - Agent.GetPosition();// Norm is distance
 	double const Distance{ Steering.Velocity.Length() };
 	
-	// Returning early if closer than TargetRadius
-	if (Distance < m_TargetRadius)
-	{
-		Agent.SetMaxLinearSpeed(0.f);
-		return Steering;
-	}
-	
 	// Clamping the distance between the target and slow radii
-	// NOTE: The clamping is performed in a way that the distances smaller or equal to TargetRadius get equated to 0.
-	double const ClampedDistance{ FMath::Clamp(Distance - m_TargetRadius, 0, m_SlowRadius - m_TargetRadius )};
-	double const SpeedFactor{ ClampedDistance / (m_SlowRadius - m_TargetRadius) };
+	// NOTE: The clamping is performed in a way that the distances smaller or equal to TargetRadius get equated to 0 and values after slow radius are clamped to 1.
+	double const SpeedFactor{ FMath::Clamp((Distance - m_TargetRadius) /  (m_SlowRadius - m_TargetRadius), 0.0, 1.0) };
 
 	// Updating the agent's max speed
 	Agent.SetMaxLinearSpeed(SpeedFactor * Agent.OldSpeed);
