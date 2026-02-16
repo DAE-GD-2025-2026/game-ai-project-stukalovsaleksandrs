@@ -1,7 +1,8 @@
 
 #include "CombinedSteeringBehaviors.h"
-#include <algorithm>
 #include "../SteeringAgent.h"
+#include "DrawDebugHelpers.h"
+#include <algorithm>
 
 BlendedSteering::BlendedSteering(const std::vector<WeightedBehavior>& WeightedBehaviors)
 	:m_WeightedBehaviors(WeightedBehaviors)
@@ -13,8 +14,28 @@ SteeringOutput BlendedSteering::CalculateSteering(float DeltaTime, ASteeringAgen
 {
 	SteeringOutput BlendedSteering = {};
 	// TODO: Calculate the weighted average steeringbehavior
-	
-	// TODO: Add debug drawing
+	// We have the multiple of steering behavior that we want to switch between right now
+	// 1. Iterate over all the weighted steering behaviors
+	for (auto const& WeightedBehavior : m_WeightedBehaviors)
+	{
+		SteeringOutput WeightedBehaviorSteering{ WeightedBehavior.pBehavior->CalculateSteering(DeltaTime, SteeringAgent) };
+		// 2. We have 2 variables, values for which we have to calculate: direction and angular velocity
+		// 2.1. Direction
+		BlendedSteering.LinearVelocity += WeightedBehaviorSteering.LinearVelocity * WeightedBehavior.Weight;
+		// 2.2. Angular velocity
+		BlendedSteering.DegreesPerSec += WeightedBehaviorSteering.DegreesPerSec * WeightedBehavior.Weight;
+	}
+
+	// Debug output for the blended steering
+	if (SteeringAgent.GetDebugRenderingEnabled())
+	{
+		DrawDebugLine(
+			SteeringAgent.GetWorld(),
+			SteeringAgent.GetActorLocation(),
+			SteeringAgent.GetActorLocation() + FVector(BlendedSteering.LinearVelocity, 0.0),
+			FColor::Green, false, 0.025f, 0, 5
+			);
+	}
 	
 	return BlendedSteering;
 }
