@@ -37,8 +37,8 @@ public:
 private:
 	Flock* pFlock{};
 
-	float constexpr AvoidanceRadius{ 200.f },
-		SeparationFactor{ 1.2f };
+	float constexpr m_AvoidanceRadius{ 200.f },
+		m_SeparationFactor{ 1.2f };
 	
 };
 
@@ -49,8 +49,12 @@ class VelocityMatch final : public Seek
 public:
 	VelocityMatch(Flock* const pFlock) : pFlock(pFlock) {};
 
+	/**
+	 * @def Matches the average velocity  
+	 */
 	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& Agent) override;
 
 private:
 	Flock* pFlock{};
+	
 };

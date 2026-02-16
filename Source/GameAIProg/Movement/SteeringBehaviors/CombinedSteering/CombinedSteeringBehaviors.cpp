@@ -10,7 +10,7 @@ BlendedSteering::BlendedSteering(const std::vector<WeightedBehavior>& WeightedBe
 
 //****************
 //BLENDED STEERING
-SteeringOutput BlendedSteering::CalculateSteering(float DeltaTime, ASteeringAgent& SteeringAgent)
+SteeringOutput BlendedSteering::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
 	SteeringOutput BlendedSteering = {};
 	// TODO: Calculate the weighted average steeringbehavior
@@ -18,7 +18,7 @@ SteeringOutput BlendedSteering::CalculateSteering(float DeltaTime, ASteeringAgen
 	// 1. Iterate over all the weighted steering behaviors
 	for (auto const& WeightedBehavior : m_WeightedBehaviors)
 	{
-		SteeringOutput WeightedBehaviorSteering{ WeightedBehavior.pBehavior->CalculateSteering(DeltaTime, SteeringAgent) };
+		SteeringOutput WeightedBehaviorSteering{ WeightedBehavior.pBehavior->CalculateSteering(DeltaTime, Agent) };
 		// 2. We have 2 variables, values for which we have to calculate: direction and angular velocity
 		// 2.1. Direction
 		BlendedSteering.LinearVelocity += WeightedBehaviorSteering.LinearVelocity * WeightedBehavior.Weight;
@@ -27,12 +27,12 @@ SteeringOutput BlendedSteering::CalculateSteering(float DeltaTime, ASteeringAgen
 	}
 
 	// Debug output for the blended steering
-	if (SteeringAgent.GetDebugRenderingEnabled())
+	if (Agent.GetDebugRenderingEnabled())
 	{
 		DrawDebugLine(
-			SteeringAgent.GetWorld(),
-			SteeringAgent.GetActorLocation(),
-			SteeringAgent.GetActorLocation() + FVector(BlendedSteering.LinearVelocity, 0.0),
+			Agent.GetWorld(),
+			Agent.GetActorLocation(),
+			Agent.GetActorLocation() + FVector(BlendedSteering.LinearVelocity, 0.0),
 			FColor::Green, false, 0.025f, 0, 5
 			);
 	}

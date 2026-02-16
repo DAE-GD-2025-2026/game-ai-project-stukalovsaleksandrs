@@ -22,7 +22,7 @@ public:
 	BlendedSteering(const std::vector<WeightedBehavior>& WeightedBehaviors);
 
 	void AddBehaviour(const WeightedBehavior& WeightedBehavior) { m_WeightedBehaviors.push_back(WeightedBehavior); }
-	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& SteeringAgent) override;
+	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& Agent) override;
 
 	float* GetWeight(ISteeringBehavior* const SteeringBehavior);
 	
