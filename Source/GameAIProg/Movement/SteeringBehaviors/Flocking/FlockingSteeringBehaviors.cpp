@@ -51,5 +51,11 @@ SteeringOutput Separation::CalculateSteering(float const DeltaTime, ASteeringAge
 //VELOCITY MATCH (FLOCKING)
 SteeringOutput VelocityMatch::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
-	return Seek::CalculateSteering(DeltaTime, Agent);
+	SteeringOutput Steering{};
+	for (ASteeringAgent const* const pNeighbor : m_pFlock->GetNeighbors())
+	{
+		Steering.LinearVelocity += pNeighbor->GetLinearVelocity();
+	}
+	Steering.LinearVelocity /= static_cast<float>(m_pFlock->GetNeighborCount());
+	return Steering;
 }

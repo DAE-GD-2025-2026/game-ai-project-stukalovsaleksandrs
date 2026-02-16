@@ -111,6 +111,7 @@ void Flock::RenderNeighborhood()
  // TODO: Debugrender the neighbors for the first agent in the flock
 }
 
+#ifndef GAMEAI_USE_SPACE_PARTITIONING
 void Flock::RegisterNeighbors(ASteeringAgent const * const Agent)
 {
 	m_NeighborCount = 0;
@@ -126,11 +127,6 @@ void Flock::RegisterNeighbors(ASteeringAgent const * const Agent)
 	}
 }
 
-#ifndef GAMEAI_USE_SPACE_PARTITIONING
-void Flock::RegisterNeighbors(ASteeringAgent* const pAgent)
-{
- // TODO: Implement
-}
 #endif
 
 FVector2D Flock::GetAverageNeighborLocation() const

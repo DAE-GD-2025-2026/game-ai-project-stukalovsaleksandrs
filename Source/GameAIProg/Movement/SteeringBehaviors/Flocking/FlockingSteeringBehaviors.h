@@ -37,23 +37,23 @@ public:
 private:
 	Flock* m_pFlock{};
 
-	float constexpr m_SeparationFactor{ 1.2f };
+	float const m_SeparationFactor{ 1.2f };
 	
 };
 
 //VELOCITY MATCH - FLOCKING
 //************************
-class VelocityMatch final : public Seek
+class VelocityMatch final : public ISteeringBehavior
 {
 public:
-	VelocityMatch(Flock* const pFlock) : pFlock(pFlock) {};
+	VelocityMatch(Flock* const pFlock) : m_pFlock(pFlock) {};
 
 	/**
-	 * @def Matches the average velocity  
+	 * @def Matches the average velocity of the agent's neighbors
 	 */
 	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& Agent) override;
 
 private:
-	Flock* pFlock{};
+	Flock* m_pFlock{};
 	
 };

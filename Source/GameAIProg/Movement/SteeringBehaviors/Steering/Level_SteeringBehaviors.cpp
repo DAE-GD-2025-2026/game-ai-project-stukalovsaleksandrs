@@ -128,7 +128,7 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 			ImGui::SameLine();
 			ImGui::PushItemWidth(100);
 			
-			int selectedTargetOffset = Agent.SelectedTarget + 1;
+			int SelectedTargetOffset = Agent.SelectedTarget + 1;
 			std::string const Label{""};
 			std::string Targets{};
 			for (auto const & Target : TargetLabels)
@@ -136,9 +136,9 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 				Targets += Target;
 				Targets += '\0';
 			}
-			if (ImGui::Combo(Label.c_str(), &selectedTargetOffset, Targets.c_str()))
+			if (ImGui::Combo(Label.c_str(), &SelectedTargetOffset, Targets.c_str()))
 			{
-				Agent.SelectedTarget = selectedTargetOffset - 1;
+				Agent.SelectedTarget = SelectedTargetOffset - 1;
 				bBehaviourModified = true;
 			}
 			
