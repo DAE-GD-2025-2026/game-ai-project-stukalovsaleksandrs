@@ -67,7 +67,7 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 	
 		if (ImGui::Checkbox("Debug Rendering", &CanDebugRender))
 		{
-   // TODO: Handle the debug rendering of your agents here :)
+		// TODO: Handle the debug rendering of your agents here :)
 		}
 		ImGui::Checkbox("Trim World", &TrimWorld->bShouldTrimWorld);
 		if (TrimWorld->bShouldTrimWorld)
@@ -85,13 +85,13 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 		ImGui::Spacing();
 
 
-		// ImGuiHelpers::ImGuiSliderFloatWithSetter("Seek",
-		// 	pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
-		// 	[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight = InVal; }, "%.2f");
-		//
-		// ImGuiHelpers::ImGuiSliderFloatWithSetter("Wander",
-		// pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight, 0.f, 1.f,
-		// [this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight = InVal; }, "%.2f");
+		ImGuiHelpers::ImGuiSliderFloatWithSetter("Seek",
+			pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
+			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight = InVal; }, "%.2f");
+		
+		ImGuiHelpers::ImGuiSliderFloatWithSetter("Wander",
+		pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight, 0.f, 1.f,
+		[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight = InVal; }, "%.2f");
 	
 		//End
 		ImGui::End();
