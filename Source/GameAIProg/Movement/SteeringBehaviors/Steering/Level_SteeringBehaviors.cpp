@@ -252,7 +252,7 @@ void ALevel_SteeringBehaviors::SetAgentBehavior(ImGui_Agent& Agent_ImGui)
 		Agent_ImGui.Behavior = std::make_unique<Pursuit>();
 		break;
 	case BehaviorTypes::Evade:
-		Agent_ImGui.Behavior = std::make_unique<Evade>();
+		Agent_ImGui.Behavior = std::make_unique<Evade>(500.f);
 		break;
 	case BehaviorTypes::Wander:
 		Agent_ImGui.Behavior = std::make_unique<Wander>();

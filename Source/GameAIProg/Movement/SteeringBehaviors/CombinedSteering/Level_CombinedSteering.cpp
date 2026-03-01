@@ -23,15 +23,21 @@ void ALevel_CombinedSteering::BeginPlay()
 	// call Release on that, which is too much fiddling around
 	SeekBehavior = std::make_unique<Seek>();
 	WanderBehavior = std::make_unique<Wander>();
-	EvadeBehavior = std::make_unique<Evade>();
+	EvadeBehavior = std::make_unique<Evade>(650.f);
+	
 	BlendedBehavior = std::make_unique<FBlendedSteering>(
 		std::vector<FBlendedSteering::FWeightedBehavior>{
 			{ SeekBehavior.get(), 0.5f },
 			{ WanderBehavior.get(), 0.5f }
 		}
 	);
+	PriorityBehavior = std::make_unique<FPrioritySteering>(
+		std::vector<ISteeringBehavior*>{
+			EvadeBehavior.get(),// NOTE: Must precede Wander for it to trigger first
+			WanderBehavior.get()
+		}
+	);
 	
-	// TODO: Initialize PrioritySteering
 	// 2. Initializing the agents
 	BlendedSteeringAgent = GetWorld()->SpawnActor<ASteeringAgent>(
 		SteeringAgentClass,
@@ -40,12 +46,12 @@ void ALevel_CombinedSteering::BeginPlay()
 	);
 	BlendedSteeringAgent->SetSteeringBehavior(BlendedBehavior.get());
 	
-	// TODO: Initialize PriorityAgent
-	// PrioritySteeringAgent = GetWorld()->SpawnActor<ASteeringAgent>(
-	// 	SteeringAgentClass,
-	// 	FVector{0, 0, 90},
-	// 	FRotator::ZeroRotator
-	// );
+	PrioritySteeringAgent = GetWorld()->SpawnActor<ASteeringAgent>(
+		SteeringAgentClass,
+		FVector{0, 0, 90},
+		FRotator::ZeroRotator
+	);
+	PrioritySteeringAgent->SetSteeringBehavior(PriorityBehavior.get());
 }
 
 void ALevel_CombinedSteering::BeginDestroy()
@@ -128,9 +134,14 @@ void ALevel_CombinedSteering::Tick(float const DeltaTime)
 		ImGui::End();
 	}
 #pragma endregion
-	
+
 	// Combined Steering Update
+	// Setting behavior targets
 	SeekBehavior->SetTarget(MouseTarget);
-	// TODO: implement Make sure to also evade the wanderer
-	
+	EvadeBehavior->SetTarget(FTargetData{
+		BlendedSteeringAgent->GetLocation(),
+		BlendedSteeringAgent->GetRotation(),
+		BlendedSteeringAgent->GetLinearVelocity(),
+		BlendedSteeringAgent->GetAngularVelocity(),
+	});
 }

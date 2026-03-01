@@ -47,7 +47,7 @@ private:
 	std::unique_ptr<Wander> WanderBehavior{};
 	std::unique_ptr<Evade> EvadeBehavior{};
 	std::unique_ptr<FBlendedSteering> BlendedBehavior{};
-	// FPrioritySteering* PriorityBehavior;
+	std::unique_ptr<FPrioritySteering> PriorityBehavior{};
 	
 	bool UseMouseTarget{}, CanDebugRender{};
 };

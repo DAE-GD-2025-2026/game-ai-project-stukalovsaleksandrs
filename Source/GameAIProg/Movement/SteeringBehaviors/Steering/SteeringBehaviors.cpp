@@ -122,11 +122,28 @@ SteeringOutput Pursuit::CalculateSteering(float const DeltaTime, ASteeringAgent&
 }
 
 // Evade 
+Evade::Evade(float const EvadeRadius)
+	: Flee()
+	, EvadeRadius{ EvadeRadius }
+{}
+
 SteeringOutput Evade::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
+	// Drawing the evade radius
+	if (Agent.GetDebugRenderingEnabled())
+	{
+		DrawDebugCircle(Agent.GetWorld(), Agent.GetActorLocation(), EvadeRadius, 32, FColor::Purple, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false);
+	}
+	
 	// NOTE: Identical to Pursuit except that it moves away(Flees) from the target
-	double const Distance{ (Target.Position - Agent.GetLocation()).Length() },
-		SecToReachTarget{ Distance / Agent.GetMaxLinearSpeed() };
+	double const Distance{ (Target.Position - Agent.GetLocation()).Length() };
+
+	// Early returning if the target is further than the radius
+	SteeringOutput Steering{};
+	Steering.IsValid = false;
+	if (Distance > EvadeRadius) return Steering;
+
+	double const SecToReachTarget{ Distance / Agent.GetMaxLinearSpeed() };
 	
 	FVector2D const NewTargetPosition{ Target.Position + Target.LinearVelocity * SecToReachTarget };
 

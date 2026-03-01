@@ -41,7 +41,7 @@ class FPrioritySteering final: public ISteeringBehavior
 {
 public:
 	explicit FPrioritySteering(const std::vector<ISteeringBehavior*>& PriorityBehaviors)
-		:m_PriorityBehaviors(PriorityBehaviors) 
+		: m_PriorityBehaviors(PriorityBehaviors) 
 	{}
 
 	void AddBehaviour(ISteeringBehavior* const pBehavior) { m_PriorityBehaviors.push_back(pBehavior); }

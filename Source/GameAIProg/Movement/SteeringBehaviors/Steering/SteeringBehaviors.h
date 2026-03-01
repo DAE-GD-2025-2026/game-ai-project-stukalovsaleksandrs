@@ -76,7 +76,11 @@ public:
 class Evade final : public Flee
 {
 public:
+	explicit Evade(float EvadeRadius);
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+	
+private:
+	float const EvadeRadius{};
 };
 
 class Wander final : public Seek 
