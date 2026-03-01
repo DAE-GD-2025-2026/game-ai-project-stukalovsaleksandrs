@@ -29,7 +29,6 @@ protected:
 	
 	virtual void BeginDestroy() override;
 
-private:
 	enum class BehaviorTypes
 	{
 		Seek,

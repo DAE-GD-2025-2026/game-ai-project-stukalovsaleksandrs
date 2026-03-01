@@ -182,11 +182,11 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 	ImGui::End();
 #pragma endregion
 
-	for (ImGui_Agent& a : SteeringAgents)
+	for (ImGui_Agent& Agent : SteeringAgents)
 	{
-		if (a.Agent_Steering)
+		if (Agent.Agent_Steering)
 		{
-			UpdateTarget(a);
+			UpdateTarget(Agent);
 		}
 	}
 }
@@ -300,7 +300,7 @@ void ALevel_SteeringBehaviors::UpdateTarget(ImGui_Agent& Agent)
 	}
 }
 
-void ALevel_SteeringBehaviors::RefreshAgentTargets(unsigned int IndexRemoved)
+void ALevel_SteeringBehaviors::RefreshAgentTargets(unsigned int const IndexRemoved)
 {
 	for (unsigned int i = 0; i < SteeringAgents.size(); ++i)
 	{

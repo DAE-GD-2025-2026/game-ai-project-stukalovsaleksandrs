@@ -14,17 +14,49 @@ ALevel_CombinedSteering::ALevel_CombinedSteering()
 void ALevel_CombinedSteering::BeginPlay()
 {
 	Super::BeginPlay();
-
+	// NOTE: Member fields are initialized here instead of constructor to
+	// reset them every time the game is booted.
+	// 1. Initializing the steering behaviors on BeginPlay and not in the constructor
+	// for them to be re-created every time the game is restarted
+	// NOTE: Using the "new" keyword here, because the function accepts a raw
+	// pointer, but MakeUnique<T> returns a unique pointer, so I'll have to
+	// call Release on that, which is too much fiddling around
+	SeekBehavior = std::make_unique<Seek>();
+	WanderBehavior = std::make_unique<Wander>();
+	EvadeBehavior = std::make_unique<Evade>();
+	BlendedBehavior = std::make_unique<FBlendedSteering>(
+		std::vector<FBlendedSteering::FWeightedBehavior>{
+			{ SeekBehavior.get(), 0.5f },
+			{ WanderBehavior.get(), 0.5f }
+		}
+	);
+	
+	// TODO: Initialize PrioritySteering
+	// 2. Initializing the agents
+	BlendedSteeringAgent = GetWorld()->SpawnActor<ASteeringAgent>(
+		SteeringAgentClass,
+		FVector{0, 0, 90},
+		FRotator::ZeroRotator
+	);
+	BlendedSteeringAgent->SetSteeringBehavior(BlendedBehavior.get());
+	
+	// TODO: Initialize PriorityAgent
+	// PrioritySteeringAgent = GetWorld()->SpawnActor<ASteeringAgent>(
+	// 	SteeringAgentClass,
+	// 	FVector{0, 0, 90},
+	// 	FRotator::ZeroRotator
+	// );
 }
 
 void ALevel_CombinedSteering::BeginDestroy()
 {
 	Super::BeginDestroy();
-
+	// NOTE: Not deleting agents, because their lifecycle is managed
+	// by the world
 }
 
 // Called every frame
-void ALevel_CombinedSteering::Tick(float DeltaTime)
+void ALevel_CombinedSteering::Tick(float const DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
@@ -74,7 +106,7 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 		{
 			ImGuiHelpers::ImGuiSliderFloatWithSetter("Trim Size",
 				TrimWorld->GetTrimWorldSize(), 1000.f, 3000.f,
-				[this](float InVal) { TrimWorld->SetTrimWorldSize(InVal); });
+				[this](float const InVal) { TrimWorld->SetTrimWorldSize(InVal); });
 		}
 		
 		ImGui::Spacing();
@@ -84,14 +116,13 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 		ImGui::Text("Behavior Weights");
 		ImGui::Spacing();
 
-
 		ImGuiHelpers::ImGuiSliderFloatWithSetter("Seek",
-			pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
-			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight = InVal; }, "%.2f");
+			BlendedBehavior->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
+			[this](float const InVal) { BlendedBehavior->GetWeightedBehaviorsRef()[0].Weight = InVal; }, "%.2f");
 		
 		ImGuiHelpers::ImGuiSliderFloatWithSetter("Wander",
-		pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight, 0.f, 1.f,
-		[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight = InVal; }, "%.2f");
+		BlendedBehavior->GetWeightedBehaviorsRef()[1].Weight, 0.f, 1.f,
+		[this](float const InVal) { BlendedBehavior->GetWeightedBehaviorsRef()[1].Weight = InVal; }, "%.2f");
 	
 		//End
 		ImGui::End();
@@ -99,6 +130,7 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 #pragma endregion
 	
 	// Combined Steering Update
- // TODO: implement handling mouse click input for seek
- // TODO: implement Make sure to also evade the wanderer
+	SeekBehavior->SetTarget(MouseTarget);
+	// TODO: implement Make sure to also evade the wanderer
+	
 }

@@ -5,43 +5,43 @@
 
 //****************
 //BLENDED STEERING
-class BlendedSteering final: public ISteeringBehavior
+class FBlendedSteering final: public ISteeringBehavior
 {
 public:
-	struct WeightedBehavior
+	struct FWeightedBehavior
 	{
-		ISteeringBehavior* pBehavior{};
+		ISteeringBehavior* Behavior{};
 		float Weight{};
 
-		WeightedBehavior(ISteeringBehavior* const pBehavior, float Weight) :
-			pBehavior(pBehavior),
+		FWeightedBehavior(ISteeringBehavior* const pBehavior, float const Weight) :
+			Behavior(pBehavior),
 			Weight(Weight)
 		{};
 	};
 
-	BlendedSteering(const std::vector<WeightedBehavior>& WeightedBehaviors);
+	explicit FBlendedSteering(const std::vector<FWeightedBehavior>& WeightedBehaviors);
 
-	void AddBehaviour(const WeightedBehavior& WeightedBehavior) { m_WeightedBehaviors.push_back(WeightedBehavior); }
+	void AddBehaviour(const FWeightedBehavior& WeightedBehavior) { m_WeightedBehaviors.push_back(WeightedBehavior); }
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& Agent) override;
 
 	float* GetWeight(ISteeringBehavior* const SteeringBehavior);
 	
 	// returns a reference to the weighted behaviors, can be used to adjust weighting. Is not intended to alter the behaviors themselves.
-	std::vector<WeightedBehavior>& GetWeightedBehaviorsRef() { return m_WeightedBehaviors; }
+	std::vector<FWeightedBehavior>& GetWeightedBehaviorsRef() { return m_WeightedBehaviors; }
 
 private:
-	std::vector<WeightedBehavior> m_WeightedBehaviors = {};
+	std::vector<FWeightedBehavior> m_WeightedBehaviors = {};
 
 	// using ISteeringBehavior::SetTarget; // made private because targets need to be set on the individual behaviors, not the combined behavior
 };
 
 //*****************
 //PRIORITY STEERING
-class PrioritySteering final: public ISteeringBehavior
+class FPrioritySteering final: public ISteeringBehavior
 {
 public:
-	PrioritySteering(const std::vector<ISteeringBehavior*>& priorityBehaviors)
-		:m_PriorityBehaviors(priorityBehaviors) 
+	explicit FPrioritySteering(const std::vector<ISteeringBehavior*>& PriorityBehaviors)
+		:m_PriorityBehaviors(PriorityBehaviors) 
 	{}
 
 	void AddBehaviour(ISteeringBehavior* const pBehavior) { m_PriorityBehaviors.push_back(pBehavior); }

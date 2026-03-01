@@ -92,8 +92,8 @@ private:
 	std::unique_ptr<Seek> pSeekBehavior{};
 	std::unique_ptr<Wander> pWanderBehavior{};
 	std::unique_ptr<Evade> pEvadeBehavior{};
-	std::unique_ptr<BlendedSteering> m_pBlendedSteering{};
-	std::unique_ptr<PrioritySteering> m_pPrioritySteering{};
+	std::unique_ptr<FBlendedSteering> m_pBlendedSteering{};
+	std::unique_ptr<FPrioritySteering> m_pPrioritySteering{};
 
 	// UI and rendering
 	bool m_DebugRenderSteering{};

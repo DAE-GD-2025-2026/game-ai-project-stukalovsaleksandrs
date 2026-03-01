@@ -4,21 +4,21 @@
 #include "DrawDebugHelpers.h"
 #include <algorithm>
 
-BlendedSteering::BlendedSteering(const std::vector<WeightedBehavior>& WeightedBehaviors)
+FBlendedSteering::FBlendedSteering(const std::vector<FWeightedBehavior>& WeightedBehaviors)
 	:m_WeightedBehaviors(WeightedBehaviors)
 {};
 
 //****************
 //BLENDED STEERING
-SteeringOutput BlendedSteering::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
+SteeringOutput FBlendedSteering::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
 	SteeringOutput BlendedSteering = {};
 	// TODO: Calculate the weighted average steeringbehavior
-	// We have the multiple of steering behavior that we want to switch between right now
+	// We have multiple steering behaviors that we want to switch between right now
 	// 1. Iterate over all the weighted steering behaviors
 	for (auto const& WeightedBehavior : m_WeightedBehaviors)
 	{
-		SteeringOutput WeightedBehaviorSteering{ WeightedBehavior.pBehavior->CalculateSteering(DeltaTime, Agent) };
+		SteeringOutput WeightedBehaviorSteering{ WeightedBehavior.Behavior->CalculateSteering(DeltaTime, Agent) };
 		// 2. We have 2 variables, values for which we have to calculate: direction and angular velocity
 		// 2.1. Direction
 		BlendedSteering.LinearVelocity += WeightedBehaviorSteering.LinearVelocity * WeightedBehavior.Weight;
@@ -40,13 +40,13 @@ SteeringOutput BlendedSteering::CalculateSteering(float const DeltaTime, ASteeri
 	return BlendedSteering;
 }
 
-float* BlendedSteering::GetWeight(ISteeringBehavior* const SteeringBehavior)
+float* FBlendedSteering::GetWeight(ISteeringBehavior* const SteeringBehavior)
 {
 	auto it = find_if(m_WeightedBehaviors.begin(),
 		m_WeightedBehaviors.end(),
-		[SteeringBehavior](const WeightedBehavior& Elem)
+		[SteeringBehavior](const FWeightedBehavior& Elem)
 		{
-			return Elem.pBehavior == SteeringBehavior;
+			return Elem.Behavior == SteeringBehavior;
 		}
 	);
 
@@ -58,7 +58,7 @@ float* BlendedSteering::GetWeight(ISteeringBehavior* const SteeringBehavior)
 
 //*****************
 //PRIORITY STEERING
-SteeringOutput PrioritySteering::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
+SteeringOutput FPrioritySteering::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
 	SteeringOutput Steering = {};
 

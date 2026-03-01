@@ -45,8 +45,6 @@ void Flock::Tick(float const DeltaTime)
 		RegisterNeighbors(pAgent);
 		// Updating the agent using the neighbors in the memory pool
 		pAgent->Tick(DeltaTime);
-		
-		// TODO: trim the agent to the world
 	}
 }
 
