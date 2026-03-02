@@ -129,12 +129,6 @@ Evade::Evade(float const EvadeRadius)
 
 SteeringOutput Evade::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
-	// Drawing the evade radius
-	if (Agent.GetDebugRenderingEnabled())
-	{
-		DrawDebugCircle(Agent.GetWorld(), Agent.GetActorLocation(), EvadeRadius, 32, FColor::Purple, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false);
-	}
-	
 	// NOTE: Identical to Pursuit except that it moves away(Flees) from the target
 	double const Distance{ (Target.Position - Agent.GetLocation()).Length() };
 

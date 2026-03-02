@@ -78,6 +78,10 @@ class Evade final : public Flee
 public:
 	explicit Evade(float EvadeRadius);
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+	float GetEvadeRadius() const
+	{
+		return EvadeRadius;
+	}
 	
 private:
 	float const EvadeRadius{};

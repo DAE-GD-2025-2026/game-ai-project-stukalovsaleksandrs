@@ -13,7 +13,6 @@ FBlendedSteering::FBlendedSteering(const std::vector<FWeightedBehavior>& Weighte
 SteeringOutput FBlendedSteering::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
 	SteeringOutput BlendedSteering = {};
-	// TODO: Calculate the weighted average steeringbehavior
 	// We have multiple steering behaviors that we want to switch between right now
 	// 1. Iterate over all the weighted steering behaviors
 	for (auto const& WeightedBehavior : m_WeightedBehaviors)

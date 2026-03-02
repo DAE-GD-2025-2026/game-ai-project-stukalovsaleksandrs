@@ -11,14 +11,21 @@ Flock::Flock(
 	float WorldSize,
 	ASteeringAgent* const pAgentToEvade,
 	bool bTrimWorld)
-	: m_pWorld{pWorld}
-	, m_FlockSize{ FlockSize }
-	, m_pAgentToEvade{pAgentToEvade}
+	: pWorld{pWorld}
+	, FlockSize{ FlockSize }
+	, pAgentToEvade{pAgentToEvade}
 {
-	m_Agents.SetNum(FlockSize);
-	for (auto& Agent : m_Agents)
+	// Populating the Agents array
+	Agents.SetNum(FlockSize);
+	for (auto& Agent : Agents)
 	{
-		Agent->SetSteeringBehavior(m_pBlendedSteering.get());
+		Agent = pWorld->SpawnActor<ASteeringAgent>(
+			AgentClass,
+			FVector{0, 0, 90},
+			FRotator::ZeroRotator
+		);
+		assert(Agent);
+		Agent->SetSteeringBehavior(BlendedSteering.get());
 		// Disabling the ticking to prevent the agent from
 		// running its own steering behavior independently.
 		// We need sequential update for consistency.
@@ -28,18 +35,18 @@ Flock::Flock(
 	// Initializing the flock and the memory pool of neighbors
 	// NOTE: Each boid can have at max all boids in the flock as neighbors,
 	// but it will never count itself as a neighbor.
-	m_Neighbors.SetNum(m_FlockSize - 1);
+	m_Neighbors.SetNum(FlockSize - 1);
 }
 
 Flock::~Flock()
 {
-	m_Agents.Empty();
+	Agents.Empty();
 	m_Neighbors.Empty();
 }
 
 void Flock::Tick(float const DeltaTime)
 {
-	for (ASteeringAgent* pAgent : m_Agents)
+	for (ASteeringAgent* pAgent : Agents)
 	{
 		// Populating the neighbor memory pool
 		RegisterNeighbors(pAgent);
@@ -51,6 +58,10 @@ void Flock::Tick(float const DeltaTime)
 void Flock::RenderDebug()
 {
  // TODO: Render all the agents in the flock
+ for (auto Agent : Agents)
+ {
+ 	// Debug rendering
+ }
 }
 
 void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
@@ -91,7 +102,10 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 		ImGui::Text("Flocking");
 		ImGui::Spacing();
 
-  // TODO: implement ImGUI checkboxes for debug rendering here
+		if (ImGui::Checkbox("Debug Rendering", &DebugRenderSteering))
+		{
+			
+		}
 
 		ImGui::Text("Behavior Weights");
 		ImGui::Spacing();
@@ -112,15 +126,15 @@ void Flock::RenderNeighborhood()
 #ifndef GAMEAI_USE_SPACE_PARTITIONING
 void Flock::RegisterNeighbors(ASteeringAgent const * const Agent)
 {
-	m_NeighborCount = 0;
+	NeighborCount = 0;
 	// Filling the memory pool with the neighbors for the currently evaluated agent
-	for (auto const& OtherAgent : m_Agents)
+	for (auto const& OtherAgent : Agents)
 	{
 		if (Agent == OtherAgent) continue;
-		if( (OtherAgent->GetActorLocation() - Agent->GetActorLocation()).Length() < m_NeighborhoodRadius )
+		if( (OtherAgent->GetActorLocation() - Agent->GetActorLocation()).Length() < NeighborhoodRadius )
 		{
 			assert(NeighborCount < m_Neighbors.Num());
-			m_Neighbors[m_NeighborCount++] = OtherAgent; 
+			m_Neighbors[NeighborCount++] = OtherAgent; 
 		}
 	}
 }
@@ -130,27 +144,27 @@ void Flock::RegisterNeighbors(ASteeringAgent const * const Agent)
 FVector2D Flock::GetAverageNeighborLocation() const
 {
 	FVector2D AverageLocation{};
-	for (int32_t NeighborIdx{}; NeighborIdx < m_NeighborCount; ++NeighborIdx)
+	for (int32_t NeighborIdx{}; NeighborIdx < NeighborCount; ++NeighborIdx)
 	{
 		AverageLocation += m_Neighbors[NeighborIdx]->GetLocation();
 	}
-	AverageLocation /= static_cast<float>(m_NeighborCount);
+	AverageLocation /= static_cast<float>(NeighborCount);
 	return AverageLocation;
 }
 
 FVector2D Flock::GetAverageNeighborVelocity() const
 {
 	FVector2D AverageVelocity{};
-	for (int32_t NeighborIdx{}; NeighborIdx < m_NeighborCount; ++NeighborIdx)
+	for (int32_t NeighborIdx{}; NeighborIdx < NeighborCount; ++NeighborIdx)
 	{
 		AverageVelocity += m_Neighbors[NeighborIdx]->GetLocation();
 	}
-	AverageVelocity /= static_cast<float>(m_NeighborCount);
+	AverageVelocity /= static_cast<float>(NeighborCount);
 	return AverageVelocity;
 }
 
 void Flock::SetTarget_Seek(FSteeringParams const& Target)
 {
- // TODO: Implement
+	SeekBehavior->SetTarget(Target);
 }
 

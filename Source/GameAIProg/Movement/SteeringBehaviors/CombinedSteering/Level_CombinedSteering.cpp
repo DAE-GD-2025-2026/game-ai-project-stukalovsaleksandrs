@@ -22,8 +22,11 @@ void ALevel_CombinedSteering::BeginPlay()
 	// pointer, but MakeUnique<T> returns a unique pointer, so I'll have to
 	// call Release on that, which is too much fiddling around
 	SeekBehavior = std::make_unique<Seek>();
+	assert(SeekBehavior);
 	WanderBehavior = std::make_unique<Wander>();
+	assert(WanderBehavior);
 	EvadeBehavior = std::make_unique<Evade>(650.f);
+	assert(EvadeBehavior);
 	
 	BlendedBehavior = std::make_unique<FBlendedSteering>(
 		std::vector<FBlendedSteering::FWeightedBehavior>{
@@ -31,12 +34,14 @@ void ALevel_CombinedSteering::BeginPlay()
 			{ WanderBehavior.get(), 0.5f }
 		}
 	);
+	assert(BlendedBehavior);
 	PriorityBehavior = std::make_unique<FPrioritySteering>(
 		std::vector<ISteeringBehavior*>{
 			EvadeBehavior.get(),// NOTE: Must precede Wander for it to trigger first
 			WanderBehavior.get()
 		}
 	);
+	assert(PriorityBehavior);
 	
 	// 2. Initializing the agents
 	BlendedSteeringAgent = GetWorld()->SpawnActor<ASteeringAgent>(
@@ -45,12 +50,14 @@ void ALevel_CombinedSteering::BeginPlay()
 		FRotator::ZeroRotator
 	);
 	BlendedSteeringAgent->SetSteeringBehavior(BlendedBehavior.get());
+	assert(BlendedSteeringAgent);
 	
 	PrioritySteeringAgent = GetWorld()->SpawnActor<ASteeringAgent>(
 		SteeringAgentClass,
 		FVector{0, 0, 90},
 		FRotator::ZeroRotator
 	);
+	assert(PrioritySteeringAgent);
 	PrioritySteeringAgent->SetSteeringBehavior(PriorityBehavior.get());
 }
 
@@ -105,7 +112,13 @@ void ALevel_CombinedSteering::Tick(float const DeltaTime)
 	
 		if (ImGui::Checkbox("Debug Rendering", &CanDebugRender))
 		{
-		// TODO: Handle the debug rendering of your agents here :)
+			// Drawing the evade radius
+			DrawDebugCircle(
+				PrioritySteeringAgent->GetWorld(),
+				PrioritySteeringAgent->GetActorLocation(),
+				EvadeBehavior->GetEvadeRadius(),
+				32, FColor::Purple, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false
+			);
 		}
 		ImGui::Checkbox("Trim World", &TrimWorld->bShouldTrimWorld);
 		if (TrimWorld->bShouldTrimWorld)

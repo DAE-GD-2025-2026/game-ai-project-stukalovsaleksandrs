@@ -233,7 +233,7 @@ void ALevel_SteeringBehaviors::SetAgentBehavior(ImGui_Agent& Agent_ImGui)
 	}
 	
 	// NOTE: In MSVC switch with no cases is a compilation error
-	// TODO: Use a map instead of switch case 
+	// NOTE: Can try to use a map instead of switch case 
 	switch (static_cast<BehaviorTypes>(Agent_ImGui.SelectedBehavior))
 	{
 	case BehaviorTypes::Seek:

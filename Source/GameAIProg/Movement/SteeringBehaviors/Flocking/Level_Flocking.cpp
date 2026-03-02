@@ -27,11 +27,11 @@ void ALevel_Flocking::BeginPlay()
 			TrimWorld->GetTrimWorldSize(),
 			pAgentToEvade,
 			true)
-			);
+	);
 }
 
 // Called every frame
-void ALevel_Flocking::Tick(float DeltaTime)
+void ALevel_Flocking::Tick(float const DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
