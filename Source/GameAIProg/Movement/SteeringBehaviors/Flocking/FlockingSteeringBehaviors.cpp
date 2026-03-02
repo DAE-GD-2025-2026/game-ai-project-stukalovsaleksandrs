@@ -40,20 +40,6 @@ SteeringOutput Separation::CalculateSteering(float const DeltaTime, ASteeringAge
 	Steering.LinearVelocity *= m_SeparationFactor;
 
 	assert(!Steering.LinearVelocity.ContainsNaN());
-	
-	// 3. Debug output
-	if (Agent.GetDebugRenderingEnabled())
-	{
-		// 3.1. Avoidance radius
-		DrawDebugCircle(Agent.GetWorld(), Agent.GetActorLocation(), m_pFlock->GetNeighborhoodRadius(), 32, FColor::Blue, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false);
-		// 3.2. Direction vector
-		DrawDebugLine(
-			Agent.GetWorld(),
-			Agent.GetActorLocation(),
-			Agent.GetActorLocation() + FVector(Steering.LinearVelocity, 0.0),
-			FColor::Blue, false, 0.025f, 0, 5
-			);
-	}
 		
 	return Steering;
 }

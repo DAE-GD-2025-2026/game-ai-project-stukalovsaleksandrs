@@ -15,6 +15,7 @@ public:
     virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent & Agent) = 0;
 
     void SetTarget(const FTargetData& NewTarget) { Target = NewTarget; }
+    FTargetData GetTarget() const { return Target; }
     
     template<class T, std::enable_if_t<std::is_base_of_v<ISteeringBehavior, T>>* = nullptr>
     T* As()
@@ -93,6 +94,7 @@ class Wander final : public Seek
 {
 public:
     virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+    float GetTargetRadius() const{ return m_TargetCircleRadius; }
 
 private:
     // Radius of a circle for selecting random target points,

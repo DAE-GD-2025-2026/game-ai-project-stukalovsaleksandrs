@@ -26,17 +26,6 @@ SteeringOutput FBlendedSteering::CalculateSteering(float const DeltaTime, ASteer
 		// 2.2. Angular velocity
 		BlendedSteering.DegreesPerSec += WeightedBehaviorSteering.DegreesPerSec * WeightedBehavior.Weight;
 	}
-
-	// Debug output for the blended steering
-	if (Agent.GetDebugRenderingEnabled())
-	{
-		DrawDebugLine(
-			Agent.GetWorld(),
-			Agent.GetActorLocation(),
-			Agent.GetActorLocation() + FVector(BlendedSteering.LinearVelocity, 0.0),
-			FColor::Green, false, 0.025f, 0, 5
-		);
-	}
 	
 	return BlendedSteering;
 }

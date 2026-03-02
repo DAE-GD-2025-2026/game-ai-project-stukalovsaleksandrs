@@ -169,13 +169,6 @@ SteeringOutput Wander::CalculateSteering(float const DeltaTime, ASteeringAgent& 
     FVector2D const NewTargetPosition{ Agent.GetLocation() + m_TargetCircleOffset  * AgentForwardVector + m_TargetCircleRadius * FVector2D(FMath::Cos(NewTargetDegrees), FMath::Sin(NewTargetDegrees) ) };
     Target.Position = NewTargetPosition;
     
-    // Debug output
-    if (Agent.GetDebugRenderingEnabled())
-    {
-        DrawDebugCircle(Agent.GetWorld(), Agent.GetActorLocation() + m_TargetCircleOffset * Agent.GetActorForwardVector(), m_TargetCircleRadius, 32, FColor::Blue, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false);
-        DrawDebugPoint(Agent.GetWorld(), FVector(NewTargetPosition, Agent.GetActorLocation().Z), 10.f, FColor::Green, false, 0.025f, 1);
-    }
-
     // Steering
     return Seek::CalculateSteering(DeltaTime, Agent);
 }

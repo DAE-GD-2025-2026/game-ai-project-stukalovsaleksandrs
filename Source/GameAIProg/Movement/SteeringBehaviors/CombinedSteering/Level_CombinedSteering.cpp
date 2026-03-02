@@ -110,7 +110,7 @@ void ALevel_CombinedSteering::Tick(float const DeltaTime)
         ImGui::Spacing();
         ImGui::Spacing();
     
-        if (ImGui::Checkbox("Debug Rendering", &CanDebugRender))
+        if (ImGui::Checkbox("Debug Rendering", &CanDebugRender); CanDebugRender)
         {
             // Drawing the evade radius
             DrawDebugCircle(

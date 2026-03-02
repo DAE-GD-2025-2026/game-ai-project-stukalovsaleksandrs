@@ -57,72 +57,97 @@ void FFlock::Tick(float const DeltaTime)
 
 void FFlock::RenderDebug()
 {
- // TODO: Render all the agents in the flock
- for (auto Agent : Agents)
+	if (!DebugRenderSteering) return;
+	for (auto const Agent : Agents)
  {
- 	// Debug rendering
+	// Blended steering direction vector
+	FVector AgentLocation{ Agent->GetActorLocation() };
+	DrawDebugLine(
+		Agent->GetWorld(),
+		AgentLocation,
+		AgentLocation + FVector(Agent->GetLinearVelocity().X, Agent->GetLinearVelocity().Y, AgentLocation.Z).GetSafeNormal() * 50.f,
+		FColor::Green, false, 0.025f, 0, 5
+	);
+
+	// Wander
+	DrawDebugCircle(
+		Agent->GetWorld(),
+		Agent->GetActorLocation() + WanderBehavior->GetTargetRadius() * Agent->GetActorForwardVector(),
+		WanderBehavior->GetTargetRadius(),
+		32, FColor::Emerald, false, 0.025f, 0, 5,
+		FVector(0, 1, 0), FVector(1, 0, 0), false
+	);
+	DrawDebugPoint(Agent->GetWorld(), FVector(WanderBehavior->GetTarget().Position, Agent->GetActorLocation().Z),
+		10.f, FColor::Green, false, 0.025f, 1
+	);
+
+		
+	// Separation avoidance radius
+	DrawDebugCircle(
+		Agent->GetWorld(),
+		Agent->GetActorLocation(),
+		GetNeighborhoodRadius(),
+		32, FColor::Blue, false,
+		0.025f, 0, 5,
+		FVector(0, 1, 0), FVector
+		(1, 0, 0), false
+	);
  }
 }
 
 void FFlock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize, AWorldTrimVolume* TrimWorld)
 {
-#pragma region UI
-	//UI
+	//Setup
+	bool bWindowActive = true;
+	ImGui::SetNextWindowPos(WindowPos);
+	ImGui::SetNextWindowSize(WindowSize);
+	ImGui::Begin("Gameplay Programming", &bWindowActive, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+
+	//Elements
+	ImGui::Text("CONTROLS");
+	ImGui::Indent();
+	ImGui::Text("LMB: place target");
+	ImGui::Text("RMB: move cam.");
+	ImGui::Text("Scrollwheel: zoom cam.");
+	ImGui::Unindent();
+
+	ImGui::Spacing();
+	ImGui::Separator();
+	ImGui::Spacing();
+	ImGui::Spacing();
+
+	ImGui::Text("STATS");
+	ImGui::Indent();
+	ImGui::Text("%.3f ms/frame", 1000.0f / ImGui::GetIO().Framerate);
+	ImGui::Text("%.1f FPS", ImGui::GetIO().Framerate);
+	ImGui::Unindent();
+
+	ImGui::Spacing();
+	ImGui::Separator();
+	ImGui::Spacing();
+	
+	ImGui::Text("Flocking");
+	ImGui::Spacing();
+
+	ImGui::Checkbox("Trim World", &TrimWorld->bShouldTrimWorld);
+	if (TrimWorld->bShouldTrimWorld)
 	{
-		//Setup
-		bool bWindowActive = true;
-		ImGui::SetNextWindowPos(WindowPos);
-		ImGui::SetNextWindowSize(WindowSize);
-		ImGui::Begin("Gameplay Programming", &bWindowActive, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-
-		//Elements
-		ImGui::Text("CONTROLS");
-		ImGui::Indent();
-		ImGui::Text("LMB: place target");
-		ImGui::Text("RMB: move cam.");
-		ImGui::Text("Scrollwheel: zoom cam.");
-		ImGui::Unindent();
-
-		ImGui::Spacing();
-		ImGui::Separator();
-		ImGui::Spacing();
-		ImGui::Spacing();
-
-		ImGui::Text("STATS");
-		ImGui::Indent();
-		ImGui::Text("%.3f ms/frame", 1000.0f / ImGui::GetIO().Framerate);
-		ImGui::Text("%.1f FPS", ImGui::GetIO().Framerate);
-		ImGui::Unindent();
-
-		ImGui::Spacing();
-		ImGui::Separator();
-		ImGui::Spacing();
-		
-		ImGui::Text("Flocking");
-		ImGui::Spacing();
-
-		ImGui::Checkbox("Trim World", &TrimWorld->bShouldTrimWorld);
-		if (TrimWorld->bShouldTrimWorld)
-		{
-			ImGuiHelpers::ImGuiSliderFloatWithSetter("Trim Size",
-				TrimWorld->GetTrimWorldSize(), 1000.f, 3000.f,
-				[this, TrimWorld](float const InVal) { TrimWorld->SetTrimWorldSize(InVal); });
-		}
-
-		if (ImGui::Checkbox("Debug Rendering", &DebugRenderSteering))
-		{
-			
-		}
-		
-		ImGui::Text("Behavior Weights");
-		ImGui::Spacing();
-
-		DrawBehaviorSliders();
-			
-		//End
-		ImGui::End();
+		ImGuiHelpers::ImGuiSliderFloatWithSetter("Trim Size",
+			TrimWorld->GetTrimWorldSize(), 1000.f, 3000.f,
+			[this, TrimWorld](float const InVal) { TrimWorld->SetTrimWorldSize(InVal); });
 	}
-#pragma endregion
+
+	if (ImGui::Checkbox("Debug Rendering", &DebugRenderSteering))
+	{
+	}
+	
+	ImGui::Text("Behavior Weights");
+	ImGui::Spacing();
+
+	DrawBehaviorSliders();
+		
+	//End
+	ImGui::End();
 }
 
 void FFlock::RenderNeighborhood()
