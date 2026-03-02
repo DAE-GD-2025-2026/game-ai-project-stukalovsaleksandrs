@@ -19,7 +19,7 @@ SteeringOutput Cohesion::CalculateSteering(float const DeltaTime, ASteeringAgent
 SteeringOutput Separation::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
 	SteeringOutput Steering{};
-	for (ASteeringAgent const* const Neighbor : m_pFlock->GetNeighbors())
+	for (ASteeringAgent const* const Neighbor : Flock->GetNeighbors())
 	{
 		FVector2D const NeighborToAgent{ Agent.GetLocation() - Neighbor->GetLocation() };
 		// Avoiding division by increasingly small numbers to avoid getting NaN
@@ -33,11 +33,11 @@ SteeringOutput Separation::CalculateSteering(float const DeltaTime, ASteeringAge
 	}
 		
 	// 2. Dividing the weightedVelocity by the neighbor count to make the velocity neighbor count-independent
-	if (int const NeighborCount{ m_pFlock->GetNeighborCount()})// Avoiding division by 0
+	if (int const NeighborCount{ Flock->GetNeighborCount()})// Avoiding division by 0
 	{
 		Steering.LinearVelocity /= NeighborCount;
 	}
-	Steering.LinearVelocity *= m_SeparationFactor;
+	Steering.LinearVelocity *= SeparationFactor;
 
 	assert(!Steering.LinearVelocity.ContainsNaN());
 		

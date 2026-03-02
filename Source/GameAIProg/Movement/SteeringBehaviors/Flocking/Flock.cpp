@@ -80,7 +80,6 @@ void FFlock::RenderDebug()
 	DrawDebugPoint(Agent->GetWorld(), FVector(WanderBehavior->GetTarget().Position, Agent->GetActorLocation().Z),
 		10.f, FColor::Green, false, 0.025f, 1
 	);
-
 		
 	// Separation avoidance radius
 	DrawDebugCircle(
@@ -139,7 +138,13 @@ void FFlock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize, AWor
 
 	if (ImGui::Checkbox("Debug Rendering", &DebugRenderSteering))
 	{
+		// See RenderDebug()
 	}
+
+	// Separation coefficient
+	ImGuiHelpers::ImGuiSliderFloatWithSetter("Separation factor",
+		SeparationBehavior->GetSeparationFactor(), 10.f, 250.f,
+		[this](float const InVal) { SeparationBehavior->SetSeparationFactor(InVal); }, "%.2f");
 	
 	ImGui::Text("Behavior Weights");
 	ImGui::Spacing();
@@ -158,8 +163,8 @@ void FFlock::RenderNeighborhood()
 void FFlock::DrawBehaviorSliders() const
 {
 	DrawBehaviorSlider("Separation", 0);
-	DrawBehaviorSlider("Cohesion", 1);
-	DrawBehaviorSlider("VelMatch", 2);
+	DrawBehaviorSlider("VelMatch", 1);
+	DrawBehaviorSlider("Cohesion", 2);
 	DrawBehaviorSlider("Wander", 3);
 }
 

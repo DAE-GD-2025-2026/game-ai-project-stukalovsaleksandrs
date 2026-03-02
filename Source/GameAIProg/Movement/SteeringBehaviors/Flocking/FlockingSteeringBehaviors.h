@@ -23,7 +23,7 @@ private:
 class Separation final : public ISteeringBehavior
 {
 public:
-	Separation(FFlock* const pFlock) :m_pFlock(pFlock) {};
+	Separation(FFlock* const pFlock) :Flock(pFlock) {};
 
 	/**
 	 * @def Moving away from neighbors with a velocity equal to the
@@ -32,13 +32,15 @@ public:
 	 * make the value independent of this count. Then it is also scaled by a
 	 * separation factor, which thus controls how fast boids move away from each other.
 	*/
-	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& Agent) override;
+	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& Agent) override;
+
+	[[nodiscard]] float GetSeparationFactor() const { return SeparationFactor; }
+	void SetSeparationFactor(float const SeparationFactor) { this->SeparationFactor = SeparationFactor; };
 
 private:
-	FFlock* m_pFlock{};
+	FFlock* Flock{};
 
-	float const m_SeparationFactor{ 1.2f };
-	
+	float SeparationFactor{ 150.f };
 };
 
 //VELOCITY MATCH - FLOCKING
