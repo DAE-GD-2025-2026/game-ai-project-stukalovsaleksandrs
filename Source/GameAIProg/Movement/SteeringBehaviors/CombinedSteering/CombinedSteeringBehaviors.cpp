@@ -49,7 +49,7 @@ float* FBlendedSteering::GetWeight(ISteeringBehavior* const SteeringBehavior)
 
 //*****************
 //PRIORITY STEERING
-SteeringOutput FPrioritySteering::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
+SteeringOutput FPrioritySteering::CalculateSteering(float const DeltaT, ASteeringAgent& Agent)
 {
 	SteeringOutput Steering = {};
 

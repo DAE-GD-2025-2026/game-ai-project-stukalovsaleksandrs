@@ -150,6 +150,16 @@ SteeringOutput Evade::CalculateSteering(float const DeltaTime, ASteeringAgent& A
     return Flee::CalculateSteering(DeltaTime, Agent);
 }
 
+void Evade::DebugDraw(ASteeringAgent const * const Agent) const
+{
+    DrawDebugCircle(
+        Agent->GetWorld(),
+        Agent->GetActorLocation(),
+        GetEvadeRadius(),
+        32, FColor::Purple, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false
+    );
+}
+
 // Wander
 SteeringOutput Wander::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {

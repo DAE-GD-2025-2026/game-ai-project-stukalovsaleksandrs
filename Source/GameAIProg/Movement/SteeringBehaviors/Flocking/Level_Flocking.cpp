@@ -37,8 +37,7 @@ void ALevel_Flocking::BeginPlay()
 			SteeringAgentClass,
 			FlockSize,
 			TrimWorld->GetTrimWorldSize(),
-			AgentToEvade,
-			true)
+			AgentToEvade)
 	);
 	assert(Flock);
 

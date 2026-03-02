@@ -106,19 +106,10 @@ void ALevel_CombinedSteering::Tick(float const DeltaTime)
         ImGui::Spacing();
         ImGui::Spacing();
     
-        ImGui::Text("Flocking");
-        ImGui::Spacing();
-        ImGui::Spacing();
-    
         if (ImGui::Checkbox("Debug Rendering", &CanDebugRender); CanDebugRender)
         {
             // Drawing the evade radius
-            DrawDebugCircle(
-                PrioritySteeringAgent->GetWorld(),
-                PrioritySteeringAgent->GetActorLocation(),
-                EvadeBehavior->GetEvadeRadius(),
-                32, FColor::Purple, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false
-            );
+            EvadeBehavior->DebugDraw(PrioritySteeringAgent);
         }
         ImGui::Checkbox("Trim World", &TrimWorld->bShouldTrimWorld);
         if (TrimWorld->bShouldTrimWorld)

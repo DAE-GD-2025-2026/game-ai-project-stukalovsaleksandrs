@@ -6,37 +6,36 @@
 
 FFlock::FFlock(
 	UWorld* World,
-	TSubclassOf<ASteeringAgent> AgentClass,
-	int FlockSize,
-	float TrimSideLength,
-	ASteeringAgent* const AgentToEvade,
-	bool bTrimWorld)
+	TSubclassOf<ASteeringAgent> const AgentClass,
+	int const FlockSize,
+	float const TrimSideLength,
+	ASteeringAgent* const AgentToEvade)
 	: pWorld{World}
 	, FlockSize{ FlockSize }
-	, pAgentToEvade{AgentToEvade}
+	, AgentToEvade{AgentToEvade}
 {
 	// Populating the Agents array
 	Agents.SetNum(FlockSize);
 	for (auto& Agent : Agents)
 	{
-		// If UE refuses to spawn an
+		// If UE refuses to spawn an actor
 		unsigned int TryCount{};
-		static constexpr unsigned maxTryCount{ 10 };
-		while (Agent == nullptr && TryCount++ < maxTryCount)
+		static unsigned constexpr MaxTryCount{ 10 };
+		while (Agent == nullptr && TryCount++ < MaxTryCount)
 		{
 			// Spawning an actor
-			float const HalfWorldSize{ 0.25f * TrimSideLength };
+			float const QuarterTrimSize{ 0.25f * TrimSideLength };
 			Agent = World->SpawnActor<ASteeringAgent>(
 				AgentClass,
 				FVector{
-					FMath::RandRange(-HalfWorldSize, HalfWorldSize)
-					,FMath::RandRange(-HalfWorldSize, HalfWorldSize) 
+					FMath::RandRange(-QuarterTrimSize, QuarterTrimSize)
+					,FMath::RandRange(-QuarterTrimSize, QuarterTrimSize) 
 					, 90
 				},
 				FRotator::ZeroRotator
 			);
 		}
-		Agent->SetSteeringBehavior(BlendedBehavior.get());
+		Agent->SetSteeringBehavior(PriorityBehavior.get());
 		// Disabling the ticking to prevent the agent from
 		// running its own steering behavior independently.
 		// We need sequential update for consistency.
@@ -44,7 +43,9 @@ FFlock::FFlock(
 	}
 
 	// Validating all agents
+#ifndef NDEBUG
 	for (auto Agent : Agents){ assert(Agent); }
+#endif
 	
 	// Initializing the flock and the memory pool of neighbors
 	// NOTE: Each boid can have at max all boids in the flock as neighbors,
@@ -60,13 +61,21 @@ FFlock::~FFlock()
 
 void FFlock::Tick(float const DeltaTime)
 {
-	for (ASteeringAgent* pAgent : Agents)
+	// Updating all agents
+	for (ASteeringAgent* const Agent : Agents)
 	{
 		// Populating the neighbor memory pool
-		RegisterNeighbors(pAgent);
+		RegisterNeighbors(Agent);
 		// Updating the agent using the neighbors in the memory pool
-		pAgent->Tick(DeltaTime);
+		Agent->Tick(DeltaTime);
 	}
+	// Setting the agent to evade as target
+	EvadeBehavior->SetTarget(FTargetData{
+		AgentToEvade->GetLocation(),
+		AgentToEvade->GetRotation(),
+		AgentToEvade->GetLinearVelocity(),
+		AgentToEvade->GetAngularVelocity(),
+	});
 }
 
 void FFlock::RenderDebug()
@@ -105,7 +114,9 @@ void FFlock::RenderDebug()
 		FVector(0, 1, 0), FVector
 		(1, 0, 0), false
 	);
- }
+		// Evade
+		EvadeBehavior->DebugDraw(Agent);
+	 }
 }
 
 void FFlock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize, AWorldTrimVolume* TrimWorld)
@@ -171,7 +182,16 @@ void FFlock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize, AWor
 
 void FFlock::RenderNeighborhood()
 {
- // TODO: Debugrender the neighbors for the first agent in the flock
+	for (auto const Neighbor: m_Neighbors)
+	{
+		DrawDebugCircle(
+			Neighbor->GetWorld(),
+			Neighbor->GetActorLocation() + WanderBehavior->GetTargetRadius() * Neighbor->GetActorForwardVector(),
+			10.f,
+			32, FColor::Cyan, false, 0.025f, 0, 5,
+			FVector(0, 1, 0), FVector(1, 0, 0), false
+		);
+	}
 }
 
 void FFlock::DrawBehaviorSliders() const

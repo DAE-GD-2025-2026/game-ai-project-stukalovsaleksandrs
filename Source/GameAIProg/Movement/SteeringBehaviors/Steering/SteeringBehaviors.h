@@ -85,6 +85,7 @@ public:
     {
         return EvadeRadius;
     }
+    void DebugDraw(const ASteeringAgent* Agent) const;
     
 private:
     float const EvadeRadius{};

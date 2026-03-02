@@ -26,8 +26,8 @@ public:
 		TSubclassOf<ASteeringAgent> AgentClass,
 		int FlockSize = 5, 
 		float TrimSideLength = 100.f, 
-		ASteeringAgent* const AgentToEvade = nullptr, 
-		bool bTrimWorld = false);
+		ASteeringAgent* const AgentToEvade = nullptr
+		);
 
 	~FFlock();
 
@@ -88,7 +88,7 @@ private:
 	float NeighborhoodRadius{ 200.f };
 	int NeighborCount{};
 
-	ASteeringAgent* pAgentToEvade{};
+	ASteeringAgent* AgentToEvade{};
 	
 	//Steering Behaviors
 	std::unique_ptr<Separation> SeparationBehavior{
@@ -118,8 +118,15 @@ private:
         	}
 		)
 	};
-	
-	std::unique_ptr<FPrioritySteering> PriorityBehavior{};
+	std::unique_ptr<Evade> EvadeBehavior{
+		std::make_unique<Evade>(350.f)
+	};
+	std::unique_ptr<FPrioritySteering> PriorityBehavior{
+		std::make_unique<FPrioritySteering>(
+			std::vector<ISteeringBehavior*>{
+				EvadeBehavior.get(), BlendedBehavior.get()
+		})
+	};
 
 	// UI and rendering
 	bool DebugRenderSteering{};
