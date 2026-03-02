@@ -10,6 +10,12 @@ ASteeringAgent::ASteeringAgent()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
+FVector2D ASteeringAgent::GetLocation() const
+{
+	FVector Location{ GetActorLocation() };
+	return {Location.X, Location.Y};
+}
+
 // Called when the game starts or when spawned
 void ASteeringAgent::BeginPlay()
 {

@@ -46,34 +46,36 @@
 UCLASS()
 class GAMEAIPROG_API ASteeringAgent : public ABaseAgent
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
-	ASteeringAgent();
+    // Sets default values for this character's properties
+    ASteeringAgent();
 
-	float OldSpeed{};// Used by SetAgentBehavior to restore the maximal speed after it got changed by the Arrive behavior.
+    float OldSpeed{};// Used by SetAgentBehavior to restore the maximal speed after it got changed by the Arrive behavior.
 
+    FVector2D GetLocation() const;
+    
 protected:
 
-	ISteeringBehavior* SteeringBehavior{}; // non-owning
-	
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+    ISteeringBehavior* SteeringBehavior{}; // non-owning
+    
+    // Called when the game starts or when spawned
+    virtual void BeginPlay() override;
 
-	// Called when the object is being destroyed
-	virtual void BeginDestroy() override;
+    // Called when the object is being destroyed
+    virtual void BeginDestroy() override;
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaSec) override;
+    // Called every frame
+    virtual void Tick(float DeltaSec) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+    // Called to bind functionality to input
+    virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
-	void SetSteeringBehavior(ISteeringBehavior* NewSteeringBehavior);
+    void SetSteeringBehavior(ISteeringBehavior* NewSteeringBehavior);
 
 private:
-	void AddAngularVelocity(float DeltaSec, float DegreesPerSec);
-	
+    void AddAngularVelocity(float DeltaSec, float DegreesPerSec);
+    
 };

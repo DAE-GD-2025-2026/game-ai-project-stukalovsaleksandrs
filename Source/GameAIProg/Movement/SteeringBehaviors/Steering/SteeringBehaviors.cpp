@@ -5,172 +5,177 @@
 // Seek
 SteeringOutput Seek::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
-	SteeringOutput Steering{};
-	// NOTE: There is no need to normalize since AddMovementInput already normalizes the vector.
-	Steering.LinearVelocity = Target.Position - Agent.GetLocation();
-	return Steering;
+    SteeringOutput Steering{};
+    // NOTE: There is no need to normalize since AddMovementInput already normalizes the vector.
+    Steering.LinearVelocity = Target.Position - Agent.GetLocation();
+    return Steering;
 }
 
 // Flee
 SteeringOutput Flee::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
-	SteeringOutput Steering{};
-	Steering.LinearVelocity = Agent.GetLocation() - Target.Position;
-	return Steering;
+    SteeringOutput Steering{};
+    Steering.LinearVelocity = Agent.GetLocation() - Target.Position;
+    return Steering;
 }
 
 // Arrive
 SteeringOutput Arrive::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
-	// Preserving the old speed if relevant
-	if (Agent.GetMaxLinearSpeed() > Agent.OldSpeed) Agent.OldSpeed = Agent.GetMaxLinearSpeed();
+    // Preserving the old speed if relevant
+    if (Agent.GetMaxLinearSpeed() > Agent.OldSpeed) Agent.OldSpeed = Agent.GetMaxLinearSpeed();
 
-	if (Agent.GetDebugRenderingEnabled())
-	{
-		// Drawing debug circles
-		DrawDebugCircle(Agent.GetWorld(), Agent.GetActorLocation(), m_TargetRadius, 32, FColor::Blue, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false);
-		DrawDebugCircle(Agent.GetWorld(), Agent.GetActorLocation(), m_SlowRadius, 32, FColor::Orange, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false);
-	}
+    if (Agent.GetDebugRenderingEnabled())
+    {
+        // Drawing debug circles
+        DrawDebugCircle(Agent.GetWorld(), Agent.GetActorLocation(), TargetRadius, 32, FColor::Blue, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false);
+        DrawDebugCircle(Agent.GetWorld(), Agent.GetActorLocation(), SlowRadius, 32, FColor::Orange, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false);
+    }
 
-	SteeringOutput Steering{};
-	// Performing steering logic
-	Steering.LinearVelocity = Target.Position - Agent.GetLocation();// Norm is distance
-	double const Distance{ Steering.LinearVelocity.Length() };
-	
-	// Clamping the distance between the target and slow radii
-	// NOTE: The clamping is performed in a way that the distances smaller or equal to TargetRadius get equated to 0 and values after slow radius are clamped to 1.
-	double const SpeedFactor{ FMath::Clamp((Distance - m_TargetRadius) /  (m_SlowRadius - m_TargetRadius), 0.0, 1.0) };
+    SteeringOutput Steering{};
+    // Performing steering logic
+    Steering.LinearVelocity = Target.Position - Agent.GetLocation();// Norm is distance
+    double const Distance{ Steering.LinearVelocity.Length() };
+    
+    // Clamping the distance between the target and slow radii
+    // NOTE: The clamping is performed in a way that the distances smaller or equal to TargetRadius get equated to 0 and values after slow radius are clamped to 1.
+    double const SpeedFactor{ FMath::Clamp((Distance - TargetRadius) /  (SlowRadius - TargetRadius), 0.0, 1.0) };
 
-	// Updating the agent's max speed
-	Agent.SetMaxLinearSpeed(SpeedFactor * Agent.OldSpeed);
-	
-	return Steering;
+    // Updating the agent's max speed
+    Agent.SetMaxLinearSpeed(SpeedFactor * Agent.OldSpeed);
+    
+    return Steering;
+}
+
+void Arrive::SetTargetRadius(float NewTargetRadius)
+{
+    TargetRadius = NewTargetRadius;
 }
 
 float GetDegreesBetweenVectors(FVector2D const& Lhs, FVector2D const& Rhs)
 {
-	checkf(!FMath::IsNearlyZero(Lhs.SquaredLength()) && !FMath::IsNearlyZero(Rhs.SquaredLength()),
-		TEXT("GetRadiansBetweenVectors() called with a zero vector"));
-	float const LhsRadians(FMath::Atan2(Lhs.Y, Lhs.X)),
-		RhsRadians(FMath::Atan2(Rhs.Y, Rhs.X));
-	return FMath::RadiansToDegrees(FMath::FindDeltaAngleRadians(LhsRadians, RhsRadians));
+    checkf(!FMath::IsNearlyZero(Lhs.SquaredLength()) && !FMath::IsNearlyZero(Rhs.SquaredLength()),
+        TEXT("GetRadiansBetweenVectors() called with a zero vector"));
+    float const LhsRadians(FMath::Atan2(Lhs.Y, Lhs.X)),
+        RhsRadians(FMath::Atan2(Rhs.Y, Rhs.X));
+    return FMath::RadiansToDegrees(FMath::FindDeltaAngleRadians(LhsRadians, RhsRadians));
 }
 
 // Face
 SteeringOutput Face::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
-	SteeringOutput Steering{};
+    SteeringOutput Steering{};
 
-	// From Agent to Target
-	FVector2D const DistanceVector{ Target.Position - Agent.GetLocation() };
+    // From Agent to Target
+    FVector2D const DistanceVector{ Target.Position - Agent.GetLocation() };
 
-	// Early returning if target is the agent's position
-	if (FMath::IsNearlyZero(DistanceVector.SquaredLength()))
-	{
-		return Steering;
-	}
+    // Early returning if target is the agent's position
+    if (FMath::IsNearlyZero(DistanceVector.SquaredLength()))
+    {
+        return Steering;
+    }
 
-	// Getting forward vector. Limiting to 2D since the project is top-down
-	FVector2D const AgentForwardVector{ Agent.GetActorForwardVector().X, Agent.GetActorForwardVector().Y };
-		
-	// Getting the angle between the agent's forward vector and the deltaVector
-	float const DeltaDegrees{ GetDegreesBetweenVectors(AgentForwardVector, DistanceVector) };
+    // Getting forward vector. Limiting to 2D since the project is top-down
+    FVector2D const AgentForwardVector{ Agent.GetActorForwardVector().X, Agent.GetActorForwardVector().Y };
+        
+    // Getting the angle between the agent's forward vector and the deltaVector
+    float const DeltaDegrees{ GetDegreesBetweenVectors(AgentForwardVector, DistanceVector) };
 
-	// Stopping upon arrival at the destination
-	if (FMath::IsNearlyZero(DeltaDegrees))
-	{
-		Agent.SetMaxAngularSpeed(0.f);
-		return Steering;
-	}
-	
-	if (FMath::IsNearlyZero(Agent.GetAngularVelocity()))// Not yet rotating
-	{
-		Steering.DegreesPerSec = 
-			FMath::Clamp(
-				DeltaDegrees / m_SecToRotate,
-				-Agent.GetMaxDegreesPerSec(),
-				Agent.GetMaxDegreesPerSec()
-			);
-	}
-	else // Rotating already
-	{
-		// Making sure the agent does not overshoot by setting the angular speed
-		// to the DeltaRadians if the former is larger than the latter
-		if (DeltaDegrees > Agent.GetAngularVelocity())
-		{
-			Steering.DegreesPerSec = DeltaDegrees;
-		}
-	}
-	
-	return Steering;
+    // Stopping upon arrival at the destination
+    if (FMath::IsNearlyZero(DeltaDegrees))
+    {
+        Agent.SetMaxAngularSpeed(0.f);
+        return Steering;
+    }
+    
+    if (FMath::IsNearlyZero(Agent.GetAngularVelocity()))// Not yet rotating
+    {
+        Steering.DegreesPerSec = 
+            FMath::Clamp(
+                DeltaDegrees / m_SecToRotate,
+                -Agent.GetMaxDegreesPerSec(),
+                Agent.GetMaxDegreesPerSec()
+            );
+    }
+    else // Rotating already
+    {
+        // Making sure the agent does not overshoot by setting the angular speed
+        // to the DeltaRadians if the former is larger than the latter
+        if (DeltaDegrees > Agent.GetAngularVelocity())
+        {
+            Steering.DegreesPerSec = DeltaDegrees;
+        }
+    }
+    
+    return Steering;
 }
 
 // Pursuit 
 SteeringOutput Pursuit::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
-	// Calculating how much time it will take for the agent to reach the target
-	// considering that target stands still.
-	double const Distance{ (Target.Position - Agent.GetLocation()).Length() },
-		SecToReachTarget{ Distance / Agent.GetMaxLinearSpeed() };// t = d / v
+    // Calculating how much time it will take for the agent to reach the target
+    // considering that target stands still.
+    double const Distance{ (Target.Position - Agent.GetLocation()).Length() },
+        SecToReachTarget{ Distance / Agent.GetMaxLinearSpeed() };// t = d / v
 
-	// Calculating location of the target after the time calculated previously elapses
-	FVector2D const NewTargetPosition{ Target.Position + Target.LinearVelocity * SecToReachTarget };
+    // Calculating location of the target after the time calculated previously elapses
+    FVector2D const NewTargetPosition{ Target.Position + Target.LinearVelocity * SecToReachTarget };
 
-	// Moving the agent towards the previously calculated position
-	Target.Position = NewTargetPosition;
-	return Seek::CalculateSteering(DeltaTime, Agent);
+    // Moving the agent towards the previously calculated position
+    Target.Position = NewTargetPosition;
+    return Seek::CalculateSteering(DeltaTime, Agent);
 }
 
 // Evade 
 Evade::Evade(float const EvadeRadius)
-	: Flee()
-	, EvadeRadius{ EvadeRadius }
+    : Flee()
+    , EvadeRadius{ EvadeRadius }
 {}
 
 SteeringOutput Evade::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
-	// NOTE: Identical to Pursuit except that it moves away(Flees) from the target
-	double const Distance{ (Target.Position - Agent.GetLocation()).Length() };
+    // NOTE: Identical to Pursuit except that it moves away(Flees) from the target
+    double const Distance{ (Target.Position - Agent.GetLocation()).Length() };
 
-	// Early returning if the target is further than the radius
-	SteeringOutput Steering{};
-	Steering.IsValid = false;
-	if (Distance > EvadeRadius) return Steering;
+    // Early returning if the target is further than the radius
+    SteeringOutput Steering{};
+    Steering.IsValid = false;
+    if (Distance > EvadeRadius) return Steering;
 
-	double const SecToReachTarget{ Distance / Agent.GetMaxLinearSpeed() };
-	
-	FVector2D const NewTargetPosition{ Target.Position + Target.LinearVelocity * SecToReachTarget };
+    double const SecToReachTarget{ Distance / Agent.GetMaxLinearSpeed() };
+    
+    FVector2D const NewTargetPosition{ Target.Position + Target.LinearVelocity * SecToReachTarget };
 
-	Target.Position = NewTargetPosition;
-	return Flee::CalculateSteering(DeltaTime, Agent);
+    Target.Position = NewTargetPosition;
+    return Flee::CalculateSteering(DeltaTime, Agent);
 }
 
 // Wander
 SteeringOutput Wander::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
-	// Getting random point on the circle
-	//// Getting random angle within offset
-	float NewTargetDegrees{
-		m_LastTargetDegrees + FMath::FRandRange(-m_MaxTargetDegreesOffset, m_MaxTargetDegreesOffset)
-	};
-	//// Clamping to [0, 360] range
-	NewTargetDegrees = FMath::Fmod(FMath::Fmod(NewTargetDegrees, 360.0f) + 360.0f, 360.0f);
-	
-	//// Getting agent's forward vector. Limiting to 2D since the project is top-down
-	FVector2D const AgentForwardVector{ Agent.GetActorForwardVector().X, Agent.GetActorForwardVector().Y };
-	//// Saving the angle
-	m_LastTargetDegrees = NewTargetDegrees;
-	//// Calculating new target's coordinates
-	FVector2D const NewTargetPosition{ Agent.GetLocation() + m_TargetCircleOffset  * AgentForwardVector + m_TargetCircleRadius * FVector2D(FMath::Cos(NewTargetDegrees), FMath::Sin(NewTargetDegrees) ) };
-	Target.Position = NewTargetPosition;
-	
-	// Debug output
-	if (Agent.GetDebugRenderingEnabled())
-	{
-		DrawDebugCircle(Agent.GetWorld(), Agent.GetActorLocation() + m_TargetCircleOffset * Agent.GetActorForwardVector(), m_TargetCircleRadius, 32, FColor::Blue, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false);
-		DrawDebugPoint(Agent.GetWorld(), FVector(NewTargetPosition, Agent.GetActorLocation().Z), 10.f, FColor::Green, false, 0.025f, 1);
-	}
+    // Getting random point on the circle
+    //// Getting random angle within offset
+    float NewTargetDegrees{
+        m_LastTargetDegrees + FMath::FRandRange(-m_MaxTargetDegreesOffset, m_MaxTargetDegreesOffset)
+    };
+    //// Clamping to [0, 360] range
+    NewTargetDegrees = FMath::Fmod(FMath::Fmod(NewTargetDegrees, 360.0f) + 360.0f, 360.0f);
+    
+    //// Getting agent's forward vector. Limiting to 2D since the project is top-down
+    FVector2D const AgentForwardVector{ Agent.GetActorForwardVector().X, Agent.GetActorForwardVector().Y };
+    //// Saving the angle
+    m_LastTargetDegrees = NewTargetDegrees;
+    //// Calculating new target's coordinates
+    FVector2D const NewTargetPosition{ Agent.GetLocation() + m_TargetCircleOffset  * AgentForwardVector + m_TargetCircleRadius * FVector2D(FMath::Cos(NewTargetDegrees), FMath::Sin(NewTargetDegrees) ) };
+    Target.Position = NewTargetPosition;
+    
+    // Debug output
+    if (Agent.GetDebugRenderingEnabled())
+    {
+        DrawDebugCircle(Agent.GetWorld(), Agent.GetActorLocation() + m_TargetCircleOffset * Agent.GetActorForwardVector(), m_TargetCircleRadius, 32, FColor::Blue, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false);
+        DrawDebugPoint(Agent.GetWorld(), FVector(NewTargetPosition, Agent.GetActorLocation().Z), 10.f, FColor::Green, false, 0.025f, 1);
+    }
 
-	// Steering
-	return Seek::CalculateSteering(DeltaTime, Agent);
+    // Steering
+    return Seek::CalculateSteering(DeltaTime, Agent);
 }

@@ -14,53 +14,53 @@
 UCLASS()
 class GAMEAIPROG_API ALevel_SteeringBehaviors : public ALevel_Base
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
-	ALevel_SteeringBehaviors();
+    // Sets default values for this actor's properties
+    ALevel_SteeringBehaviors();
 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+    // Called every frame
+    virtual void Tick(float DeltaTime) override;
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	
-	virtual void BeginDestroy() override;
+    // Called when the game starts or when spawned
+    virtual void BeginPlay() override;
+    
+    virtual void BeginDestroy() override;
 
-	enum class BehaviorTypes
-	{
-		Seek,
-		Flee,
-		Arrive,
-		Face,
-		Pursuit,
-		Evade,
-		Wander,
+    enum class BehaviorTypes
+    {
+        Seek,
+        Flee,
+        Arrive,
+        Face,
+        Pursuit,
+        Evade,
+        Wander,
 
-		// @ End
-		Count
-	};
+        // @ End
+        Count
+    };
 
-	struct ImGui_Agent final
-	{
-		ASteeringAgent* Agent_Steering{nullptr};
-		std::unique_ptr<ISteeringBehavior> Behavior{nullptr};
-		int SelectedBehavior{static_cast<int>(BehaviorTypes::Arrive)};
-		int SelectedTarget = -1;
-	};
-	
-	std::vector<ImGui_Agent> SteeringAgents{};
-	std::vector<std::string> TargetLabels{};
-	
-	int AgentIndexToRemove = -1;
-	
-	bool AddAgent(BehaviorTypes BehaviorType = BehaviorTypes::Wander, bool AutoOrient = true);
-	void RemoveAgent(unsigned int Index);
-	void SetAgentBehavior(ImGui_Agent& Agent_ImGui);
+    struct ImGui_Agent final
+    {
+        ASteeringAgent* Agent_Steering{nullptr};
+        std::unique_ptr<ISteeringBehavior> Behavior{nullptr};
+        int SelectedBehavior{static_cast<int>(BehaviorTypes::Arrive)};
+        int SelectedTarget = -1;
+    };
+    
+    std::vector<ImGui_Agent> SteeringAgents{};
+    std::vector<std::string> TargetLabels{};
+    
+    int AgentIndexToRemove = -1;
+    
+    bool AddAgent(BehaviorTypes BehaviorType = BehaviorTypes::Wander, bool AutoOrient = true);
+    void RemoveAgent(unsigned int Index);
+    void SetAgentBehavior(ImGui_Agent& Agent_ImGui);
 
-	void RefreshTargetLabels();
-	void UpdateTarget(ImGui_Agent& Agent);
-	void RefreshAgentTargets(unsigned int IndexRemoved);
+    void RefreshTargetLabels();
+    void UpdateTarget(ImGui_Agent& Agent);
+    void RefreshAgentTargets(unsigned int IndexRemoved);
 };

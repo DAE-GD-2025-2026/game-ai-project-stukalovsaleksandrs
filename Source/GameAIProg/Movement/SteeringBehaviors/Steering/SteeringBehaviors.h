@@ -8,97 +8,99 @@ class ASteeringAgent;
 class ISteeringBehavior
 {
 public:
-	ISteeringBehavior() = default;
-	virtual ~ISteeringBehavior() = default;
+    ISteeringBehavior() = default;
+    virtual ~ISteeringBehavior() = default;
 
-	// Override to implement your own behavior
-	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent & Agent) = 0;
+    // Override to implement your own behavior
+    virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent & Agent) = 0;
 
-	void SetTarget(const FTargetData& NewTarget) { Target = NewTarget; }
-	
-	template<class T, std::enable_if_t<std::is_base_of_v<ISteeringBehavior, T>>* = nullptr>
-	T* As()
-	{ return static_cast<T*>(this); }
+    void SetTarget(const FTargetData& NewTarget) { Target = NewTarget; }
+    
+    template<class T, std::enable_if_t<std::is_base_of_v<ISteeringBehavior, T>>* = nullptr>
+    T* As()
+    { return static_cast<T*>(this); }
 
 protected:
-	FTargetData Target;
+    FTargetData Target;
 };
 
 // Your own SteeringBehaviors should follow here...
 class Seek : public ISteeringBehavior
 {
 public:
-	~Seek() = default;
-	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+    ~Seek() = default;
+    SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
 };
 
 class Flee : public ISteeringBehavior
 {
 public:
-	~Flee() = default;
-	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+    ~Flee() = default;
+    SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
 };
 
 class Arrive final : public ISteeringBehavior
 {
 public:
-	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
-	
+    SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+    
+    void SetTargetRadius(float NewTargetRadius);
+    
 private:
-	float m_SlowRadius{400}, m_TargetRadius{100},
-	m_MaxSpeed{ -1.f };// Speed cannot be negative,
-	// it's initial value that will be overridden immediately.
-	
+    float SlowRadius{ 400 }, TargetRadius{ 100 },
+    MaxSpeed{ -1.f };// Speed cannot be negative,
+    // it's initial value that will be overridden immediately.
+    
 };
 
 class Face final : public ISteeringBehavior
 {
 public:
-	// Rotates the agent to look at the target position by using
-	// AngularVelocity instead of pAgent->SetRotation().
-	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
-	
+    // Rotates the agent to look at the target position by using
+    // AngularVelocity instead of pAgent->SetRotation().
+    SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+    
 private:
-	// NOTE: Regardless of the angle, the rotation will take the same time,
-	// which arguably is more realistic than having a fixed angular speed,
-	// because in reality, we turn around with a larger speed than when we turn slightly.
-	float const m_SecToRotate{ .25f };// How many seconds it takes to perform any rotation.
-	
+    // NOTE: Regardless of the angle, the rotation will take the same time,
+    // which arguably is more realistic than having a fixed angular speed,
+    // because in reality, we turn around with a larger speed than when we turn slightly.
+    float const m_SecToRotate{ .25f };// How many seconds it takes to perform any rotation.
+    
 };
 
 class Pursuit final : public Seek
 {
 public:
-	// Moves and rotates towards the predicted location of the target 
-	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+    // Moves and rotates towards the predicted location of the target 
+    virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
 };
 
 class Evade final : public Flee
 {
 public:
-	explicit Evade(float EvadeRadius);
-	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
-	float GetEvadeRadius() const
-	{
-		return EvadeRadius;
-	}
-	
+    explicit Evade(float EvadeRadius);
+    virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+    float GetEvadeRadius() const
+    {
+        return EvadeRadius;
+    }
+    
 private:
-	float const EvadeRadius{};
+    float const EvadeRadius{};
 };
 
 class Wander final : public Seek 
 {
 public:
-	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+    virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
 
 private:
-	// Radius of a circle for selecting random target points,
-	// where center is the agent's center + agent's front vector times the offset.
-	float const m_TargetCircleRadius{ 200 },
-		m_TargetCircleOffset{ 400 }, 
-		// Max offset between 2 consecutive random angles
-		// NOTE: Added for smoothness
-		m_MaxTargetDegreesOffset{ 1.f };
-	float m_LastTargetDegrees{};
+    // Radius of a circle for selecting random target points,
+    // where center is the agent's center + agent's front vector times the offset.
+    float const m_TargetCircleRadius{ 200 },
+        m_TargetCircleOffset{ 400 }, 
+        // Max offset between 2 consecutive random angles
+        // NOTE: Added for smoothness
+        m_MaxTargetDegreesOffset{ 1.f };
+    float m_LastTargetDegrees{};
 };
