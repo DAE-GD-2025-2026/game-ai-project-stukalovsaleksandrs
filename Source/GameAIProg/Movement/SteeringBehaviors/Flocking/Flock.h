@@ -109,9 +109,9 @@ private:
 				// NOTE: Leaving all the weights as 1 by default.
 				// These weights should be changed via sliders in ImGui
 				{ SeparationBehavior.get(), 0.f },
-				// { CohesionBehavior.get(), 0.f },
-				// { VelMatchBehavior.get(), 0.f },
-				{ WanderBehavior.get(), 0.5f },
+				{ CohesionBehavior.get(), 0.f },
+				{ VelMatchBehavior.get(), 0.f },
+				{ WanderBehavior.get(), 0.f },
         	}
 		)
 	};

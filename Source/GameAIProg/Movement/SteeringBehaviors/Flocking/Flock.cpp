@@ -123,9 +123,9 @@ void FFlock::RenderNeighborhood()
 void FFlock::DrawBehaviorSliders() const
 {
 	DrawBehaviorSlider("Separation", 0);
-	// DrawBehaviorSlider("Cohesion", 1);
-	// DrawBehaviorSlider("VelMatch", 2);
-	DrawBehaviorSlider("Wander", 1);
+	DrawBehaviorSlider("Cohesion", 1);
+	DrawBehaviorSlider("VelMatch", 2);
+	DrawBehaviorSlider("Wander", 3);
 }
 
 void FFlock::DrawBehaviorSlider(std::string_view const Name, unsigned int const Index) const

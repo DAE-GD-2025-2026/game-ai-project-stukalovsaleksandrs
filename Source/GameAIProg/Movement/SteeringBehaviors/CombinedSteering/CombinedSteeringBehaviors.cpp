@@ -17,6 +17,8 @@ SteeringOutput FBlendedSteering::CalculateSteering(float const DeltaTime, ASteer
 	// 1. Iterate over all the weighted steering behaviors
 	for (auto const& WeightedBehavior : m_WeightedBehaviors)
 	{
+		// Not processing behaviors with weights close to 0 
+		if (WeightedBehavior.Weight < FLT_EPSILON) continue;
 		SteeringOutput WeightedBehaviorSteering{ WeightedBehavior.Behavior->CalculateSteering(DeltaTime, Agent) };
 		// 2. We have 2 variables, values for which we have to calculate: direction and angular velocity
 		// 2.1. Direction
@@ -33,7 +35,7 @@ SteeringOutput FBlendedSteering::CalculateSteering(float const DeltaTime, ASteer
 			Agent.GetActorLocation(),
 			Agent.GetActorLocation() + FVector(BlendedSteering.LinearVelocity, 0.0),
 			FColor::Green, false, 0.025f, 0, 5
-			);
+		);
 	}
 	
 	return BlendedSteering;

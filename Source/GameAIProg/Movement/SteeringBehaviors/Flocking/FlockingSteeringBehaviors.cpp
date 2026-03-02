@@ -22,8 +22,14 @@ SteeringOutput Separation::CalculateSteering(float const DeltaTime, ASteeringAge
 	for (ASteeringAgent const* const Neighbor : m_pFlock->GetNeighbors())
 	{
 		FVector2D const NeighborToAgent{ Agent.GetLocation() - Neighbor->GetLocation() };
-		// 1. Normalizing the NeighborToAgent vector and dividing it by distance, then adding to the result
-		Steering.LinearVelocity += NeighborToAgent.GetSafeNormal() / NeighborToAgent.Length();
+		// Avoiding division by increasingly small numbers to avoid getting NaN
+		if (double const Distance{ NeighborToAgent.Length() };
+			Distance > DBL_EPSILON)
+		{
+			// 1. Dividing the NeighborToAgent vector by distance squared, then adding to the result
+			Steering.LinearVelocity += NeighborToAgent / NeighborToAgent.Length() / NeighborToAgent.Length();
+			assert(!Steering.LinearVelocity.ContainsNaN());
+		}
 	}
 		
 	// 2. Dividing the weightedVelocity by the neighbor count to make the velocity neighbor count-independent
@@ -33,6 +39,8 @@ SteeringOutput Separation::CalculateSteering(float const DeltaTime, ASteeringAge
 	}
 	Steering.LinearVelocity *= m_SeparationFactor;
 
+	assert(!Steering.LinearVelocity.ContainsNaN());
+	
 	// 3. Debug output
 	if (Agent.GetDebugRenderingEnabled())
 	{
@@ -59,6 +67,10 @@ SteeringOutput VelocityMatch::CalculateSteering(float const DeltaTime, ASteering
 	{
 		Steering.LinearVelocity += pNeighbor->GetLinearVelocity();
 	}
-	Steering.LinearVelocity /= static_cast<float>(m_pFlock->GetNeighborCount());
+
+	if (int const NeighborCount{ m_pFlock->GetNeighborCount()})// Avoiding division by 0
+	{
+		Steering.LinearVelocity /= static_cast<float>(NeighborCount);
+	}
 	return Steering;
 }
