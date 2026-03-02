@@ -19,9 +19,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 	bool bUseMouseTarget{true};
 
 	int const FlockSize{ 5 };
@@ -32,4 +29,7 @@ protected:
 	ASteeringAgent* AgentToEvade{}; // non owning ref
 
 	std::unique_ptr<Seek> SeekBehavior{};
+
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 };

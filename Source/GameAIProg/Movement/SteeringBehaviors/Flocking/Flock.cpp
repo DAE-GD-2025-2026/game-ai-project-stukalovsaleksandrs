@@ -2,6 +2,8 @@
 #include "Shared/ImGuiHelpers.h"
 #include <cstdint>
 
+#include "Shared/WorldTrimVolume.h"
+
 FFlock::FFlock(
 	UWorld* World,
 	TSubclassOf<ASteeringAgent> AgentClass,
@@ -62,7 +64,7 @@ void FFlock::RenderDebug()
  }
 }
 
-void FFlock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
+void FFlock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize, AWorldTrimVolume* TrimWorld)
 {
 #pragma region UI
 	//UI
@@ -95,19 +97,27 @@ void FFlock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 		ImGui::Spacing();
 		ImGui::Separator();
 		ImGui::Spacing();
-
+		
 		ImGui::Text("Flocking");
 		ImGui::Spacing();
+
+		ImGui::Checkbox("Trim World", &TrimWorld->bShouldTrimWorld);
+		if (TrimWorld->bShouldTrimWorld)
+		{
+			ImGuiHelpers::ImGuiSliderFloatWithSetter("Trim Size",
+				TrimWorld->GetTrimWorldSize(), 1000.f, 3000.f,
+				[this, TrimWorld](float const InVal) { TrimWorld->SetTrimWorldSize(InVal); });
+		}
 
 		if (ImGui::Checkbox("Debug Rendering", &DebugRenderSteering))
 		{
 			
 		}
-
+		
 		ImGui::Text("Behavior Weights");
 		ImGui::Spacing();
 
-		DrawBehaviorSliders();		
+		DrawBehaviorSliders();
 			
 		//End
 		ImGui::End();

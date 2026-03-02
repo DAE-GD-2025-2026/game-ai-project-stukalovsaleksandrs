@@ -11,6 +11,9 @@
 #include "imgui.h"
 #include <string_view>
 #include <unordered_map>
+
+#include "Shared/WorldTrimVolume.h"
+
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
 #include "../SpacePartitioning/SpacePartitioning.h"
 #endif
@@ -30,7 +33,7 @@ public:
 
 	void Tick(float DeltaTime);
 	void RenderDebug();
-	void ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize);
+	void ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize, AWorldTrimVolume* TrimWorld);
 
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
 	//const TArray<ASteeringAgent*>& GetNeighbors() const { return pPartitionedSpace->GetNeighbors(); }

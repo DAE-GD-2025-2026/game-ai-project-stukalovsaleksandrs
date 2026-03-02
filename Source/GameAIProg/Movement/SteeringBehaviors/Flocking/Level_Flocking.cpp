@@ -41,6 +41,9 @@ void ALevel_Flocking::BeginPlay()
 			true)
 	);
 	assert(Flock);
+
+	// Setting the initial world trim size
+	TrimWorld->SetTrimWorldSize(1000.f);
 }
 
 // Called every frame
@@ -50,10 +53,10 @@ void ALevel_Flocking::Tick(float const DeltaTime)
 	// Agent to evade
     SeekBehavior->SetTarget(MouseTarget);
 	// Flock
-	Flock->ImGuiRender(WindowPos, WindowSize);
+	Flock->ImGuiRender(WindowPos, WindowSize, TrimWorld);
 	Flock->Tick(DeltaTime);
 	Flock->RenderDebug();
 	if (bUseMouseTarget)
 		Flock->SetTarget_Seek(MouseTarget);
+	
 }
-
