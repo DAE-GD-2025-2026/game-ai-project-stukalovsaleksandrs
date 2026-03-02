@@ -25,7 +25,7 @@ public:
 		UWorld* World,
 		TSubclassOf<ASteeringAgent> AgentClass,
 		int FlockSize = 5, 
-		float WorldSize = 100.f, 
+		float TrimSideLength = 100.f, 
 		ASteeringAgent* const AgentToEvade = nullptr, 
 		bool bTrimWorld = false);
 
@@ -111,10 +111,10 @@ private:
 			std::vector<FBlendedSteering::FWeightedBehavior>{
 				// NOTE: Leaving all the weights as 1 by default.
 				// These weights should be changed via sliders in ImGui
-				{ SeparationBehavior.get(), 0.f },
-				{ VelMatchBehavior.get(), 0.f },
-				{ CohesionBehavior.get(), 0.f },
-				{ WanderBehavior.get(), 0.f },
+				{ SeparationBehavior.get(), 1.f },
+				{ VelMatchBehavior.get(), 0.28f },
+				{ CohesionBehavior.get(), 1.f },
+				{ WanderBehavior.get(), 0.54f },
         	}
 		)
 	};

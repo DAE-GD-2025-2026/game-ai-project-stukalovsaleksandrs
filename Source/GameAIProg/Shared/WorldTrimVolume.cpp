@@ -17,7 +17,7 @@ AWorldTrimVolume::AWorldTrimVolume()
 
 	RootComponent = TrimVolume;
 
-	SetTrimWorldSize(TrimWorldSize);
+	SetTrimWorldSize(TrimWorldSideLength);
 }
 
 // Called when the game starts or when spawned
@@ -76,7 +76,7 @@ void AWorldTrimVolume::Tick(float DeltaTime)
 
 void AWorldTrimVolume::SetTrimWorldSize(float NewSize)
 {
-	TrimWorldSize = NewSize;
-	TrimVolume->SetBoxExtent(FVector(TrimWorldSize, TrimWorldSize, 5000));
+	TrimWorldSideLength = NewSize;
+	TrimVolume->SetBoxExtent(FVector(TrimWorldSideLength, TrimWorldSideLength, 5000));
 }
 

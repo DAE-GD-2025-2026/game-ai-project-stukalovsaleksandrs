@@ -7,7 +7,7 @@ SteeringOutput Seek::CalculateSteering(float const DeltaTime, ASteeringAgent& Ag
 {
     SteeringOutput Steering{};
     // NOTE: There is no need to normalize since AddMovementInput already normalizes the vector.
-    Steering.LinearVelocity = Target.Position - Agent.GetLocation();
+    Steering.LinearVelocity += Target.Position - Agent.GetLocation();
     return Steering;
 }
 

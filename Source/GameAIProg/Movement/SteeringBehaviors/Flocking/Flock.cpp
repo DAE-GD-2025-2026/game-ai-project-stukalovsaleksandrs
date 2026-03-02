@@ -8,7 +8,7 @@ FFlock::FFlock(
 	UWorld* World,
 	TSubclassOf<ASteeringAgent> AgentClass,
 	int FlockSize,
-	float WorldSize,
+	float TrimSideLength,
 	ASteeringAgent* const AgentToEvade,
 	bool bTrimWorld)
 	: pWorld{World}
@@ -19,12 +19,23 @@ FFlock::FFlock(
 	Agents.SetNum(FlockSize);
 	for (auto& Agent : Agents)
 	{
-		Agent = World->SpawnActor<ASteeringAgent>(
-			AgentClass,
-			FVector{0, 0, 90},
-			FRotator::ZeroRotator
-		);
-		assert(Agent);
+		// If UE refuses to spawn an
+		unsigned int TryCount{};
+		static constexpr unsigned maxTryCount{ 10 };
+		while (Agent == nullptr && TryCount++ < maxTryCount)
+		{
+			// Spawning an actor
+			float const HalfWorldSize{ 0.25f * TrimSideLength };
+			Agent = World->SpawnActor<ASteeringAgent>(
+				AgentClass,
+				FVector{
+					FMath::RandRange(-HalfWorldSize, HalfWorldSize)
+					,FMath::RandRange(-HalfWorldSize, HalfWorldSize) 
+					, 90
+				},
+				FRotator::ZeroRotator
+			);
+		}
 		Agent->SetSteeringBehavior(BlendedBehavior.get());
 		// Disabling the ticking to prevent the agent from
 		// running its own steering behavior independently.
@@ -32,6 +43,9 @@ FFlock::FFlock(
 		Agent->SetActorTickEnabled(false);
 	}
 
+	// Validating all agents
+	for (auto Agent : Agents){ assert(Agent); }
+	
 	// Initializing the flock and the memory pool of neighbors
 	// NOTE: Each boid can have at max all boids in the flock as neighbors,
 	// but it will never count itself as a neighbor.
@@ -202,7 +216,10 @@ FVector2D FFlock::GetAverageNeighborLocation() const
 	{
 		AverageLocation += m_Neighbors[NeighborIdx]->GetLocation();
 	}
-	AverageLocation /= static_cast<float>(NeighborCount);
+	if (NeighborCount > 0)
+	{
+		AverageLocation /= static_cast<float>(NeighborCount);
+	}
 	return AverageLocation;
 }
 

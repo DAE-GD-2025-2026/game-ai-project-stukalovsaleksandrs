@@ -10,7 +10,7 @@
 //COHESION (FLOCKING)
 SteeringOutput Cohesion::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
-	Target.Position = pFlock->GetAverageNeighborLocation() - Agent.GetLocation();
+	Target.Position = pFlock->GetAverageNeighborLocation();
 	return Seek::CalculateSteering(DeltaTime, Agent);
 }
 
@@ -21,6 +21,7 @@ SteeringOutput Separation::CalculateSteering(float const DeltaTime, ASteeringAge
 	SteeringOutput Steering{};
 	for (ASteeringAgent const* const Neighbor : Flock->GetNeighbors())
 	{
+		if (!Neighbor) continue;
 		FVector2D const NeighborToAgent{ Agent.GetLocation() - Neighbor->GetLocation() };
 		// Avoiding division by increasingly small numbers to avoid getting NaN
 		if (double const Distance{ NeighborToAgent.Length() };
@@ -49,9 +50,12 @@ SteeringOutput Separation::CalculateSteering(float const DeltaTime, ASteeringAge
 SteeringOutput VelocityMatch::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
 	SteeringOutput Steering{};
-	for (ASteeringAgent const* const pNeighbor : m_pFlock->GetNeighbors())
+	for (ASteeringAgent const* const Neighbor : m_pFlock->GetNeighbors())
 	{
-		Steering.LinearVelocity += pNeighbor->GetLinearVelocity();
+		if (Neighbor)
+		{
+			Steering.LinearVelocity += Neighbor->GetLinearVelocity();
+		}
 	}
 
 	if (int const NeighborCount{ m_pFlock->GetNeighborCount()})// Avoiding division by 0

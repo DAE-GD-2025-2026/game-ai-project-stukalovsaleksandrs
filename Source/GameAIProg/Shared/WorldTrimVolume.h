@@ -32,14 +32,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void SetTrimWorldSize(float NewSize);
-	float GetTrimWorldSize() const { return TrimWorldSize; }
+	float GetTrimWorldSize() const { return TrimWorldSideLength; }
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBoxComponent* TrimVolume{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float TrimWorldSize{1000.f};
+	float TrimWorldSideLength{1000.f};
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
