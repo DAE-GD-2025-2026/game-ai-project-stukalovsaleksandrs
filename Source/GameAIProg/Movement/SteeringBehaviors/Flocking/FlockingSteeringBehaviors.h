@@ -1,13 +1,13 @@
 #pragma once
 #include "Movement/SteeringBehaviors/Steering/SteeringBehaviors.h"
-class Flock;
+class FFlock;
 
 //COHESION - FLOCKING
 //*******************
 class Cohesion final : public Seek
 {
 public:
-	Cohesion(Flock* const pFlock) :pFlock(pFlock) {};
+	Cohesion(FFlock* const pFlock) :pFlock(pFlock) {};
 
 	/**
 	 * @def Moves towards the average position of all neighbors 
@@ -15,7 +15,7 @@ public:
 	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& Agent) override;
 
 private:
-	Flock* pFlock{};
+	FFlock* pFlock{};
 };
 
 //SEPARATION - FLOCKING
@@ -23,7 +23,7 @@ private:
 class Separation final : public ISteeringBehavior
 {
 public:
-	Separation(Flock* const pFlock) :m_pFlock(pFlock) {};
+	Separation(FFlock* const pFlock) :m_pFlock(pFlock) {};
 
 	/**
 	 * @def Moving away from neighbors with a velocity equal to the
@@ -35,7 +35,7 @@ public:
 	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& Agent) override;
 
 private:
-	Flock* m_pFlock{};
+	FFlock* m_pFlock{};
 
 	float const m_SeparationFactor{ 1.2f };
 	
@@ -46,7 +46,7 @@ private:
 class VelocityMatch final : public ISteeringBehavior
 {
 public:
-	VelocityMatch(Flock* const pFlock) : m_pFlock(pFlock) {};
+	VelocityMatch(FFlock* const pFlock) : m_pFlock(pFlock) {};
 
 	/**
 	 * @def Matches the average velocity of the agent's neighbors
@@ -54,6 +54,6 @@ public:
 	SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& Agent) override;
 
 private:
-	Flock* m_pFlock{};
+	FFlock* m_pFlock{};
 	
 };

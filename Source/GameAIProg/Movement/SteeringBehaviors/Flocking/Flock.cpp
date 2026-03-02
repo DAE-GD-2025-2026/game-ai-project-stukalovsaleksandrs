@@ -1,31 +1,29 @@
 #include "Flock.h"
-#include "FlockingSteeringBehaviors.h"
 #include "Shared/ImGuiHelpers.h"
 #include <cstdint>
 
-
-Flock::Flock(
-	UWorld* pWorld,
+FFlock::FFlock(
+	UWorld* World,
 	TSubclassOf<ASteeringAgent> AgentClass,
 	int FlockSize,
 	float WorldSize,
-	ASteeringAgent* const pAgentToEvade,
+	ASteeringAgent* const AgentToEvade,
 	bool bTrimWorld)
-	: pWorld{pWorld}
+	: pWorld{World}
 	, FlockSize{ FlockSize }
-	, pAgentToEvade{pAgentToEvade}
+	, pAgentToEvade{AgentToEvade}
 {
 	// Populating the Agents array
 	Agents.SetNum(FlockSize);
 	for (auto& Agent : Agents)
 	{
-		Agent = pWorld->SpawnActor<ASteeringAgent>(
+		Agent = World->SpawnActor<ASteeringAgent>(
 			AgentClass,
 			FVector{0, 0, 90},
 			FRotator::ZeroRotator
 		);
 		assert(Agent);
-		Agent->SetSteeringBehavior(BlendedSteering.get());
+		Agent->SetSteeringBehavior(BlendedBehavior.get());
 		// Disabling the ticking to prevent the agent from
 		// running its own steering behavior independently.
 		// We need sequential update for consistency.
@@ -38,13 +36,13 @@ Flock::Flock(
 	m_Neighbors.SetNum(FlockSize - 1);
 }
 
-Flock::~Flock()
+FFlock::~FFlock()
 {
 	Agents.Empty();
 	m_Neighbors.Empty();
 }
 
-void Flock::Tick(float const DeltaTime)
+void FFlock::Tick(float const DeltaTime)
 {
 	for (ASteeringAgent* pAgent : Agents)
 	{
@@ -55,7 +53,7 @@ void Flock::Tick(float const DeltaTime)
 	}
 }
 
-void Flock::RenderDebug()
+void FFlock::RenderDebug()
 {
  // TODO: Render all the agents in the flock
  for (auto Agent : Agents)
@@ -64,9 +62,8 @@ void Flock::RenderDebug()
  }
 }
 
-void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
+void FFlock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 {
-#ifdef PLATFORM_WINDOWS
 #pragma region UI
 	//UI
 	{
@@ -110,21 +107,38 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 		ImGui::Text("Behavior Weights");
 		ImGui::Spacing();
 
-  // TODO: implement ImGUI sliders for steering behavior weights here
+		DrawBehaviorSliders();		
+			
 		//End
 		ImGui::End();
 	}
 #pragma endregion
-#endif
 }
 
-void Flock::RenderNeighborhood()
+void FFlock::RenderNeighborhood()
 {
  // TODO: Debugrender the neighbors for the first agent in the flock
 }
 
+void FFlock::DrawBehaviorSliders() const
+{
+	DrawBehaviorSlider("Separation", 0);
+	// DrawBehaviorSlider("Cohesion", 1);
+	// DrawBehaviorSlider("VelMatch", 2);
+	DrawBehaviorSlider("Wander", 1);
+}
+
+void FFlock::DrawBehaviorSlider(std::string_view const Name, unsigned int const Index) const
+{
+	assert(Name.length() > 0);
+	auto & BehaviorWeight{ BlendedBehavior->GetWeightedBehaviorsRef()[Index].Weight };
+	ImGuiHelpers::ImGuiSliderFloatWithSetter(Name.data(),
+		BehaviorWeight, 0.f, 1.f,
+		[&BehaviorWeight](float const InVal) { BehaviorWeight = InVal; }, "%.2f");
+}
+
 #ifndef GAMEAI_USE_SPACE_PARTITIONING
-void Flock::RegisterNeighbors(ASteeringAgent const * const Agent)
+void FFlock::RegisterNeighbors(ASteeringAgent const * const Agent)
 {
 	NeighborCount = 0;
 	// Filling the memory pool with the neighbors for the currently evaluated agent
@@ -141,7 +155,7 @@ void Flock::RegisterNeighbors(ASteeringAgent const * const Agent)
 
 #endif
 
-FVector2D Flock::GetAverageNeighborLocation() const
+FVector2D FFlock::GetAverageNeighborLocation() const
 {
 	FVector2D AverageLocation{};
 	for (int32_t NeighborIdx{}; NeighborIdx < NeighborCount; ++NeighborIdx)
@@ -152,7 +166,7 @@ FVector2D Flock::GetAverageNeighborLocation() const
 	return AverageLocation;
 }
 
-FVector2D Flock::GetAverageNeighborVelocity() const
+FVector2D FFlock::GetAverageNeighborVelocity() const
 {
 	FVector2D AverageVelocity{};
 	for (int32_t NeighborIdx{}; NeighborIdx < NeighborCount; ++NeighborIdx)
@@ -163,7 +177,7 @@ FVector2D Flock::GetAverageNeighborVelocity() const
 	return AverageVelocity;
 }
 
-void Flock::SetTarget_Seek(FSteeringParams const& Target)
+void FFlock::SetTarget_Seek(FSteeringParams const& Target)
 {
 	SeekBehavior->SetTarget(Target);
 }

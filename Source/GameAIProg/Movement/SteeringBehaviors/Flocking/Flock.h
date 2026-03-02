@@ -9,22 +9,24 @@
 #include "Movement/SteeringBehaviors/CombinedSteering/CombinedSteeringBehaviors.h"
 #include <memory>
 #include "imgui.h"
+#include <string_view>
+#include <unordered_map>
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
 #include "../SpacePartitioning/SpacePartitioning.h"
 #endif
 
-class Flock final
+class FFlock final
 {
 public:
-	Flock(
-		UWorld* pWorld,
+	FFlock(
+		UWorld* World,
 		TSubclassOf<ASteeringAgent> AgentClass,
 		int FlockSize = 5, 
 		float WorldSize = 100.f, 
-		ASteeringAgent* const pAgentToEvade = nullptr, 
+		ASteeringAgent* const AgentToEvade = nullptr, 
 		bool bTrimWorld = false);
 
-	~Flock();
+	~FFlock();
 
 	void Tick(float DeltaTime);
 	void RenderDebug();
@@ -86,14 +88,35 @@ private:
 	ASteeringAgent* pAgentToEvade{};
 	
 	//Steering Behaviors
-	std::unique_ptr<Separation> SeparationBehavior{};
-	std::unique_ptr<Cohesion> CohesionBehavior{};
-	std::unique_ptr<VelocityMatch> VelMatchBehavior{};
-	std::unique_ptr<Seek> SeekBehavior{};
-	std::unique_ptr<Wander> WanderBehavior{};
-	std::unique_ptr<Evade> EvadeBehavior{};
-	std::unique_ptr<FBlendedSteering> BlendedSteering{};
-	std::unique_ptr<FPrioritySteering> PrioritySteering{};
+	std::unique_ptr<Separation> SeparationBehavior{
+		std::make_unique<Separation>(this)
+	};
+	std::unique_ptr<Cohesion> CohesionBehavior{
+		std::make_unique<Cohesion>(this)
+	};
+	std::unique_ptr<VelocityMatch> VelMatchBehavior{
+		std::make_unique<VelocityMatch>(this)
+	};
+	std::unique_ptr<Wander> WanderBehavior{
+		std::make_unique<Wander>()
+	};
+	std::unique_ptr<Seek> SeekBehavior{
+		std::make_unique<Seek>()
+	};
+	std::unique_ptr<FBlendedSteering> BlendedBehavior{
+		std::make_unique<FBlendedSteering>(
+			std::vector<FBlendedSteering::FWeightedBehavior>{
+				// NOTE: Leaving all the weights as 1 by default.
+				// These weights should be changed via sliders in ImGui
+				{ SeparationBehavior.get(), 0.f },
+				// { CohesionBehavior.get(), 0.f },
+				// { VelMatchBehavior.get(), 0.f },
+				{ WanderBehavior.get(), 0.5f },
+        	}
+		)
+	};
+	
+	std::unique_ptr<FPrioritySteering> PriorityBehavior{};
 
 	// UI and rendering
 	bool DebugRenderSteering{};
@@ -101,4 +124,6 @@ private:
 	bool DebugRenderPartitions{true};
 
 	void RenderNeighborhood();
+	void DrawBehaviorSliders() const;
+	void DrawBehaviorSlider(std::string_view Name, unsigned int Index) const;
 };

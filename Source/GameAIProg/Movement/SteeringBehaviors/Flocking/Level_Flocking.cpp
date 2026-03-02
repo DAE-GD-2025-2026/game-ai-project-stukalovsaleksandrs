@@ -19,26 +19,41 @@ void ALevel_Flocking::BeginPlay()
 	TrimWorld->SetTrimWorldSize(3000.f);
 	TrimWorld->bShouldTrimWorld = true;
 
-	pFlock = TUniquePtr<Flock>(
-		new Flock(
+	// Spawning an agent to evade
+	AgentToEvade = GetWorld()->SpawnActor<ASteeringAgent>(
+		SteeringAgentClass,
+		FVector{0, 0, 90},
+		FRotator::ZeroRotator
+	);
+	assert(AgentToEvade);
+	SeekBehavior = std::make_unique<Seek>();
+	assert(SeekBehavior);
+	AgentToEvade->SetSteeringBehavior(SeekBehavior.get());
+
+	// Initializing flock
+	Flock = TUniquePtr<FFlock>(
+		new FFlock(
 			GetWorld(),
 			SteeringAgentClass,
 			FlockSize,
 			TrimWorld->GetTrimWorldSize(),
-			pAgentToEvade,
+			AgentToEvade,
 			true)
 	);
+	assert(Flock);
 }
 
 // Called every frame
 void ALevel_Flocking::Tick(float const DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	pFlock->ImGuiRender(WindowPos, WindowSize);
-	pFlock->Tick(DeltaTime);
-	pFlock->RenderDebug();
+	// Agent to evade
+    SeekBehavior->SetTarget(MouseTarget);
+	// Flock
+	Flock->ImGuiRender(WindowPos, WindowSize);
+	Flock->Tick(DeltaTime);
+	Flock->RenderDebug();
 	if (bUseMouseTarget)
-		pFlock->SetTarget_Seek(MouseTarget);
+		Flock->SetTarget_Seek(MouseTarget);
 }
 

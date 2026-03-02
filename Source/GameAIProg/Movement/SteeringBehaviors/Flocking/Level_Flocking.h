@@ -17,16 +17,19 @@ public:
 	ALevel_Flocking();
 
 	virtual void Tick(float DeltaTime) override;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	bool bUseMouseTarget{true};
 
-	int const FlockSize{5};
+	int const FlockSize{ 1 };
 
-	TUniquePtr<Flock> pFlock{};
+	TUniquePtr<FFlock> Flock{};
 	
 	UPROPERTY(EditAnywhere, Category = "Flocking")
-	ASteeringAgent* pAgentToEvade{nullptr}; // non owning ref
+	ASteeringAgent* AgentToEvade{}; // non owning ref
+
+	std::unique_ptr<Seek> SeekBehavior{};
 };

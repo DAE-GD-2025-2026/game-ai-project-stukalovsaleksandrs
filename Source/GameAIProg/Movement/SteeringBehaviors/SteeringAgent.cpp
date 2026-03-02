@@ -2,6 +2,8 @@
 
 #include "SteeringAgent.h"
 
+#include <cassert>
+
 
 // Sets default values
 ASteeringAgent::ASteeringAgent()
@@ -28,16 +30,14 @@ void ASteeringAgent::BeginDestroy()
 }
 
 // Called every frame
-void ASteeringAgent::Tick(float DeltaSec)
+void ASteeringAgent::Tick(float const DeltaSec)
 {
 	Super::Tick(DeltaSec);
 
-	if (SteeringBehavior)
-	{
-		SteeringOutput const Output{ SteeringBehavior->CalculateSteering(DeltaSec, *this) };
-		AddMovementInput(FVector{ Output.LinearVelocity, 0.f });
-		AddAngularVelocity(DeltaSec, Output.DegreesPerSec);
-	}
+	assert(SteeringBehavior);
+	SteeringOutput const Output{ SteeringBehavior->CalculateSteering(DeltaSec, *this) };
+	AddMovementInput(FVector{ Output.LinearVelocity, 0.f });
+	AddAngularVelocity(DeltaSec, Output.DegreesPerSec);
 }
 
 // Called to bind functionality to input
