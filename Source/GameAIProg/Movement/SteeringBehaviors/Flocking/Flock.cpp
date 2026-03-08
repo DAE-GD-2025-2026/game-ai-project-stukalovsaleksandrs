@@ -13,6 +13,7 @@ FFlock::FFlock(
 	ASteeringAgent* const AgentToEvade)
 	: World{InWorld}
 	, FlockSize{ FlockSize }
+#ifdef GAMEAI_USE_SPACE_PARTITIONING
 	, CellSpace{ std::make_unique<FCellSpace>(
 		World,
 		TrimSideLength,
@@ -20,6 +21,7 @@ FFlock::FFlock(
 		10, 10, FlockSize 
 		)
 	}
+#endif
 	, AgentToEvade{AgentToEvade}
 {
 	// Populating the Agents array
@@ -45,8 +47,10 @@ FFlock::FFlock(
 				FRotator::ZeroRotator
 			);
 		}
+#ifdef GAMEAI_USE_SPACE_PARTITIONING
 		OldLocations.Add(Agent->GetLocation());
 		CellSpace->AddAgent(Agent);
+#endif
 		Agent->SetSteeringBehavior(PriorityBehavior.get());
 		// Disabling the ticking to prevent the agent from
 		// running its own steering behavior independently.
