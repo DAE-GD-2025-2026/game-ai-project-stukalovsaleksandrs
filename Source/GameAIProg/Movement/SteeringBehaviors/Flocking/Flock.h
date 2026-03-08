@@ -86,7 +86,7 @@ private:
 #endif // USE_SPACE_PARTITIONING
 
 	// Radius of the furthest distance between boids for them to get considered neighbors.
-	float NeighborhoodRadius{ 200.f };
+	float NeighborhoodRadius{ 300.f };
 	int NeighborCount{};
 
 	ASteeringAgent* AgentToEvade{};
@@ -110,10 +110,10 @@ private:
 	std::unique_ptr<FBlendedSteering> BlendedBehavior{
 		std::make_unique<FBlendedSteering>(
 			std::vector<FBlendedSteering::FWeightedBehavior>{
-				{ SeparationBehavior.get(), 1.f },
-				{ VelMatchBehavior.get(), 0.28f },
-				{ CohesionBehavior.get(), 1.f },
-				{ WanderBehavior.get(), 0.54f },
+				{ SeparationBehavior.get(), 0.71f },
+				{ VelMatchBehavior.get(), 0.59f },
+				{ CohesionBehavior.get(), 0.92f },
+				{ WanderBehavior.get(), 0.33f },
         	}
 		)
 	};

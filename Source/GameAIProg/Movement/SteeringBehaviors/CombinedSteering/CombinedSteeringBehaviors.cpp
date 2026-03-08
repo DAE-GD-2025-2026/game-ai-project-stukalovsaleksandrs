@@ -54,7 +54,7 @@ void FBlendedSteering::DebugDraw(ASteeringAgent const& Agent)
 		Agent.GetWorld(),
 		AgentLocation,
 		AgentLocation + FVector(Agent.GetLinearVelocity().X, Agent.GetLinearVelocity().Y, AgentLocation.Z).GetSafeNormal() * 50.f,
-		FColor::Red, false, 0.035f, 0, 5
+		FColor::Red, false, -1.f, 0, 5
 	);
 }
 

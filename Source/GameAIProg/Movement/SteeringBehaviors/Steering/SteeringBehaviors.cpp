@@ -156,7 +156,7 @@ void Evade::DebugDraw(ASteeringAgent const& Agent) const
         Agent.GetWorld(),
         Agent.GetActorLocation(),
         GetEvadeRadius(),
-        32, FColor::Purple, false, 0.035f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false
+        32, FColor::Purple, false, -1.f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false
     );
 }
 
@@ -190,7 +190,7 @@ void Wander::DebugDraw(ASteeringAgent const& Agent) const
         Agent.GetWorld(),
         Agent.GetActorLocation() + GetTargetRadius() * Agent.GetActorForwardVector(),
         GetTargetRadius(),
-        32, FColor::Emerald, false, 0.035f, 0, 5,
+        32, FColor::Emerald, false, -1.f, 0, 5,
         FVector(0, 1, 0), FVector(1, 0, 0), false
     );
     DrawDebugPoint(Agent.GetWorld(), FVector(GetTarget().Position, Agent.GetActorLocation().Z),

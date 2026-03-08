@@ -57,7 +57,7 @@ void Separation::DebugDraw(ASteeringAgent const& Agent, float const Neighborhood
 		Agent.GetActorLocation(),
 		NeighborhoodRadius,
 		32, FColor::Blue, false,
-		0.025f, 0, 5,
+		-1.f, 0, 5,
 		FVector(0, 1, 0), FVector
 		(1, 0, 0), false
 	);

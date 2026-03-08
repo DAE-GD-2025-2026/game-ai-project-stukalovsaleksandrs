@@ -17,7 +17,7 @@ FFlock::FFlock(
 		World,
 		TrimSideLength,
 		TrimSideLength,
-		10, 10, 10000
+		10, 10, FlockSize 
 		)
 	}
 	, AgentToEvade{AgentToEvade}
@@ -109,6 +109,7 @@ void FFlock::RenderDebug()
 	if (!DebugRenderSteering) return;
 
 	// Steering behavior debug
+	FlushPersistentDebugLines(World);
 	ASteeringAgent const& DebugAgent{ *Agents[0] };
 	BlendedBehavior->DebugDraw(DebugAgent);// Red 
 	WanderBehavior->DebugDraw(DebugAgent);// Green + Emerald
@@ -196,17 +197,14 @@ void FFlock::RenderNeighborhood(ASteeringAgent const& Agent)
 {
 	RegisterNeighbors(Agent);
 	UE_LOG(LogTemp, Warning, TEXT("Neighbor count: %u"), NeighborCount);
-#ifdef GAMEAI_USE_SPACE_PARTITIONING
-	for (auto const Neighbor : CellSpace->GetNeighbors())
-#else
-	for (auto const Neighbor: FlockNeighborMemoryPool)
-#endif
+	for (uint32_t NeighborIdx{}; NeighborIdx < NeighborCount; ++NeighborIdx)// Memory pool might not be full
 	{
+		auto const Neighbor{ GetNeighbors()[NeighborIdx] };
 		DrawDebugCircle(
 			Neighbor->GetWorld(),
-			Neighbor->GetActorLocation() + WanderBehavior->GetTargetRadius() * Neighbor->GetActorForwardVector(),
-			10.f,
-			32, FColor::Cyan, false, 0.025f, 0, 5,
+			Neighbor->GetActorLocation(),
+			50.f,
+			32, FColor::Cyan, false, -1.f, 0, 5,
 			FVector(0, 1, 0), FVector(1, 0, 0), false
 		);
 	}

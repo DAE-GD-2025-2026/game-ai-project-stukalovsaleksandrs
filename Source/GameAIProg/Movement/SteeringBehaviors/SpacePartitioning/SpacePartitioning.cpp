@@ -128,7 +128,6 @@ void FCellSpace::RegisterNeighbors(ASteeringAgent const & Agent, float const Que
 	}
 
 	// 5. Adding all the neighbors from these cells
-	Neighbors.Empty();
 	NeighborCount = 0;
 	for (FCell const * const CellToCheck : CellsToCheck)
 	{
@@ -137,8 +136,7 @@ void FCellSpace::RegisterNeighbors(ASteeringAgent const & Agent, float const Que
 			// Taking only neighbors within the radius
 			if ((Neighbor->GetLocation() - Agent.GetLocation()).SquaredLength() < QueryRadius * QueryRadius)
 			{
-				Neighbors.Push(Neighbor);
-				++NeighborCount;
+				Neighbors[NeighborCount++] = Neighbor;
 			}
 		}
 	}
