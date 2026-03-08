@@ -1,5 +1,4 @@
-# Created by https://www.toptal.com/developers/gitignore/api/unrealengine,c++,rider,jetbrains,jetbrains+all,jetbrains+iml,visualstudio,visualstudiocode
-# Edit at https://www.toptal.com/developers/gitignore?templates=unrealengine,c++,rider,jetbrains,jetbrains+all,jetbrains+iml,visualstudio,visualstudiocode
+.vsconfig
 
 ### C++ ###
 # Prerequisites
@@ -794,8 +793,6 @@ FodyWeavers.xsd
 
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
-
-# End of https://www.toptal.com/developers/gitignore/api/unrealengine,c++,rider,jetbrains,jetbrains+all,jetbrains+iml,visualstudio,visualstudiocode
 
 
 ### Diversion ###
