@@ -10,8 +10,13 @@
 //COHESION (FLOCKING)
 SteeringOutput Cohesion::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
-	Target.Position = pFlock->GetAverageNeighborLocation();
-	return Seek::CalculateSteering(DeltaTime, Agent);
+	if (auto const Result{ pFlock->GetAverageNeighborLocation() };
+		Result.has_value())
+	{
+		Target.Position = Result.value();
+		return Seek::CalculateSteering(DeltaTime, Agent);
+	}
+	return SteeringOutput{};
 }
 
 //*********************

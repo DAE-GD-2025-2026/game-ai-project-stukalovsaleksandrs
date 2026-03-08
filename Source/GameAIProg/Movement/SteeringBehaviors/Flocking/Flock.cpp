@@ -91,10 +91,9 @@ void FFlock::Tick(float const DeltaTime)
 		// and not before because Agent->Tick() is not executed 
 		// immediately after calling, but at some point after
 		OldLocations[AgentIdx] = Agents[AgentIdx]->GetLocation();
-#else
-		// Populating the neighbor memory pool
-		RegisterNeighbors(*Agent);
 #endif
+		// Populating the neighbor memory pool
+		RegisterNeighbors(*Agents[AgentIdx]);
 	}
 	// Setting the agent to evade as target
 	EvadeBehavior->SetTarget(FTargetData{
@@ -185,13 +184,21 @@ void FFlock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize, AWor
 	ImGui::End();
 }
 
+#ifdef GAMEAI_USE_SPACE_PARTITIONING
+void FFlock::RegisterNeighbors(ASteeringAgent const& Agent)
+{
+	CellSpace->RegisterNeighbors(Agent, NeighborhoodRadius);
+	NeighborCount = CellSpace->GetNeighborCount();
+}
+#endif
+
 void FFlock::RenderNeighborhood(ASteeringAgent const& Agent)
 {
+	RegisterNeighbors(Agent);
+	UE_LOG(LogTemp, Warning, TEXT("Neighbor count: %u"), NeighborCount);
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
-	CellSpace->RegisterNeighbors(Agent, NeighborhoodRadius);
 	for (auto const Neighbor : CellSpace->GetNeighbors())
 #else
-	RegisterNeighbors(Agent);
 	for (auto const Neighbor: FlockNeighborMemoryPool)
 #endif
 	{
@@ -240,9 +247,10 @@ void FFlock::RegisterNeighbors(ASteeringAgent const& Agent)
 
 #endif
 
-FVector2D FFlock::GetAverageNeighborLocation() const
+std::optional<FVector2D> FFlock::GetAverageNeighborLocation() const
 {
-	auto const Neighbors{ GetNeighbors() };
+	if (NeighborCount == 0) return std::nullopt;
+	auto const& Neighbors{ GetNeighbors() };
 	FVector2D AverageLocation{};
 	for (int32_t NeighborIdx{}; NeighborIdx < NeighborCount; ++NeighborIdx)
 	{

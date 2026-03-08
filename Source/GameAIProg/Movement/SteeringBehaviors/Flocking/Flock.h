@@ -10,6 +10,7 @@
 #include <memory>
 #include "imgui.h"
 #include <string_view>
+#include <optional>
 
 #include "Shared/WorldTrimVolume.h"
 
@@ -35,6 +36,7 @@ public:
 	void ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize, AWorldTrimVolume* TrimWorld);
 
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
+	void RegisterNeighbors(ASteeringAgent const& Agent);
 	const TArray<ASteeringAgent*>& GetNeighbors() const { return CellSpace->GetNeighbors(); }
 	int GetNeighborCount() const { return CellSpace->GetNeighborCount(); }
 #else // No space partitioning
@@ -52,7 +54,7 @@ public:
 	 * between locations of all the given agent's
 	 * neighbors
 	 */
-	FVector2D GetAverageNeighborLocation() const;
+	std::optional<FVector2D> GetAverageNeighborLocation() const;
 	/**
 	* @def Returns the arithmetical average
 	 * between velocities of all the given agent's
