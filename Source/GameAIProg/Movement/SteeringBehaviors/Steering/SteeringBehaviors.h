@@ -95,7 +95,10 @@ class Wander final : public Seek
 {
 public:
     virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
+
     float GetTargetRadius() const{ return m_TargetCircleRadius; }
+    
+    void DebugDraw(const ASteeringAgent* Agent) const;
 
 private:
     // Radius of a circle for selecting random target points,

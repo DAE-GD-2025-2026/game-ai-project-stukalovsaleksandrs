@@ -102,42 +102,16 @@ void FFlock::Tick(float const DeltaTime)
 void FFlock::RenderDebug()
 {
 	if (!DebugRenderSteering) return;
-	for (auto const Agent : Agents)
- {
-	// Blended steering direction vector
-	FVector AgentLocation{ Agent->GetActorLocation() };
-	DrawDebugLine(
-		Agent->GetWorld(),
-		AgentLocation,
-		AgentLocation + FVector(Agent->GetLinearVelocity().X, Agent->GetLinearVelocity().Y, AgentLocation.Z).GetSafeNormal() * 50.f,
-		FColor::Green, false, 0.025f, 0, 5
-	);
 
-	// Wander
-	DrawDebugCircle(
-		Agent->GetWorld(),
-		Agent->GetActorLocation() + WanderBehavior->GetTargetRadius() * Agent->GetActorForwardVector(),
-		WanderBehavior->GetTargetRadius(),
-		32, FColor::Emerald, false, 0.025f, 0, 5,
-		FVector(0, 1, 0), FVector(1, 0, 0), false
-	);
-	DrawDebugPoint(Agent->GetWorld(), FVector(WanderBehavior->GetTarget().Position, Agent->GetActorLocation().Z),
-		10.f, FColor::Green, false, 0.025f, 1
-	);
-		
-	// Separation avoidance radius
-	DrawDebugCircle(
-		Agent->GetWorld(),
-		Agent->GetActorLocation(),
-		GetNeighborhoodRadius(),
-		32, FColor::Blue, false,
-		0.025f, 0, 5,
-		FVector(0, 1, 0), FVector
-		(1, 0, 0), false
-	);
-		// Evade
-		EvadeBehavior->DebugDraw(Agent);
-	 }
+	// Steering behavior debug
+	ASteeringAgent const * const DebugAgent{ Agents[0] };
+	BlendedBehavior->DebugDraw(DebugAgent);
+	WanderBehavior->DebugDraw(DebugAgent);
+	SeparationBehavior->DebugDraw(DebugAgent, NeighborhoodRadius);
+	EvadeBehavior->DebugDraw(DebugAgent);
+
+	// Cell grid
+	CellSpace->RenderCells();
 }
 
 void FFlock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize, AWorldTrimVolume* TrimWorld)

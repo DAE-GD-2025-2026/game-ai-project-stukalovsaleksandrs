@@ -47,6 +47,17 @@ float* FBlendedSteering::GetWeight(ISteeringBehavior* const SteeringBehavior)
 	return nullptr;
 }
 
+void FBlendedSteering::DebugDraw(const ASteeringAgent* Agent)
+{
+	FVector const AgentLocation{ Agent->GetActorLocation() };
+	DrawDebugLine(
+		Agent->GetWorld(),
+		AgentLocation,
+		AgentLocation + FVector(Agent->GetLinearVelocity().X, Agent->GetLinearVelocity().Y, AgentLocation.Z).GetSafeNormal() * 50.f,
+		FColor::Green, false, 0.025f, 0, 5
+	);
+}
+
 //*****************
 //PRIORITY STEERING
 SteeringOutput FPrioritySteering::CalculateSteering(float const DeltaT, ASteeringAgent& Agent)

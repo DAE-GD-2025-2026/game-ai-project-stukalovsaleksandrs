@@ -26,9 +26,11 @@ public:
 
 	float* GetWeight(ISteeringBehavior* const SteeringBehavior);
 	
-	// returns a reference to the weighted behaviors, can be used to adjust weighting. Is not intended to alter the behaviors themselves.
+	// Returns a reference to the weighted behaviors, can be used to adjust weighting. Is not intended to alter the behaviors themselves.
 	std::vector<FWeightedBehavior>& GetWeightedBehaviorsRef() { return m_WeightedBehaviors; }
 
+	static void DebugDraw(const ASteeringAgent* Agent);
+	
 private:
 	std::vector<FWeightedBehavior> m_WeightedBehaviors = {};
 };

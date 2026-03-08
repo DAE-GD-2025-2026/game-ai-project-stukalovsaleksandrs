@@ -45,6 +45,19 @@ SteeringOutput Separation::CalculateSteering(float const DeltaTime, ASteeringAge
 	return Steering;
 }
 
+void Separation::DebugDraw(const ASteeringAgent* Agent, float const NeighborhoodRadius)
+{
+	DrawDebugCircle(
+		Agent->GetWorld(),
+		Agent->GetActorLocation(),
+		NeighborhoodRadius,
+		32, FColor::Blue, false,
+		0.025f, 0, 5,
+		FVector(0, 1, 0), FVector
+		(1, 0, 0), false
+	);
+}
+
 //*************************
 //VELOCITY MATCH (FLOCKING)
 SteeringOutput VelocityMatch::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)

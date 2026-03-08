@@ -182,3 +182,18 @@ SteeringOutput Wander::CalculateSteering(float const DeltaTime, ASteeringAgent& 
     // Steering
     return Seek::CalculateSteering(DeltaTime, Agent);
 }
+
+void Wander::DebugDraw(const ASteeringAgent* Agent) const
+{
+    // Wander
+    DrawDebugCircle(
+        Agent->GetWorld(),
+        Agent->GetActorLocation() + GetTargetRadius() * Agent->GetActorForwardVector(),
+        GetTargetRadius(),
+        32, FColor::Emerald, false, 0.025f, 0, 5,
+        FVector(0, 1, 0), FVector(1, 0, 0), false
+    );
+    DrawDebugPoint(Agent->GetWorld(), FVector(GetTarget().Position, Agent->GetActorLocation().Z),
+        10.f, FColor::Green, false, 0.025f, 1
+    );
+}
