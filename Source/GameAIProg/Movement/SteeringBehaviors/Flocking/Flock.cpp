@@ -1,4 +1,5 @@
 #include "Flock.h"
+#include "../SpacePartitioning/SpacePartitioning.h"
 #include "Shared/ImGuiHelpers.h"
 #include <cstdint>
 
@@ -13,6 +14,13 @@ FFlock::FFlock(
 	: pWorld{World}
 	, FlockSize{ FlockSize }
 	, AgentToEvade{AgentToEvade}
+	, CellSpace{ std::make_unique<FCellSpace>(
+		World,
+		TrimSideLength,
+		TrimSideLength,
+		10, 10, 10000
+		)
+	}
 {
 	// Populating the Agents array
 	Agents.SetNum(FlockSize);
@@ -35,6 +43,9 @@ FFlock::FFlock(
 				FRotator::ZeroRotator
 			);
 		}
+		// Adding the agent to the cell space
+		CellSpace->AddAgent(*Agent);
+		// Setting steering behavior
 		Agent->SetSteeringBehavior(PriorityBehavior.get());
 		// Disabling the ticking to prevent the agent from
 		// running its own steering behavior independently.
@@ -68,6 +79,16 @@ void FFlock::Tick(float const DeltaTime)
 		RegisterNeighbors(Agent);
 		// Updating the agent using the neighbors in the memory pool
 		Agent->Tick(DeltaTime);
+
+		// Updating agent's cell
+		if (UseSpatialPartitioning)
+		{
+			CellSpace->UpdateAgentCell(*Agent, Agent->GetOldLocation());
+		}
+		// NOTE: Updating old location after Agent->Tick(),
+		// and not before because Agent->Tick() is not executed 
+		// immediately after calling, but at some point after
+		Agent->UpdateOldLocation();
 	}
 	// Setting the agent to evade as target
 	EvadeBehavior->SetTarget(FTargetData{
@@ -161,10 +182,8 @@ void FFlock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize, AWor
 			[this, TrimWorld](float const InVal) { TrimWorld->SetTrimWorldSize(InVal); });
 	}
 
-	if (ImGui::Checkbox("Debug Rendering", &DebugRenderSteering))
-	{
-		// See RenderDebug()
-	}
+	ImGui::Checkbox("Debug Rendering", &DebugRenderSteering);
+	ImGui::Checkbox("Use spatial partitioning", &UseSpatialPartitioning);
 
 	// Separation coefficient
 	ImGuiHelpers::ImGuiSliderFloatWithSetter("Separation factor",
@@ -214,15 +233,22 @@ void FFlock::DrawBehaviorSlider(std::string_view const Name, unsigned int const 
 #ifndef GAMEAI_USE_SPACE_PARTITIONING
 void FFlock::RegisterNeighbors(ASteeringAgent const * const Agent)
 {
-	NeighborCount = 0;
-	// Filling the memory pool with the neighbors for the currently evaluated agent
-	for (auto const& OtherAgent : Agents)
+	if (UseSpatialPartitioning)
 	{
-		if (Agent == OtherAgent) continue;
-		if( (OtherAgent->GetActorLocation() - Agent->GetActorLocation()).Length() < NeighborhoodRadius )
+		CellSpace->RegisterNeighbors(*Agent, NeighborhoodRadius);
+	}
+	else
+	{
+		NeighborCount = 0;
+		// Filling the memory pool with the neighbors for the currently evaluated agent
+		for (auto const& OtherAgent : Agents)
 		{
-			assert(NeighborCount < m_Neighbors.Num());
-			m_Neighbors[NeighborCount++] = OtherAgent; 
+			if (Agent == OtherAgent) continue;
+			if( (OtherAgent->GetActorLocation() - Agent->GetActorLocation()).Length() < NeighborhoodRadius )
+			{
+				assert(NeighborCount < m_Neighbors.Num());
+				m_Neighbors[NeighborCount++] = OtherAgent; 
+			}
 		}
 	}
 }

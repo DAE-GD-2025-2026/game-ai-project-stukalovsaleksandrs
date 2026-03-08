@@ -18,6 +18,8 @@
 #include "../SpacePartitioning/SpacePartitioning.h"
 #endif
 
+class FCellSpace;
+
 class FFlock final
 {
 public:
@@ -109,8 +111,6 @@ private:
 	std::unique_ptr<FBlendedSteering> BlendedBehavior{
 		std::make_unique<FBlendedSteering>(
 			std::vector<FBlendedSteering::FWeightedBehavior>{
-				// NOTE: Leaving all the weights as 1 by default.
-				// These weights should be changed via sliders in ImGui
 				{ SeparationBehavior.get(), 1.f },
 				{ VelMatchBehavior.get(), 0.28f },
 				{ CohesionBehavior.get(), 1.f },
@@ -129,10 +129,13 @@ private:
 	};
 
 	// UI and rendering
-	bool DebugRenderSteering{};
-	bool DebugRenderNeighborhood{true};
-	bool DebugRenderPartitions{true};
+	bool DebugRenderSteering{}
+		, DebugRenderNeighborhood{ true }
+		, DebugRenderPartitions{ true }
+		, UseSpatialPartitioning{ true };
 
+	std::unique_ptr<FCellSpace>	CellSpace{};
+	
 	void RenderNeighborhood();
 	void DrawBehaviorSliders() const;
 	void DrawBehaviorSlider(std::string_view Name, unsigned int Index) const;

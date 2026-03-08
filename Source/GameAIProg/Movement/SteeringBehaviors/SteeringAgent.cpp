@@ -10,12 +10,23 @@ ASteeringAgent::ASteeringAgent()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	UpdateOldLocation();// Initializes the old location
 }
 
 FVector2D ASteeringAgent::GetLocation() const
 {
 	FVector3f Location{ GetActorLocation() };
 	return {Location.X, Location.Y};
+}
+
+FVector2D ASteeringAgent::GetOldLocation() const
+{
+	return OldLocation;
+}
+
+void ASteeringAgent::UpdateOldLocation()
+{
+	OldLocation = GetLocation();
 }
 
 // Called when the game starts or when spawned
