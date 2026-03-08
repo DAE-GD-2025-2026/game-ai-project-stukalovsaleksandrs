@@ -6,14 +6,13 @@
 #include "Shared/WorldTrimVolume.h"
 
 FFlock::FFlock(
-	UWorld* World,
+	UWorld* InWorld,
 	TSubclassOf<ASteeringAgent> const AgentClass,
 	int const FlockSize,
 	float const TrimSideLength,
 	ASteeringAgent* const AgentToEvade)
-	: pWorld{World}
+	: World{InWorld}
 	, FlockSize{ FlockSize }
-	, AgentToEvade{AgentToEvade}
 	, CellSpace{ std::make_unique<FCellSpace>(
 		World,
 		TrimSideLength,
@@ -21,9 +20,12 @@ FFlock::FFlock(
 		10, 10, 10000
 		)
 	}
+	, AgentToEvade{AgentToEvade}
 {
 	// Populating the Agents array
 	Agents.SetNum(FlockSize);
+	// NOTE: Reference is not redundant here
+	// Without it, copies will be used instead of the sources
 	for (auto& Agent : Agents)
 	{
 		// If UE refuses to spawn an actor
@@ -43,9 +45,8 @@ FFlock::FFlock(
 				FRotator::ZeroRotator
 			);
 		}
-		// Adding the agent to the cell space
-		CellSpace->AddAgent(*Agent);
-		// Setting steering behavior
+		OldLocations.Add(Agent->GetLocation());
+		CellSpace->AddAgent(Agent);
 		Agent->SetSteeringBehavior(PriorityBehavior.get());
 		// Disabling the ticking to prevent the agent from
 		// running its own steering behavior independently.
@@ -54,41 +55,46 @@ FFlock::FFlock(
 	}
 
 	// Validating all agents
-#ifndef NDEBUG
-	for (auto Agent : Agents){ assert(Agent); }
-#endif
-	
+	for (auto Agent : Agents){ assert(Agent != nullptr); }
+
+#ifndef GAMEAI_USE_SPACE_PARTITIONING
 	// Initializing the flock and the memory pool of neighbors
 	// NOTE: Each boid can have at max all boids in the flock as neighbors,
 	// but it will never count itself as a neighbor.
-	m_Neighbors.SetNum(FlockSize - 1);
+	FlockNeighborMemoryPool.SetNum(FlockSize - 1);
+
+	// Saving the old positions
+	
+#endif
 }
 
 FFlock::~FFlock()
 {
 	Agents.Empty();
-	m_Neighbors.Empty();
+#ifndef GAMEAI_USE_SPACE_PARTITIONING
+	FlockNeighborMemoryPool.Empty();
+#endif
 }
 
 void FFlock::Tick(float const DeltaTime)
 {
 	// Updating all agents
-	for (ASteeringAgent* const Agent : Agents)
+	for (size_t AgentIdx{}; AgentIdx < Agents.Num(); ++AgentIdx)
 	{
-		// Populating the neighbor memory pool
-		RegisterNeighbors(Agent);
 		// Updating the agent using the neighbors in the memory pool
-		Agent->Tick(DeltaTime);
+		Agents[AgentIdx]->Tick(DeltaTime);
 
+#ifdef GAMEAI_USE_SPACE_PARTITIONING
 		// Updating agent's cell
-		if (UseSpatialPartitioning)
-		{
-			CellSpace->UpdateAgentCell(*Agent, Agent->GetOldLocation());
-		}
+		CellSpace->UpdateAgentCell(Agents[AgentIdx], OldLocations[AgentIdx]);
 		// NOTE: Updating old location after Agent->Tick(),
 		// and not before because Agent->Tick() is not executed 
 		// immediately after calling, but at some point after
-		Agent->UpdateOldLocation();
+		OldLocations[AgentIdx] = Agents[AgentIdx]->GetLocation();
+#else
+		// Populating the neighbor memory pool
+		RegisterNeighbors(*Agent);
+#endif
 	}
 	// Setting the agent to evade as target
 	EvadeBehavior->SetTarget(FTargetData{
@@ -104,14 +110,19 @@ void FFlock::RenderDebug()
 	if (!DebugRenderSteering) return;
 
 	// Steering behavior debug
-	ASteeringAgent const * const DebugAgent{ Agents[0] };
-	BlendedBehavior->DebugDraw(DebugAgent);
-	WanderBehavior->DebugDraw(DebugAgent);
-	SeparationBehavior->DebugDraw(DebugAgent, NeighborhoodRadius);
-	EvadeBehavior->DebugDraw(DebugAgent);
+	ASteeringAgent const& DebugAgent{ *Agents[0] };
+	BlendedBehavior->DebugDraw(DebugAgent);// Red 
+	WanderBehavior->DebugDraw(DebugAgent);// Green + Emerald
+	SeparationBehavior->DebugDraw(DebugAgent, NeighborhoodRadius);// Blue
+	EvadeBehavior->DebugDraw(DebugAgent);// Purple
 
+	// Neighbor debug
+	RenderNeighborhood(DebugAgent);
+	
+#ifdef GAMEAI_USE_SPACE_PARTITIONING
 	// Cell grid
 	CellSpace->RenderCells();
+#endif
 }
 
 void FFlock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize, AWorldTrimVolume* TrimWorld)
@@ -157,7 +168,8 @@ void FFlock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize, AWor
 	}
 
 	ImGui::Checkbox("Debug Rendering", &DebugRenderSteering);
-	ImGui::Checkbox("Use spatial partitioning", &UseSpatialPartitioning);
+	// TODO: Make space partitioning toggleable at runtime
+	// ImGui::Checkbox("Use spatial partitioning", &bUseSpatialPartitioning);
 
 	// Separation coefficient
 	ImGuiHelpers::ImGuiSliderFloatWithSetter("Separation factor",
@@ -173,9 +185,15 @@ void FFlock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize, AWor
 	ImGui::End();
 }
 
-void FFlock::RenderNeighborhood()
+void FFlock::RenderNeighborhood(ASteeringAgent const& Agent)
 {
-	for (auto const Neighbor: m_Neighbors)
+#ifdef GAMEAI_USE_SPACE_PARTITIONING
+	CellSpace->RegisterNeighbors(Agent, NeighborhoodRadius);
+	for (auto const Neighbor : CellSpace->GetNeighbors())
+#else
+	RegisterNeighbors(Agent);
+	for (auto const Neighbor: FlockNeighborMemoryPool)
+#endif
 	{
 		DrawDebugCircle(
 			Neighbor->GetWorld(),
@@ -205,24 +223,17 @@ void FFlock::DrawBehaviorSlider(std::string_view const Name, unsigned int const 
 }
 
 #ifndef GAMEAI_USE_SPACE_PARTITIONING
-void FFlock::RegisterNeighbors(ASteeringAgent const * const Agent)
+void FFlock::RegisterNeighbors(ASteeringAgent const& Agent)
 {
-	if (UseSpatialPartitioning)
+	NeighborCount = 0;
+	// Filling the memory pool with the neighbors for the currently evaluated agent
+	for (auto const OtherAgent : Agents)
 	{
-		CellSpace->RegisterNeighbors(*Agent, NeighborhoodRadius);
-	}
-	else
-	{
-		NeighborCount = 0;
-		// Filling the memory pool with the neighbors for the currently evaluated agent
-		for (auto const& OtherAgent : Agents)
+		if (&Agent == OtherAgent) continue;
+		if( (OtherAgent->GetActorLocation() - Agent.GetActorLocation()).Length() < NeighborhoodRadius )
 		{
-			if (Agent == OtherAgent) continue;
-			if( (OtherAgent->GetActorLocation() - Agent->GetActorLocation()).Length() < NeighborhoodRadius )
-			{
-				assert(NeighborCount < m_Neighbors.Num());
-				m_Neighbors[NeighborCount++] = OtherAgent; 
-			}
+			assert(NeighborCount < m_Neighbors.Num());
+			FlockNeighborMemoryPool[NeighborCount++] = OtherAgent; 
 		}
 	}
 }
@@ -231,10 +242,11 @@ void FFlock::RegisterNeighbors(ASteeringAgent const * const Agent)
 
 FVector2D FFlock::GetAverageNeighborLocation() const
 {
+	auto const Neighbors{ GetNeighbors() };
 	FVector2D AverageLocation{};
 	for (int32_t NeighborIdx{}; NeighborIdx < NeighborCount; ++NeighborIdx)
 	{
-		AverageLocation += m_Neighbors[NeighborIdx]->GetLocation();
+		AverageLocation += Neighbors[NeighborIdx]->GetLocation();
 	}
 	if (NeighborCount > 0)
 	{
@@ -248,7 +260,7 @@ FVector2D FFlock::GetAverageNeighborVelocity() const
 	FVector2D AverageVelocity{};
 	for (int32_t NeighborIdx{}; NeighborIdx < NeighborCount; ++NeighborIdx)
 	{
-		AverageVelocity += m_Neighbors[NeighborIdx]->GetLocation();
+		AverageVelocity += GetNeighbors()[NeighborIdx]->GetLocation();
 	}
 	AverageVelocity /= static_cast<float>(NeighborCount);
 	return AverageVelocity;

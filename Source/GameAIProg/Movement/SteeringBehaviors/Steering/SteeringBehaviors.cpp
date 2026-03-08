@@ -150,13 +150,13 @@ SteeringOutput Evade::CalculateSteering(float const DeltaTime, ASteeringAgent& A
     return Flee::CalculateSteering(DeltaTime, Agent);
 }
 
-void Evade::DebugDraw(ASteeringAgent const * const Agent) const
+void Evade::DebugDraw(ASteeringAgent const& Agent) const
 {
     DrawDebugCircle(
-        Agent->GetWorld(),
-        Agent->GetActorLocation(),
+        Agent.GetWorld(),
+        Agent.GetActorLocation(),
         GetEvadeRadius(),
-        32, FColor::Purple, false, 0.025f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false
+        32, FColor::Purple, false, 0.035f, 0, 5, FVector(0, 1, 0), FVector(1, 0, 0), false
     );
 }
 
@@ -166,7 +166,7 @@ SteeringOutput Wander::CalculateSteering(float const DeltaTime, ASteeringAgent& 
     // Getting random point on the circle
     //// Getting random angle within offset
     float NewTargetDegrees{
-        m_LastTargetDegrees + FMath::FRandRange(-m_MaxTargetDegreesOffset, m_MaxTargetDegreesOffset)
+        LastTargetDegrees + FMath::FRandRange(-MaxTargetDegreesOffset, MaxTargetDegreesOffset)
     };
     //// Clamping to [0, 360] range
     NewTargetDegrees = FMath::Fmod(FMath::Fmod(NewTargetDegrees, 360.0f) + 360.0f, 360.0f);
@@ -174,26 +174,26 @@ SteeringOutput Wander::CalculateSteering(float const DeltaTime, ASteeringAgent& 
     //// Getting agent's forward vector. Limiting to 2D since the project is top-down
     FVector2D const AgentForwardVector{ Agent.GetActorForwardVector().X, Agent.GetActorForwardVector().Y };
     //// Saving the angle
-    m_LastTargetDegrees = NewTargetDegrees;
+    LastTargetDegrees = NewTargetDegrees;
     //// Calculating new target's coordinates
-    FVector2D const NewTargetPosition{ Agent.GetLocation() + m_TargetCircleOffset  * AgentForwardVector + m_TargetCircleRadius * FVector2D(FMath::Cos(NewTargetDegrees), FMath::Sin(NewTargetDegrees) ) };
+    FVector2D const NewTargetPosition{ Agent.GetLocation() + TargetCircleOffset  * AgentForwardVector + TargetCircleRadius * FVector2D(FMath::Cos(NewTargetDegrees), FMath::Sin(NewTargetDegrees) ) };
     Target.Position = NewTargetPosition;
     
     // Steering
     return Seek::CalculateSteering(DeltaTime, Agent);
 }
 
-void Wander::DebugDraw(const ASteeringAgent* Agent) const
+void Wander::DebugDraw(ASteeringAgent const& Agent) const
 {
     // Wander
     DrawDebugCircle(
-        Agent->GetWorld(),
-        Agent->GetActorLocation() + GetTargetRadius() * Agent->GetActorForwardVector(),
+        Agent.GetWorld(),
+        Agent.GetActorLocation() + GetTargetRadius() * Agent.GetActorForwardVector(),
         GetTargetRadius(),
-        32, FColor::Emerald, false, 0.025f, 0, 5,
+        32, FColor::Emerald, false, 0.035f, 0, 5,
         FVector(0, 1, 0), FVector(1, 0, 0), false
     );
-    DrawDebugPoint(Agent->GetWorld(), FVector(GetTarget().Position, Agent->GetActorLocation().Z),
-        10.f, FColor::Green, false, 0.025f, 1
+    DrawDebugPoint(Agent.GetWorld(), FVector(GetTarget().Position, Agent.GetActorLocation().Z),
+        10.f, FColor::Green, false, 0.035f, 1
     );
 }

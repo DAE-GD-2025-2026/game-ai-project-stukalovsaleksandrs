@@ -109,7 +109,7 @@ void ALevel_CombinedSteering::Tick(float const DeltaTime)
         if (ImGui::Checkbox("Debug Rendering", &CanDebugRender); CanDebugRender)
         {
             // Drawing the evade radius
-            EvadeBehavior->DebugDraw(PrioritySteeringAgent);
+            EvadeBehavior->DebugDraw(*PrioritySteeringAgent);
         }
         ImGui::Checkbox("Trim World", &TrimWorld->bShouldTrimWorld);
         if (TrimWorld->bShouldTrimWorld)

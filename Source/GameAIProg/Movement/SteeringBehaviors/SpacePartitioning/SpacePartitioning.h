@@ -34,14 +34,13 @@ class FCellSpace final
 public:
 	FCellSpace(UWorld* World, float Width, float Height, uint32_t Rows, uint32_t Cols, int MaxEntities);
 
-	void AddAgent(ASteeringAgent& Agent);
-	void RemoveAgent(ASteeringAgent& Agent);
+	void AddAgent(ASteeringAgent* Agent);
 	// Moves agent from one cell to another if necessary
-	void UpdateAgentCell(ASteeringAgent& Agent, const FVector2D& OldLocation);
+	void UpdateAgentCell(ASteeringAgent* Agent, const FVector2D& OldLocation);
 
 	void RegisterNeighbors(ASteeringAgent const& Agent, float QueryRadius);
-	const TArray<ASteeringAgent*>& GetNeighbors() const { return Neighbors; }
-	int GetNrOfNeighbors() const { return NeighborCount; }
+	TArray<ASteeringAgent*> const & GetNeighbors() const { return Neighbors; }
+	int GetNeighborCount() const { return NeighborCount; }
 
 	//empties the cells of entities
 	void EmptyCells();
@@ -52,7 +51,7 @@ private:
 	UWorld* World{};
 	
 	// Cells and properties
-	std::vector<FCell> Cells;// Row major
+	std::vector<FCell> Cells;
 	FVector2f GridBottomLeft{};// From the camera's perspective
 	
 	float SpaceWidth, SpaceHeight;// Dimensions of the grid containing all the cells

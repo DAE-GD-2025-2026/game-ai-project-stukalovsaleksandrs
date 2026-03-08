@@ -85,7 +85,7 @@ public:
     {
         return EvadeRadius;
     }
-    void DebugDraw(const ASteeringAgent* Agent) const;
+    void DebugDraw(ASteeringAgent const& Agent) const;
     
 private:
     float const EvadeRadius{};
@@ -96,17 +96,17 @@ class Wander final : public Seek
 public:
     virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent & Agent) override;
 
-    float GetTargetRadius() const{ return m_TargetCircleRadius; }
+    float GetTargetRadius() const{ return TargetCircleRadius; }
     
-    void DebugDraw(const ASteeringAgent* Agent) const;
+    void DebugDraw(ASteeringAgent const& Agent) const;
 
 private:
     // Radius of a circle for selecting random target points,
     // where center is the agent's center + agent's front vector times the offset.
-    float const m_TargetCircleRadius{ 200 },
-        m_TargetCircleOffset{ 400 }, 
+    float const TargetCircleRadius{ 200 },
+        TargetCircleOffset{ 400 }, 
         // Max offset between 2 consecutive random angles
         // NOTE: Added for smoothness
-        m_MaxTargetDegreesOffset{ 1.f };
-    float m_LastTargetDegrees{};
+        MaxTargetDegreesOffset{ 1.f };
+    float LastTargetDegrees{};
 };

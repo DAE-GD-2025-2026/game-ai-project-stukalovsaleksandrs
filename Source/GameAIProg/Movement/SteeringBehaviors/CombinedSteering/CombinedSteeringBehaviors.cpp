@@ -5,7 +5,7 @@
 #include <algorithm>
 
 FBlendedSteering::FBlendedSteering(const std::vector<FWeightedBehavior>& WeightedBehaviors)
-	:m_WeightedBehaviors(WeightedBehaviors)
+	:WeightedBehaviors(WeightedBehaviors)
 {};
 
 //****************
@@ -15,7 +15,7 @@ SteeringOutput FBlendedSteering::CalculateSteering(float const DeltaTime, ASteer
 	SteeringOutput BlendedSteering = {};
 	// We have multiple steering behaviors that we want to switch between right now
 	// 1. Iterate over all the weighted steering behaviors
-	for (auto const& WeightedBehavior : m_WeightedBehaviors)
+	for (auto const& WeightedBehavior : WeightedBehaviors)
 	{
 		// Not processing behaviors with weights close to 0 
 		if (WeightedBehavior.Weight < FLT_EPSILON) continue;
@@ -33,28 +33,28 @@ SteeringOutput FBlendedSteering::CalculateSteering(float const DeltaTime, ASteer
 
 float* FBlendedSteering::GetWeight(ISteeringBehavior* const SteeringBehavior)
 {
-	auto it = find_if(m_WeightedBehaviors.begin(),
-		m_WeightedBehaviors.end(),
+	auto it = find_if(WeightedBehaviors.begin(),
+		WeightedBehaviors.end(),
 		[SteeringBehavior](const FWeightedBehavior& Elem)
 		{
 			return Elem.Behavior == SteeringBehavior;
 		}
 	);
 
-	if(it!= m_WeightedBehaviors.end())
+	if(it!= WeightedBehaviors.end())
 		return &it->Weight;
 	
 	return nullptr;
 }
 
-void FBlendedSteering::DebugDraw(const ASteeringAgent* Agent)
+void FBlendedSteering::DebugDraw(ASteeringAgent const& Agent)
 {
-	FVector const AgentLocation{ Agent->GetActorLocation() };
+	FVector const AgentLocation{ Agent.GetActorLocation() };
 	DrawDebugLine(
-		Agent->GetWorld(),
+		Agent.GetWorld(),
 		AgentLocation,
-		AgentLocation + FVector(Agent->GetLinearVelocity().X, Agent->GetLinearVelocity().Y, AgentLocation.Z).GetSafeNormal() * 50.f,
-		FColor::Green, false, 0.025f, 0, 5
+		AgentLocation + FVector(Agent.GetLinearVelocity().X, Agent.GetLinearVelocity().Y, AgentLocation.Z).GetSafeNormal() * 50.f,
+		FColor::Red, false, 0.035f, 0, 5
 	);
 }
 

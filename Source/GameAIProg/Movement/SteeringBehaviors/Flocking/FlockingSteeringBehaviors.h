@@ -37,7 +37,7 @@ public:
 	[[nodiscard]] float GetSeparationFactor() const { return SeparationFactor; }
 	void SetSeparationFactor(float const SeparationFactor) { this->SeparationFactor = SeparationFactor; };
 
-	static void DebugDraw(const ASteeringAgent* Agent, float const NeighborhoodRadius);
+	static void DebugDraw(ASteeringAgent const& Agent, float const NeighborhoodRadius);
 	
 private:
 	FFlock* Flock{};

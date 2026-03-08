@@ -45,11 +45,11 @@ SteeringOutput Separation::CalculateSteering(float const DeltaTime, ASteeringAge
 	return Steering;
 }
 
-void Separation::DebugDraw(const ASteeringAgent* Agent, float const NeighborhoodRadius)
+void Separation::DebugDraw(ASteeringAgent const& Agent, float const NeighborhoodRadius)
 {
 	DrawDebugCircle(
-		Agent->GetWorld(),
-		Agent->GetActorLocation(),
+		Agent.GetWorld(),
+		Agent.GetActorLocation(),
 		NeighborhoodRadius,
 		32, FColor::Blue, false,
 		0.025f, 0, 5,

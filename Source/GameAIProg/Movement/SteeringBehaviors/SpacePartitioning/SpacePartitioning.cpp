@@ -51,11 +51,11 @@ FCellSpace::FCellSpace(UWorld* const World, float const Width, float const Heigh
 	Neighbors.SetNum(MaxEntities);
 	
 	// Creating cells
-	Cells.reserve(NeighborCount);
+	Cells.reserve(Rows * Cols);
 	// NOTE: Storing the cells in row-major order
-	for (int Col{}; Col < Cols; ++Col)
+	for (int Row{}; Row < Rows; ++Row)
 	{
-		for (int Row{}; Row < Rows; ++Row)
+		for (int Col{}; Col < Cols; ++Col)
 		{
 			// GridBottomLeft + Width * 
 			Cells.emplace_back(
@@ -68,39 +68,28 @@ FCellSpace::FCellSpace(UWorld* const World, float const Width, float const Heigh
 	}
 }
 
-void FCellSpace::AddAgent(ASteeringAgent& Agent)
+void FCellSpace::AddAgent(ASteeringAgent* Agent)
 {
 	// 1. Getting the cell index
-	auto const GridIndex{ GetCellIndexFromLocation(Agent.GetLocation()) };
+	auto const GridIndex{ GetCellIndexFromLocation(Agent->GetLocation()) };
 	// 2. Making sure the agent is not listed already
 	if (auto& CellAgentList{ Cells[GridIndex].Agents };
-		!std::ranges::binary_search(CellAgentList, &Agent))
+		!std::ranges::binary_search(CellAgentList, Agent))
 	{
 		// 3. Listing the agent
-		CellAgentList.push_back(&Agent);
+		CellAgentList.push_back(Agent);
 	}
 }
 
-void FCellSpace::RemoveAgent(ASteeringAgent& Agent)
-{
-	std::erase_if(
-		Cells[GetCellIndexFromLocation(Agent.GetLocation())].Agents,
-		[&Agent](ASteeringAgent const * const CurrentAgent)
-		{
-			return CurrentAgent == &Agent;
-		}
-	);
-}
-
-void FCellSpace::UpdateAgentCell(ASteeringAgent& Agent, const FVector2D& OldLocation)
+void FCellSpace::UpdateAgentCell(ASteeringAgent* Agent, const FVector2D& OldLocation)
 {
 	// 1. Getting the index of the old cell
 	auto const OldCellIdx{ GetCellIndexFromLocation(OldLocation) },
-		NewCellIdx{ GetCellIndexFromLocation(Agent.GetLocation()) };
+		NewCellIdx{ GetCellIndexFromLocation(Agent->GetLocation()) };
 	if (OldCellIdx != NewCellIdx)
 	{
 		// 2. Removing the agent from the previous cell
-		RemoveAgent(Agent);
+		std::erase(Cells[OldCellIdx].Agents, Agent);
 		// 3. Adding the agent to the new cell
 		AddAgent(Agent);
 	}
@@ -188,6 +177,7 @@ void FCellSpace::RenderCells() const
 		DrawDebugLine(World, LineStart, LineEnd, FColor::Black, true);
 	}
 	// 3. Rendering the agent count inside each cell
+	FlushDebugStrings(World);
 	for (FCell Cell : Cells)
 	{
 		FVector2f const Center2D{0.5f * (Cell.BoundingBox.Min + Cell.BoundingBox.Max)};
@@ -209,7 +199,7 @@ uint32_t FCellSpace::GetCellCollFromX(float const X) const
 {
 	// NOTE: Clamping to the valid column and row values to avoid reading outside of bounds
 	return std::clamp(
-		static_cast<uint32_t>((X - GridBottomLeft.X) / CellWidth),
+		static_cast<uint32_t>((X + 0.5f * SpaceWidth) / CellWidth),
 		0u,
 		ColCount - 1
 	);
@@ -218,7 +208,8 @@ uint32_t FCellSpace::GetCellCollFromX(float const X) const
 uint32_t FCellSpace::GetCellRowFromY(float const Y) const
 {
 	return std::clamp(
-		static_cast<uint32_t>((Y - GridBottomLeft.Y) / CellHeight),
+		// static_cast<uint32_t>((Y - GridBottomLeft.Y) / CellHeight),
+		static_cast<uint32_t>((Y + 0.5f * SpaceHeight) / CellHeight),
 		0u,
 		RowCount - 1
 	);

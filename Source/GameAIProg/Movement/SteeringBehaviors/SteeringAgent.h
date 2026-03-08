@@ -55,9 +55,6 @@ public:
     float OldSpeed{};// Used by SetAgentBehavior to restore the maximal speed after it got changed by the Arrive behavior.
 
     FVector2D GetLocation() const;
-    FVector2D GetOldLocation() const;
-    // Sets old location to the current location
-    void UpdateOldLocation();
     
 protected:
 
@@ -80,5 +77,4 @@ public:
 
 private:
     void AddAngularVelocity(float DeltaSec, float DegreesPerSec);
-    FVector2D OldLocation{};
 };

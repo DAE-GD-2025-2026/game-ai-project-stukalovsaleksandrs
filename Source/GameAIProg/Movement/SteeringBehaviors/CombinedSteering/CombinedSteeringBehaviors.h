@@ -21,18 +21,18 @@ public:
 
 	explicit FBlendedSteering(const std::vector<FWeightedBehavior>& WeightedBehaviors);
 
-	void AddBehaviour(const FWeightedBehavior& WeightedBehavior) { m_WeightedBehaviors.push_back(WeightedBehavior); }
+	void AddBehaviour(const FWeightedBehavior& WeightedBehavior) { WeightedBehaviors.push_back(WeightedBehavior); }
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& Agent) override;
 
 	float* GetWeight(ISteeringBehavior* const SteeringBehavior);
 	
 	// Returns a reference to the weighted behaviors, can be used to adjust weighting. Is not intended to alter the behaviors themselves.
-	std::vector<FWeightedBehavior>& GetWeightedBehaviorsRef() { return m_WeightedBehaviors; }
+	std::vector<FWeightedBehavior>& GetWeightedBehaviorsRef() { return WeightedBehaviors; }
 
-	static void DebugDraw(const ASteeringAgent* Agent);
+	static void DebugDraw(ASteeringAgent const& Agent);
 	
 private:
-	std::vector<FWeightedBehavior> m_WeightedBehaviors = {};
+	std::vector<FWeightedBehavior> WeightedBehaviors{};
 };
 
 //*****************
