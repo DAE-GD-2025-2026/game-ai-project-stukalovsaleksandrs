@@ -55,7 +55,7 @@ private:
 	std::vector<FCell> Cells;// Row major
 	FVector2f GridBottomLeft{};// From the camera's perspective
 	
-	float SpaceWidth, SpaceHeight;
+	float SpaceWidth, SpaceHeight;// Dimensions of the grid containing all the cells
 
 	uint32_t RowCount, ColCount;
 
@@ -70,6 +70,6 @@ private:
 	uint32_t GetCellCollFromX(float X) const;
 	uint32_t GetCellRowFromY(float Y) const;
 	uint32_t GetCellIndexFromLocation(FVector2D const &) const;
-	
-	bool DoRectsOverlap(FRect const& RectA, FRect const& RectB);
+
+	static bool DoRectsOverlap(FRect const& RectA, FRect const& RectB);
 };

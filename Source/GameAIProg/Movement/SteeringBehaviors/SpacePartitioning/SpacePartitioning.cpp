@@ -1,8 +1,10 @@
 #include "SpacePartitioning.h"
 #include <ranges>
 
+#include "AssetTypeCategories.h"
 #include "IntVectorTypes.h"
 #include "IPropertyTable.h"
+#include "StaticMeshAttributes.h"
 
 // NOTE: Space partitioning uses doubles all around the place, because UE classes, such
 // as FRect are primarily double-based, and their float-based alternatives, like FSlateRect
@@ -161,15 +163,45 @@ void FCellSpace::EmptyCells()
 
 void FCellSpace::RenderCells() const
 {
-	// TODO Render the cells with the number of agents inside of it
-
-	// 1. Iterating over all the cells
-	for (FCell const& Cell : Cells)
+	// 2. Rendering cell boundaries
+	float const GridTop{ GridBottomLeft.Y + SpaceHeight }
+		, GridBottom{ GridBottomLeft.Y }
+		, GridLeft{ GridBottomLeft.X }
+		, GridRight{ GridBottomLeft.X + SpaceWidth }
+		, LineZ{ 50.f };
+	// 2.1. Rendering vertical lines
+	for (uint32_t ColIdx{}; ColIdx < ColCount; ++ColIdx)
 	{
-		// 2. Rendering boundary for each cell
+		float const LineX{ GridLeft + ColIdx * CellWidth };
+		FVector const LineStart{ LineX, GridTop, LineZ }
+			, LineEnd{ LineX, GridBottom, LineZ };
 		
-		//DrawDebugBox(World, )
-		// 3. Rendering the agent count inside each cell
+		DrawDebugLine(World, LineStart, LineEnd, FColor::Black, true);
+	}
+	// 2.2. Rendering horizontal lines
+	for (uint32_t RowIdx{}; RowIdx < RowCount; ++RowIdx)
+	{
+		float const LineY{ GridBottom + RowIdx * CellHeight };
+		FVector const LineStart{ GridLeft, LineY, LineZ }
+			, LineEnd{ GridRight, LineY, LineZ };
+		
+		DrawDebugLine(World, LineStart, LineEnd, FColor::Black, true);
+	}
+	// 3. Rendering the agent count inside each cell
+	for (FCell Cell : Cells)
+	{
+		FVector2f const Center2D{0.5f * (Cell.BoundingBox.Min + Cell.BoundingBox.Max)};
+		FVector const Center3D{
+			// NOTE: Offsetting to bring the text closer to the bottom left corner of each cell
+			Center2D.X + 0.5f * CellWidth,
+			Center2D.Y - 0.5f * CellHeight,
+			LineZ
+		};
+		DrawDebugString(
+			World,
+			Center3D,
+			FString::FromInt(Cell.Agents.size())
+		);
 	}
 }
 
