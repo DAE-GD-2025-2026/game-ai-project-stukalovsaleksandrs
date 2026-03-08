@@ -14,7 +14,7 @@ ASteeringAgent::ASteeringAgent()
 
 FVector2D ASteeringAgent::GetLocation() const
 {
-	FVector Location{ GetActorLocation() };
+	FVector3f Location{ GetActorLocation() };
 	return {Location.X, Location.Y};
 }
 

@@ -16,9 +16,9 @@
 
 // --- Cell ---
 // ------------
-struct Cell final
+struct FCell final
 {
-	Cell(float Left, float Bottom, float Width, float Height);
+	FCell(float Left, float Bottom, float Width, float Height);
 
 	std::vector<FVector2D> GetRectPoints() const;
 	
@@ -29,17 +29,19 @@ struct Cell final
 
 // --- Partitioned Space ---
 // -------------------------
-class CellSpace final
+class FCellSpace final
 {
 public:
-	CellSpace(UWorld* pWorld, float Width, float Height, int Rows, int Cols, int MaxEntities);
+	FCellSpace(UWorld* World, float Width, float Height, uint32_t Rows, uint32_t Cols, int MaxEntities);
 
 	void AddAgent(ASteeringAgent& Agent);
-	void UpdateAgentCell(ASteeringAgent& Agent, const FVector2D& OldPos);
+	void RemoveAgent(ASteeringAgent& Agent);
+	// Moves agent from one cell to another if necessary
+	void UpdateAgentCell(ASteeringAgent& Agent, const FVector2D& OldLocation);
 
-	void RegisterNeighbors(ASteeringAgent& Agent, float QueryRadius);
+	void RegisterNeighbors(ASteeringAgent const& Agent, float QueryRadius);
 	const TArray<ASteeringAgent*>& GetNeighbors() const { return Neighbors; }
-	int GetNrOfNeighbors() const { return NrOfNeighbors; }
+	int GetNrOfNeighbors() const { return NeighborCount; }
 
 	//empties the cells of entities
 	void EmptyCells();
@@ -47,26 +49,27 @@ public:
 
 private:
 	// For debug draw purposes
-	UWorld* pWorld{};
+	UWorld* World{};
 	
 	// Cells and properties
-	std::vector<Cell> Cells;
-	FVector2D CellOrigin{};
+	std::vector<FCell> Cells;// Row major
+	FVector2f GridBottomLeft{};// From the camera's perspective
 	
-	float SpaceWidth;
-	float SpaceHeight;
+	float SpaceWidth, SpaceHeight;
 
-	int NrOfRows;
-	int NrOfCols;
+	uint32_t RowCount, ColCount;
 
-	float CellWidth;
-	float CellHeight;
+	float CellWidth, CellHeight;
 
 	// Members to avoid memory allocation on every frame
 	TArray<ASteeringAgent*> Neighbors;
-	int NrOfNeighbors;
+	int NeighborCount{};
 
 	// Helper functions
-	int PositionToIndex(FVector2D const & Pos) const;
+	FCell& GetCell(uint32_t const Col, uint32_t const Row) { return Cells[Row * ColCount + Col]; }
+	uint32_t GetCellCollFromX(float X) const;
+	uint32_t GetCellRowFromY(float Y) const;
+	uint32_t GetCellIndexFromLocation(FVector2D const &) const;
+	
 	bool DoRectsOverlap(FRect const& RectA, FRect const& RectB);
 };

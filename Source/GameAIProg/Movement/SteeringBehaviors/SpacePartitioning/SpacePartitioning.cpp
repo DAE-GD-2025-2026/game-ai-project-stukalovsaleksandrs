@@ -1,14 +1,22 @@
 #include "SpacePartitioning.h"
+#include <ranges>
+
+#include "IntVectorTypes.h"
+#include "IPropertyTable.h"
+
+// NOTE: Space partitioning uses doubles all around the place, because UE classes, such
+// as FRect are primarily double-based, and their float-based alternatives, like FSlateRect
+// are designed for specific purposes and do not share the same interface  
 
 // --- Cell ---
 // ------------
-Cell::Cell(float Left, float Bottom, float Width, float Height)
+FCell::FCell(float Left, float Bottom, float Width, float Height)
 {
 	BoundingBox.Min = { Left, Bottom };
 	BoundingBox.Max = { BoundingBox.Min.X + Width, BoundingBox.Min.Y + Height };
 }
 
-std::vector<FVector2D> Cell::GetRectPoints() const
+std::vector<FVector2D> FCell::GetRectPoints() const
 {
 	const float left = BoundingBox.Min.X;
 	const float bottom = BoundingBox.Min.Y;
@@ -28,58 +36,168 @@ std::vector<FVector2D> Cell::GetRectPoints() const
 
 // --- Partitioned Space ---
 // -------------------------
-CellSpace::CellSpace(UWorld* pWorld, float Width, float Height, int Rows, int Cols, int MaxEntities)
-	: pWorld{pWorld}
+FCellSpace::FCellSpace(UWorld* const World, float const Width, float const Height, uint32_t const Rows, uint32_t const Cols, int const MaxEntities)
+	: World{World}
+	, GridBottomLeft(-0.5f * Width, -0.5f * Height)
 	, SpaceWidth{Width}
 	, SpaceHeight{Height}
-	, NrOfRows{Rows}
-	, NrOfCols{Cols}
-	, NrOfNeighbors{0}
+	, RowCount{Rows}
+	, ColCount{Cols}
+	, CellWidth{ Width / Cols }
+	, CellHeight{ Height / Rows }
 {
 	Neighbors.SetNum(MaxEntities);
 	
-	//calculate bounds of a cell
-	CellWidth = Width / Cols;
-	CellHeight = Height / Rows;
-
-	// TODO create the cells
+	// Creating cells
+	Cells.reserve(NeighborCount);
+	// NOTE: Storing the cells in row-major order
+	for (int Col{}; Col < Cols; ++Col)
+	{
+		for (int Row{}; Row < Rows; ++Row)
+		{
+			// GridBottomLeft + Width * 
+			Cells.emplace_back(
+				GridBottomLeft.X + static_cast<float>(Col) * CellWidth,
+				GridBottomLeft.Y + static_cast<float>(Row) * CellHeight,
+				CellWidth,
+				CellHeight
+			);
+		}
+	}
 }
 
-void CellSpace::AddAgent(ASteeringAgent& Agent)
+void FCellSpace::AddAgent(ASteeringAgent& Agent)
 {
-	// TODO Add the agent to the correct cell
+	// 1. Getting the cell index
+	auto const GridIndex{ GetCellIndexFromLocation(Agent.GetLocation()) };
+	// 2. Making sure the agent is not listed already
+	if (auto& CellAgentList{ Cells[GridIndex].Agents };
+		!std::ranges::binary_search(CellAgentList, &Agent))
+	{
+		// 3. Listing the agent
+		CellAgentList.push_back(&Agent);
+	}
 }
 
-void CellSpace::UpdateAgentCell(ASteeringAgent& Agent, const FVector2D& OldPos)
+void FCellSpace::RemoveAgent(ASteeringAgent& Agent)
 {
-	//TODO Check if the agent needs to be moved to another cell.
-	//TODO Use the calculated index for oldPos and currentPos for this
+	std::erase_if(
+		Cells[GetCellIndexFromLocation(Agent.GetLocation())].Agents,
+		[&Agent](ASteeringAgent const * const CurrentAgent)
+		{
+			return CurrentAgent == &Agent;
+		}
+	);
 }
 
-void CellSpace::RegisterNeighbors(ASteeringAgent& Agent, float QueryRadius)
+void FCellSpace::UpdateAgentCell(ASteeringAgent& Agent, const FVector2D& OldLocation)
 {
-	// TODO Register the neighbors for the provided agent
-	// TODO Only check the cells that are within the radius of the neighborhood
+	// 1. Getting the index of the old cell
+	auto const OldCellIdx{ GetCellIndexFromLocation(OldLocation) },
+		NewCellIdx{ GetCellIndexFromLocation(Agent.GetLocation()) };
+	if (OldCellIdx != NewCellIdx)
+	{
+		// 2. Removing the agent from the previous cell
+		RemoveAgent(Agent);
+		// 3. Adding the agent to the new cell
+		AddAgent(Agent);
+	}
 }
 
-void CellSpace::EmptyCells()
+void FCellSpace::RegisterNeighbors(ASteeringAgent const & Agent, float const QueryRadius)
 {
-	for (Cell& c : Cells)
+	// NOTE: Testing against the circumscribed square instead of the query circle for simplicity
+	
+	// 1. Getting the bottom left cell
+	FVector2D const QueryRadii{ FVector2D(QueryRadius, QueryRadius) },
+		BottomLeft{ Agent.GetLocation() - QueryRadii };
+	uint32_t const BottomLeftCol{ GetCellCollFromX(BottomLeft.X) },
+		BottomLeftRow{ GetCellRowFromY(BottomLeft.Y) };
+	
+	// 2. Getting the width and height in cells of the area of the square to check
+	uint32_t const AreaCellWidth{ static_cast<uint32_t>(2.f * QueryRadius / CellWidth) },
+		AreaCellHeight{ static_cast<uint32_t>(2.f * QueryRadius / CellHeight) };
+	
+	// 3. Getting the circumscribed AABB around the circle with QueryRadius
+	FRect const CircumscribedAABB( BottomLeft, Agent.GetLocation() + QueryRadii );
+	
+	// 4. Iterating over all the cells in the area
+	std::vector<FCell*> CellsToCheck;
+	for (uint32_t Col{ BottomLeftCol }; Col < BottomLeftCol + AreaCellWidth; ++Col)
+	{
+		for (uint32_t Row{ BottomLeftRow }; Row < BottomLeftRow + AreaCellHeight; ++Row)
+		{
+			// 5. Checking if every cell is within the circumscribed square
+			if (FCell& Cell{ GetCell(Col, Row) };
+				DoRectsOverlap(Cell.BoundingBox, CircumscribedAABB))
+			{
+				CellsToCheck.push_back(&Cell);
+			}
+		}
+	}
+
+	// 5. Adding all the neighbors from these cells
+	Neighbors.Empty();
+	NeighborCount = 0;
+	for (FCell const * const CellToCheck : CellsToCheck)
+	{
+		for (ASteeringAgent* Neighbor: CellToCheck->Agents)
+		{
+			// Taking only neighbors within the radius
+			if ((Neighbor->GetLocation() - Agent.GetLocation()).SquaredLength() < QueryRadius * QueryRadius)
+			{
+				Neighbors.Push(Neighbor);
+				++NeighborCount;
+			}
+		}
+	}
+}
+
+void FCellSpace::EmptyCells()
+{
+	for (FCell& c : Cells)
 		c.Agents.clear();
 }
 
-void CellSpace::RenderCells() const
+void FCellSpace::RenderCells() const
 {
 	// TODO Render the cells with the number of agents inside of it
+
+	// 1. Iterating over all the cells
+	for (FCell const& Cell : Cells)
+	{
+		// 2. Rendering boundary for each cell
+		
+		//DrawDebugBox(World, )
+		// 3. Rendering the agent count inside each cell
+	}
 }
 
-int CellSpace::PositionToIndex(FVector2D const & Pos) const
+uint32_t FCellSpace::GetCellCollFromX(float const X) const
 {
-	// TODO Calculate the index of the cell based on the position
-	return 0;
+	// NOTE: Clamping to the valid column and row values to avoid reading outside of bounds
+	return std::clamp(
+		static_cast<uint32_t>((X - GridBottomLeft.X) / CellWidth),
+		0u,
+		ColCount - 1
+	);
 }
 
-bool CellSpace::DoRectsOverlap(FRect const & RectA, FRect const & RectB)
+uint32_t FCellSpace::GetCellRowFromY(float const Y) const
+{
+	return std::clamp(
+		static_cast<uint32_t>((Y - GridBottomLeft.Y) / CellHeight),
+		0u,
+		RowCount - 1
+	);
+}
+
+uint32_t FCellSpace::GetCellIndexFromLocation(FVector2D const & Location) const
+{
+	return GetCellRowFromY(Location.Y) * ColCount + GetCellCollFromX(Location.X);
+}
+
+bool FCellSpace::DoRectsOverlap(FRect const & RectA, FRect const & RectB)
 {
 	// Check if the rectangles are separated on either axis
 	if (RectA.Max.X < RectB.Min.X || RectA.Min.X > RectB.Max.X) return false;
