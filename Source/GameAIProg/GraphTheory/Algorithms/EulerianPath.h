@@ -1,4 +1,5 @@
 #pragma once
+#include <avx512fintrin.h>
 #include <stack>
 #include "Shared/Graph/Graph.h"
 
@@ -16,8 +17,8 @@ namespace GameAI
 	public:
 		EulerianPath(Graph* const pGraph);
 
-		Eulerianity IsEulerian() const;
-		std::vector<Node*> FindPath(Eulerianity& eulerianity) const;
+		Eulerianity GetEulerianity() const;
+		std::vector<Node*> FindPath(Eulerianity& OutEulerianity) const;
 
 	private:
 		void VisitAllNodesDFS(const std::vector<Node*>& pNodes, std::vector<bool>& visited, int startIndex) const;
@@ -31,7 +32,7 @@ namespace GameAI
 	{
 	}
 
-	inline Eulerianity EulerianPath::IsEulerian() const
+	inline Eulerianity EulerianPath::GetEulerianity() const
 	{
 		// TODO If the graph is not connected, there can be no Eulerian Trail
 
@@ -47,19 +48,54 @@ namespace GameAI
 		return Eulerianity::notEulerian;
 	}
 
-	inline std::vector<Node*> EulerianPath::FindPath(Eulerianity& eulerianity) const
+	inline std::vector<Node*> EulerianPath::FindPath(Eulerianity& OutEulerianity) const
 	{
 		// Get a copy of the graph because this algorithm involves removing edges
 		Graph graphCopy = m_pGraph->Clone();
 		std::vector<Node*> Path = {};
 		std::vector<Node*> Nodes = graphCopy.GetActiveNodes();
-		int currentNodeId{ Graphs::InvalidNodeId };
+		int CurrentNodeId{};
 		
-		// TODO Check if there can be an Euler path
-		// TODO If this graph is not eulerian, return the empty path
+		// DONE_TODO Check if there can be an Euler path
+		OutEulerianity = GetEulerianity();
 		
 		// TODO Start algorithm loop
-		std::stack<int> nodeStack;
+		// 1. Starting with an empty stack and an empty path
+		std::stack<int> NodeStack;
+
+		// 2. Choosing a starting node(current node)
+		switch (OutEulerianity)
+		{
+		case Eulerianity::eulerian:
+			// All nodes even degree -> choosing any(using the first one)
+			break;
+		case Eulerianity::semiEulerian:
+			// 2 nodes with odd degree -> choosing one with the odd degree
+			for ([[maybe_unused]] auto* Node : Nodes)
+			{
+				if (!m_pGraph->HasEvenDegree(CurrentNodeId)) break;
+				++CurrentNodeId;
+			}
+			break;
+		case Eulerianity::notEulerian:
+			// DONE_TODO If this graph is not eulerian, return the empty path
+			return Nodes;
+		default:
+			throw std::invalid_argument("Unsupported Eulerianity");
+		}
+
+		// 3. Looping until the stack is empty and there are no more connections left for the current node
+		// How to check for the connections left? Iterate over them?
+		while (!(NodeStack.empty() && m_pGraph->Nodes.at(CurrentNodeId)))
+		{
+			// 4. If the current node has neighbors:
+			// 4.1. Adding the node to stack
+			// 4.2. Taking any of its neighbors
+			// 4.3. Setting that neighbor as the current node
+			// 4.4. Removing the edge between the selected neighbor and that node
+			
+		}
+		// 5. Adding the last current node(from the original graph) to the path
 
 		std::reverse(Path.begin(), Path.end());
 		return Path;

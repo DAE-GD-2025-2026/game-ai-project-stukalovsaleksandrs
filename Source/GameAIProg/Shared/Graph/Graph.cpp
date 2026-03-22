@@ -210,7 +210,7 @@ namespace GameAI
         return it != Connections.end() ? it->get() : nullptr;
     }
 
-    std::vector<Connection*> Graph::FindConnectionsFrom(int NodeId) const
+    std::vector<Connection*> Graph::FindConnectionsFrom(int const NodeId) const
     {
         std::vector<Connection*> Result{};
         for (auto& Connection : Connections)
@@ -221,7 +221,7 @@ namespace GameAI
         return Result;
     }
 
-    std::vector<Connection*> Graph::FindConnectionsTo(int NodeId) const
+    std::vector<Connection*> Graph::FindConnectionsTo(int const NodeId) const
     {
         std::vector<Connection*> Result{};
         for (auto& Connection : Connections)
@@ -232,6 +232,15 @@ namespace GameAI
         return Result;
     }
 
+    [[nodiscard]] bool Graph::HasEvenDegree(int const NodeId) const
+    {
+        size_t const ConnectionCount{
+            FindConnectionsFrom(NodeId).size() + FindConnectionsTo(NodeId).size()
+        };
+
+        return ConnectionCount % 2 == 0;
+    }
+    
     void Graph::AddConnection(std::unique_ptr<Connection> NewConnection)
     {
         // Get an inverse copy for later

@@ -84,6 +84,7 @@ namespace GameAI
         Connection* FindConnection(int FromId, int ToId);         
         std::vector<Connection*> FindConnectionsFrom(int NodeId) const;           
         std::vector<Connection*> FindConnectionsTo(int NodeId) const;
+        [[nodiscard]] bool HasEvenDegree(int NodeId) const;
 
         void AddConnection(std::unique_ptr<Connection> NewConnection);
         void AddConnection(int FromNodeId, int ToNodeId);
