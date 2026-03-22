@@ -91,6 +91,8 @@ namespace GameAI
         bool RemoveConnection(Connection const* ConnectionToRemove);
         bool RemoveConnection(int FromNodeId, int ToNodeId);
 
+        bool HasConnections(int NodeId) const;
+
         bool GetIsDirectional() const;
         Graph Clone() const;
         

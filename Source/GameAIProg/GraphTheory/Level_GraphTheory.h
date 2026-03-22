@@ -13,35 +13,35 @@
 UCLASS()
 class GAMEAIPROG_API ALevel_GraphTheory : public ALevel_Base
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "GraphEditor")
-    TSubclassOf<UGraphEditorComponent> GraphEditorClass;
-    
-    // Sets default values for this actor's properties
-    ALevel_GraphTheory();
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "GraphEditor")
+	TSubclassOf<UGraphEditorComponent> GraphEditorClass;
+	
+	// Sets default values for this actor's properties
+	ALevel_GraphTheory();
 
-    // Called every frame
-    virtual void Tick(float DeltaTime) override;
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 protected:
-    UPROPERTY()
-    APlayerController* PlayerController{nullptr};
-    
-    virtual void BeginPlay() override;
-    virtual void BeginDestroy() override;
+	UPROPERTY()
+	APlayerController* PlayerController{nullptr};
+	
+	virtual void BeginPlay() override;
+	virtual void BeginDestroy() override;
 
 private:
-    UPROPERTY()
-    ASteeringAgent* Agent{nullptr}; // ref
-    PathFollow PathFollow{};
-    GameAI::Graph Graph{false};
-    GameAI::GraphRenderer Renderer{nullptr};
-    GameAI::GraphNodeFactory<GameAI::Node> NodeFactory{};
-    
-    UPROPERTY()
-    UGraphEditorComponent* PlayerGraphEditor{}; // ref
-    
-    void UpdateAgentPath( std::vector<GameAI::Node*> const & Trail);
+	UPROPERTY()
+	ASteeringAgent* Agent{nullptr}; // ref
+	PathFollow PathFollow{};
+	GameAI::Graph Graph{false};
+	GameAI::GraphRenderer Renderer{nullptr};
+	GameAI::GraphNodeFactory<GameAI::Node> NodeFactory{};
+	
+	UPROPERTY()
+	UGraphEditorComponent* PlayerGraphEditor{}; // ref
+	
+	void UpdateAgentPath( std::vector<GameAI::Node*> const & Trail);
 };

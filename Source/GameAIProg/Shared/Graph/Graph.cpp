@@ -296,6 +296,11 @@ namespace GameAI
         return false;
     }
 
+    bool Graph::HasConnections(int const NodeId) const
+    {
+        return FindConnectionsFrom(NodeId).size() > 0 && FindConnectionsTo(NodeId).size() > 0;
+    }
+
     bool Graph::GetIsDirectional() const
     {
         return bIsDirectional;

@@ -47,7 +47,7 @@ public:
 
 	FVector2D GetLinearVelocity() const { return FVector2D{GetCharacterMovement()->Velocity}; }
 
-	float GetMaxDegreesPerSec() const { return GetCharacterMovement()->RotationRate.Yaw; }
+	float GetMaxAngularSpeed() const { return GetCharacterMovement()->RotationRate.Yaw; }
 	void SetMaxAngularSpeed(float maxAngularSpeed) { GetCharacterMovement()->RotationRate.Yaw = maxAngularSpeed; }
 
 	float GetAngularVelocity() const { return GetCharacterMovement()->GetLastUpdateRotation().Yaw - GetActorRotation().Yaw; }
