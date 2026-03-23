@@ -92,9 +92,9 @@ void ALevel_SteeringBehaviors::Tick(float DeltaTime)
 			//Actor Props
 			if (ImGui::CollapsingHeader("Properties"))
 			{
-				float v = Agent.Agent_Steering->GetMaxLinearSpeed();
+				float v = Agent.Agent_Steering->GetMaxDegreesPerSec();
 				if (ImGui::SliderFloat("Lin", &v, 0.f, 600.f, "%.2f"))
-					Agent.Agent_Steering->SetMaxLinearSpeed(v);
+					Agent.Agent_Steering->SetMaxDegreesPerSec(v);
 
 				v = Agent.Agent_Steering->GetMaxDegreesPerSec();
 				if (ImGui::SliderFloat("Ang", &v, 0.f, 360.f, "%.2f"))
@@ -228,7 +228,7 @@ void ALevel_SteeringBehaviors::SetAgentBehavior(ImGui_Agent& Agent_ImGui)
 	// If after arrive, restoring the speed to its original state
 	if (float& OldSpeed{ Agent_ImGui.Agent_Steering->OldSpeed }; OldSpeed > 0.f)
 	{
-		Agent_ImGui.Agent_Steering->SetMaxLinearSpeed( OldSpeed );
+		Agent_ImGui.Agent_Steering->SetMaxDegreesPerSec( OldSpeed );
 		OldSpeed = -1.f;
 	}
 	

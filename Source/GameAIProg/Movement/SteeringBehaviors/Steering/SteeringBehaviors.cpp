@@ -23,7 +23,7 @@ SteeringOutput Flee::CalculateSteering(float const DeltaTime, ASteeringAgent& Ag
 SteeringOutput Arrive::CalculateSteering(float const DeltaTime, ASteeringAgent& Agent)
 {
     // Preserving the old speed if relevant
-    if (Agent.GetMaxLinearSpeed() > Agent.OldSpeed) Agent.OldSpeed = Agent.GetMaxLinearSpeed();
+    if (Agent.GetMaxDegreesPerSec() > Agent.OldSpeed) Agent.OldSpeed = Agent.GetMaxDegreesPerSec();
 
     if (Agent.GetDebugRenderingEnabled())
     {
@@ -42,7 +42,7 @@ SteeringOutput Arrive::CalculateSteering(float const DeltaTime, ASteeringAgent& 
     double const SpeedFactor{ FMath::Clamp((Distance - TargetRadius) /  (SlowRadius - TargetRadius), 0.0, 1.0) };
 
     // Updating the agent's max speed
-    Agent.SetMaxLinearSpeed(SpeedFactor * Agent.OldSpeed);
+    Agent.SetMaxDegreesPerSec(SpeedFactor * Agent.OldSpeed);
     
     return Steering;
 }
@@ -116,7 +116,7 @@ SteeringOutput Pursuit::CalculateSteering(float const DeltaTime, ASteeringAgent&
     // Calculating how much time it will take for the agent to reach the target
     // considering that target stands still.
     double const Distance{ (Target.Position - Agent.GetLocation()).Length() },
-        SecToReachTarget{ Distance / Agent.GetMaxLinearSpeed() };// t = d / v
+        SecToReachTarget{ Distance / Agent.GetMaxDegreesPerSec() };// t = d / v
 
     // Calculating location of the target after the time calculated previously elapses
     FVector2D const NewTargetPosition{ Target.Position + Target.LinearVelocity * SecToReachTarget };
@@ -142,7 +142,7 @@ SteeringOutput Evade::CalculateSteering(float const DeltaTime, ASteeringAgent& A
     Steering.IsValid = false;
     if (Distance > EvadeRadius) return Steering;
 
-    double const SecToReachTarget{ Distance / Agent.GetMaxLinearSpeed() };
+    double const SecToReachTarget{ Distance / Agent.GetMaxDegreesPerSec() };
     
     FVector2D const NewTargetPosition{ Target.Position + Target.LinearVelocity * SecToReachTarget };
 

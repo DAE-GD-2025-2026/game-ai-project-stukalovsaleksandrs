@@ -63,6 +63,7 @@ namespace GameAI
 
     inline std::vector<Node*> EulerianPath::FindPath(Eulerianity& outEulerianity) const
     {
+        assert(!m_pGraph->GetIsDirectional() && "EulerianPath::FindPath: Directional graphs not supported");
         // Get a copy of the graph because this algorithm involves removing edges
         Graph graphCopy = m_pGraph->Clone();
         std::vector<Node*> path = {};
