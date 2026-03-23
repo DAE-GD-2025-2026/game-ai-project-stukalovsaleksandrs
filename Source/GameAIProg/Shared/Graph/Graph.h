@@ -20,6 +20,8 @@ namespace GameAI
     {
     public:
         explicit Node(FVector2D const& Position);
+        virtual ~Node() = default;
+        
         void SetId(int id);
         int GetId() const;
 
@@ -33,6 +35,26 @@ namespace GameAI
         FVector2D Position;
         int Id = Graphs::InvalidNodeId;
     };
+    
+    class TerrainNode : public Node
+    {
+    public:
+        enum class Type
+        {
+            Clear,
+            Mud,
+            Water
+        };
+        
+        explicit TerrainNode(FVector2D const& Position, Type Type = Type::Clear);
+        virtual ~TerrainNode() override = default;
+        
+        void SetType(Type NewType);
+        Type GetType() const;
+        
+    private:
+        Type Terrain;
+    };
 #pragma endregion NodeType(s)
 
 #pragma region ConnectionType(s)
@@ -40,6 +62,7 @@ namespace GameAI
     {
     public:
         Connection(int FromId, int ToId);
+        virtual ~Connection() = default;
 
         int GetFromId() const;
         int GetToId() const;
@@ -55,7 +78,7 @@ namespace GameAI
         float Weight{};
     };
 #pragma endregion ConnectionType(s)
-
+    
     class Graph
     {
     public:
@@ -72,8 +95,19 @@ namespace GameAI
 
         std::unique_ptr<Node> const& GetNode(int NodeId) const;
         std::unique_ptr<Node>& GetNode(int NodeId);
+        
+        template<typename T>
+        T const * GetNodeAs(int NodeId) const
+        {
+            return static_cast<T const*>(Nodes[NodeId].get());
+        }
+        template<typename T>
+        T* GetNodeAs(int NodeId)
+        {
+            return static_cast<T*>(Nodes[NodeId].get());
+        }
 
-        int AddNode(std::unique_ptr<Node> NewNode);// takes ownership
+        int AddNode(std::unique_ptr<Node> NewNode);   // takes ownership
         bool RemoveNode(int NodeToRemoveId);
 
         // --- Connections --------------------------------------------------
@@ -83,15 +117,16 @@ namespace GameAI
         Connection* FindConnection(int FromId, int ToId);         
         std::vector<Connection*> FindConnectionsFrom(int NodeId) const;           
         std::vector<Connection*> FindConnectionsTo(int NodeId) const;
-        [[nodiscard]] bool HasEvenDegree(int NodeId) const;
+        std::vector<Connection*> FindConnectionsWith(int NodeId) const;
 
         void AddConnection(std::unique_ptr<Connection> NewConnection);
         void AddConnection(int FromNodeId, int ToNodeId);
 
         bool RemoveConnection(Connection const* ConnectionToRemove);
         bool RemoveConnection(int FromNodeId, int ToNodeId);
-
-        bool HasConnections(int NodeId) const;
+        
+        bool RemoveConnectionsFrom(int FromId);
+        bool RemoveConnectionsTo(int ToId);
 
         bool GetIsDirectional() const;
         Graph Clone() const;
@@ -99,11 +134,11 @@ namespace GameAI
         // Helper
         void SetConnectionCostsToDistances();
 
-    private:
+    protected:
         std::optional<int> GetFirstInvalidNodeIdx() const;
         
         bool const bIsDirectional;
-        std::vector<std::unique_ptr<Node>> m_nodes;
-        std::vector<std::unique_ptr<Connection>> m_connections;
+        std::vector<std::unique_ptr<Node>> Nodes;
+        std::vector<std::unique_ptr<Connection>> Connections;
     };
 }

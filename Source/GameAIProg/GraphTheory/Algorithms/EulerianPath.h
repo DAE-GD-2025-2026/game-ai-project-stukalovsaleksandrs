@@ -22,7 +22,9 @@ namespace GameAI
 
     private:
         void VisitAllNodesDFS(const std::vector<Node*>& pNodes, std::vector<bool>& visited, int startIndex) const;
-        bool IsConnected() const;
+        [[nodiscard]] bool IsConnected() const;
+        [[nodiscard]] bool HasEvenDegree(int nodeId) const;
+        [[nodiscard]] bool HasConnections(int const nodeId) const;
 
         Graph* m_pGraph;
     };
@@ -42,7 +44,7 @@ namespace GameAI
         size_t oddDegreeNodeCount{};
         for (auto* pNode : nodes)
         {
-            if (!m_pGraph->HasEvenDegree(pNode->GetId()))
+            if (!HasEvenDegree(pNode->GetId()))
             {
                 ++oddDegreeNodeCount;
             }
@@ -89,7 +91,7 @@ namespace GameAI
             // 2 nodes with odd degree -> choosing one with the odd degree
             for (auto const * const pNode : nodes)
             {
-                if (!m_pGraph->HasEvenDegree(pNode->GetId()))
+                if (!HasEvenDegree(pNode->GetId()))
                 {
                     currentNodeId = pNode->GetId();
                     break;
@@ -178,11 +180,11 @@ namespace GameAI
         int StartNodeIdx{};
         for ([[maybe_unused]] Node* Node : Nodes)
         {
-            if (m_pGraph->HasConnections(StartNodeIdx)) break;
+            if (HasConnections(StartNodeIdx)) break;
             ++StartNodeIdx;
         }
         // Starting node still has no connections -> none of the nodes does, bad coms(
-        if (!m_pGraph->HasConnections(StartNodeIdx)) return false;
+        if (!HasConnections(StartNodeIdx)) return false;
         
         // DONE_TODO start a depth-first-search traversal from the node that has at least one connection
         std::vector<bool> VisitedNodes(Nodes.size());
@@ -192,5 +194,18 @@ namespace GameAI
         // Returning if all nodes were visited
         return std::ranges::any_of(VisitedNodes, [&](bool const bVisited){ return !bVisited; });
     }
-    
+
+    inline bool EulerianPath::HasEvenDegree(int const nodeId) const
+    {
+        size_t const ConnectionCount{
+            m_pGraph->FindConnectionsFrom(nodeId).size() + m_pGraph->FindConnectionsTo(nodeId).size()
+        };
+
+        return ConnectionCount % 2 == 0;
+    }
+
+    inline bool EulerianPath::HasConnections(int const nodeId) const
+    {
+        return m_pGraph->FindConnectionsFrom(nodeId).size() > 0 && m_pGraph->FindConnectionsTo(nodeId).size() > 0;
+    }
 }

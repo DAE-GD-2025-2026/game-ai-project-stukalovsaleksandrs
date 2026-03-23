@@ -172,7 +172,6 @@ void FFlock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize, AWor
 	}
 
 	ImGui::Checkbox("Debug Rendering", &DebugRenderSteering);
-	// TODO: Make space partitioning toggleable at runtime
 	// ImGui::Checkbox("Use spatial partitioning", &bUseSpatialPartitioning);
 
 	// Separation coefficient
