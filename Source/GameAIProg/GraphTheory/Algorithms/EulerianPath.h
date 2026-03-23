@@ -18,7 +18,7 @@ namespace GameAI
 		EulerianPath(Graph* const pGraph);
 
 		Eulerianity GetEulerianity() const;
-		std::vector<Node*> FindPath(Eulerianity& OutEulerianity) const;
+		std::vector<Node*> FindPath(Eulerianity& outEulerianity) const;
 
 	private:
 		void VisitAllNodesDFS(const std::vector<Node*>& pNodes, std::vector<bool>& visited, int startIndex) const;
@@ -48,57 +48,65 @@ namespace GameAI
 		return Eulerianity::notEulerian;
 	}
 
-	inline std::vector<Node*> EulerianPath::FindPath(Eulerianity& OutEulerianity) const
+	inline std::vector<Node*> EulerianPath::FindPath(Eulerianity& outEulerianity) const
 	{
 		// Get a copy of the graph because this algorithm involves removing edges
 		Graph graphCopy = m_pGraph->Clone();
-		std::vector<Node*> Path = {};
-		std::vector<Node*> Nodes = graphCopy.GetActiveNodes();
-		int CurrentNodeId{};
+		std::vector<Node*> path = {};
+		std::vector<Node*> nodes = graphCopy.GetActiveNodes();
+		if (nodes.empty()) return path;
+		int currentNodeId{};
 		
 		// DONE_TODO Check if there can be an Euler path
-		OutEulerianity = GetEulerianity();
+		outEulerianity = GetEulerianity();
 		
 		// TODO Start algorithm loop
 		// 1. Starting with an empty stack and an empty path
-		std::stack<int> NodeStack;
+		std::stack<int> nodeStack;
 
 		// 2. Choosing a starting node(current node)
-		switch (OutEulerianity)
+		switch (outEulerianity)
 		{
 		case Eulerianity::eulerian:
 			// All nodes even degree -> choosing any(using the first one)
+			currentNodeId = nodes.at(0)->GetId();
 			break;
 		case Eulerianity::semiEulerian:
 			// 2 nodes with odd degree -> choosing one with the odd degree
-			for ([[maybe_unused]] auto* Node : Nodes)
+			for (auto const * const pNode : nodes)
 			{
-				if (!m_pGraph->HasEvenDegree(CurrentNodeId)) break;
-				++CurrentNodeId;
+				if (!m_pGraph->HasEvenDegree(currentNodeId))
+				{
+					currentNodeId = pNode->GetId();
+					break;
+				}
 			}
 			break;
 		case Eulerianity::notEulerian:
 			// DONE_TODO If this graph is not eulerian, return the empty path
-			return Nodes;
+			return path;
 		default:
 			throw std::invalid_argument("Unsupported Eulerianity");
 		}
 
 		// 3. Looping until the stack is empty and there are no more connections left for the current node
-		// How to check for the connections left? Iterate over them?
-		while (!(NodeStack.empty() && m_pGraph->Nodes.at(CurrentNodeId)))
+		while (!(nodeStack.empty() && graphCopy.GetConnections().size() < 0))
 		{
 			// 4. If the current node has neighbors:
+			auto connectionsFrom{ graphCopy.FindConnectionsFrom(currentNodeId) }; 
+			if (connectionsFrom.empty()) continue;
 			// 4.1. Adding the node to stack
+			nodeStack.push(nodes.at(currentNodeId)->GetId());
 			// 4.2. Taking any of its neighbors
 			// 4.3. Setting that neighbor as the current node
+			currentNodeId = connectionsFrom.at(connectionsFrom.size() - 1)->GetToId();
 			// 4.4. Removing the edge between the selected neighbor and that node
-			
+			connectionsFrom.pop_back();
 		}
 		// 5. Adding the last current node(from the original graph) to the path
 
-		std::reverse(Path.begin(), Path.end());
-		return Path;
+		std::reverse(path.begin(), path.end());
+		return path;
 	}
 
 	inline void EulerianPath::VisitAllNodesDFS(const std::vector<Node*>& pNodes, std::vector<bool>& Visited, int const StartIdx ) const
