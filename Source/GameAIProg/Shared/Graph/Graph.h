@@ -56,7 +56,6 @@ namespace GameAI
     };
 #pragma endregion ConnectionType(s)
 
-
     class Graph
     {
     public:
@@ -74,7 +73,7 @@ namespace GameAI
         std::unique_ptr<Node> const& GetNode(int NodeId) const;
         std::unique_ptr<Node>& GetNode(int NodeId);
 
-        int AddNode(std::unique_ptr<Node> NewNode);   // takes ownership
+        int AddNode(std::unique_ptr<Node> NewNode);// takes ownership
         bool RemoveNode(int NodeToRemoveId);
 
         // --- Connections --------------------------------------------------
@@ -104,7 +103,7 @@ namespace GameAI
         std::optional<int> GetFirstInvalidNodeIdx() const;
         
         bool const bIsDirectional;
-        std::vector<std::unique_ptr<Node>> Nodes;
-        std::vector<std::unique_ptr<Connection>> Connections;
+        std::vector<std::unique_ptr<Node>> m_nodes;
+        std::vector<std::unique_ptr<Connection>> m_connections;
     };
 }

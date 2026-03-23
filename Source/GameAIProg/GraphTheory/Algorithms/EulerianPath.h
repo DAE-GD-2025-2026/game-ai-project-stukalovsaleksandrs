@@ -29,21 +29,34 @@ namespace GameAI
 
     inline EulerianPath::EulerianPath(Graph* const pGraph)
         : m_pGraph(pGraph)
-    {
-    }
+    {}
 
     inline Eulerianity EulerianPath::GetEulerianity() const
     {
-        // TODO If the graph is not connected, there can be no Eulerian Trail
+        // DONE_TODO If the graph is not connected, there can be no Eulerian Trail
+        if (!IsConnected()) return Eulerianity::notEulerian;
 
-        // TODO Count nodes with odd degree 
+        // DONE_TODO Count nodes with odd degree 
+        auto nodes{ m_pGraph->GetActiveNodes() };
+        size_t const nodeCount{ nodes.size() };
+        size_t oddDegreeNodeCount{};
+        for (auto* pNode : nodes)
+        {
+            if (!m_pGraph->HasEvenDegree(pNode->GetId()))
+            {
+                ++oddDegreeNodeCount;
+            }
+        }
+        // DONE_TODO A connected graph with more than 2 nodes with an odd degree (an odd amount of connections) is not Eulerian
+        if (oddDegreeNodeCount > 2) return Eulerianity::notEulerian;
 
-        // TODO A connected graph with more than 2 nodes with an odd degree (an odd amount of connections) is not Eulerian
+        // DONE_TODO A connected graph with exactly 2 nodes with an odd degree is Semi-Eulerian (unless there are only 2 nodes)
+        // DONE_TODO An Euler trail can be made, but only starting and ending in these 2 nodes
+        if (oddDegreeNodeCount == 2 && nodeCount > 2) return Eulerianity::semiEulerian;
 
-        // TODO A connected graph with exactly 2 nodes with an odd degree is Semi-Eulerian (unless there are only 2 nodes)
-        // TODO An Euler trail can be made, but only starting and ending in these 2 nodes
-
-        // TODO A connected graph with no odd nodes is Eulerian
+        // DONE_TODO A connected graph with no odd nodes is Eulerian
+        // NOTE: Check for whether the graph is connected was already performed
+        if (!oddDegreeNodeCount && nodeCount) return Eulerianity::eulerian;
         
         return Eulerianity::notEulerian;
     }
@@ -60,7 +73,7 @@ namespace GameAI
         // DONE_TODO Check if there can be an Euler path
         outEulerianity = GetEulerianity();
         
-        // TODO Start algorithm loop
+        // DONE_TODO Start algorithm loop
         // 1. Starting with an empty stack and an empty path
         std::stack<int> nodeStack;
 
