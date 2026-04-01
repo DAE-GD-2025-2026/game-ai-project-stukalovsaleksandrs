@@ -34,7 +34,7 @@ std::vector<Node*> BFS::FindPath(Node* const pStartNode, Node* const pDestinatio
 			}
 			path.push_back(pStartNode);
 			std::ranges::reverse(path);
-			return std::move(path);
+			return path;
 		}
 	};
 	

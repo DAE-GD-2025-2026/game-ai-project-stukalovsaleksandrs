@@ -18,8 +18,8 @@ std::vector<Node*>AStar::FindPath(Node* const pStartNode, Node* const pGoalNode)
 	std::list openList{ NodeRecord{
 		.pNode = pStartNode,
 		.estimatedTotalCost = GetHeuristicCost(pStartNode, pGoalNode)
-	}}
-	, closedList;
+	}};
+	std::list<NodeRecord> closedList;
 
 	// The While Loop
 	std::list<NodeRecord>::iterator pCurrentNodeRecord{};
@@ -64,11 +64,11 @@ std::vector<Node*>AStar::FindPath(Node* const pStartNode, Node* const pGoalNode)
 			}
 			
 			// 2.F. Adding the new record for this neighbor to the open list
-			openList.emplace_back(
-				.pNode = pNeighborNode,
-				.pConnection = pNeighborConnection,
-				.costSoFar = costSoFar,
-				.estimatedTotalCost = costSoFar + GetHeuristicCost(pNeighborNode, pGoalNode)
+			openList.emplace_back(NodeRecord{
+				pNeighborNode,
+				pNeighborConnection,
+				costSoFar,
+				costSoFar + GetHeuristicCost(pNeighborNode, pGoalNode)}
 			);
 		}
 		
@@ -91,7 +91,7 @@ std::vector<Node*>AStar::FindPath(Node* const pStartNode, Node* const pGoalNode)
 	}
 	path.push_back(pStartNode);
 	std::ranges::reverse(path);
-	return std::move(path);
+	return path;
 }
 
 float AStar::GetHeuristicCost(Node* const pStartNode, Node* const pEndNode) const
