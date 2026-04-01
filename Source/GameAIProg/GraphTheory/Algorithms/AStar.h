@@ -25,12 +25,12 @@ namespace GameAI
 					&& pConnection == other.pConnection
 					&& costSoFar == other.costSoFar
 					&& estimatedTotalCost == other.estimatedTotalCost;
-			};
+			}
 
 			bool operator<(const NodeRecord& other) const
 			{
 				return estimatedTotalCost < other.estimatedTotalCost;
-			};
+			}
 		};
 
 		std::vector<Node*> FindPath(Node* const pStartNode, Node* const pDestinationNode);
@@ -38,7 +38,7 @@ namespace GameAI
 	private:
 		float GetHeuristicCost(Node* const pStartNode, Node* const pEndNode) const;
 
-		Graph* pGraph;
+		Graph* m_pGraph;
 		HeuristicFunctions::Heuristic HeuristicFunction;
 	};
 }

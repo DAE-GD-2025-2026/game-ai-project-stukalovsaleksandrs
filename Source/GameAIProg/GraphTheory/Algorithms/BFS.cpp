@@ -24,9 +24,8 @@ std::vector<Node*> BFS::FindPath(Node* const pStartNode, Node* const pDestinatio
 	std::unordered_map<Node*, Node*> childToParent;// Nodes used for path reconstruction
 
 	auto reconstructPath{
-		[=]()
+		[=]
 		{
-			// Reconstructing the path
 			std::vector<Node*> path;
 			for (Node* pCurrentNode{ pDestinationNode }; pCurrentNode != pStartNode;)
 			{
