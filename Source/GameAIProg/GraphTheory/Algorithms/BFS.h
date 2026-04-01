@@ -14,6 +14,6 @@ namespace GameAI
 		std::vector<Node*> FindPath(Node* const pStartNode, Node* const pDestinationNode) const;
 
 	private:
-		Graph* pGraph;
+		Graph* m_pGraph;
 	};
 }
