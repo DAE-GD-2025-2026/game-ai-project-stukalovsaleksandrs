@@ -11,7 +11,7 @@ namespace GameAI
 	public:
 		BFS(Graph* const pGraph);
 
-		std::vector<Node*> FindPath(Node* const pStartNode, Node* const pDestinationNode) const;
+		std::vector<Node*> FindPath(Node* const pStartNode, Node* const pDestinationNode, UWorld* pWorld) const;
 
 	private:
 		Graph* m_pGraph;

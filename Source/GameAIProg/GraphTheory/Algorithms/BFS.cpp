@@ -16,15 +16,15 @@ BFS::BFS(Graph* const pGraph)
 }
 
 // DONE_TODO Breath First Search Algorithm searches for a path from the startNode to the destinationNode
-std::vector<Node*> BFS::FindPath(Node* const pStartNode, Node* const pDestinationNode) const
+std::vector<Node*> BFS::FindPath(Node* const pStartNode, Node* const pDestinationNode, UWorld* pWorld) const
 {
 	// Initializing the containers
-	std::queue openList(std::deque{pStartNode});// Nodes to be visited
+std::queue openList(std::deque{pStartNode});// Nodes to be visited
 	std::unordered_set closedList{pStartNode};// Nodes that were already visited
 	std::unordered_map<Node*, Node*> childToParent;// Nodes used for path reconstruction
 
 	auto reconstructPath{
-		[=]
+		[&childToParent, pStartNode, pDestinationNode]
 		{
 			std::vector<Node*> path;
 			for (Node* pCurrentNode{ pDestinationNode }; pCurrentNode != pStartNode;)
@@ -46,7 +46,7 @@ std::vector<Node*> BFS::FindPath(Node* const pStartNode, Node* const pDestinatio
 
 		if (pParentNode == pDestinationNode) return reconstructPath();
 
-		for (auto* pConnection : m_pGraph->FindConnectionsFrom(pStartNode->GetId()))
+		for (auto* pConnection : m_pGraph->FindConnectionsFrom(pParentNode->GetId()))
 		{
 			Node* pChildNode{ m_pGraph->GetNode(pConnection->GetToId()).get() };
 			if (closedList.contains(pChildNode)) continue;
@@ -56,5 +56,15 @@ std::vector<Node*> BFS::FindPath(Node* const pStartNode, Node* const pDestinatio
 		}
 	}
 
+	// Debug rendering(beware, rn only works when path not found)
+	// ENGINE_API void DrawDebugBox(const UWorld* InWorld, FVector const& Center, FVector const& Extent, FColor const& Color, bool bPersistentLines = false, float LifeTime=-1.f, uint8 DepthPriority = 0, float Thickness = 0.f);
+	/** Draw a debug box with rotation */
+	//ENGINE_API void DrawDebugBox(const UWorld* InWorld, FVector const& Center, FVector const& Extent, const FQuat& Rotation, FColor const& Color, bool bPersistentLines = false, float LifeTime=-1.f, uint8 DepthPriority = 0, float Thickness = 0.f);
+	// for (auto* pNode : closedList)
+	// {
+	// 	DrawDebugBox(pWorld, pNode->GetPosition(), pNode->)
+	// }
+	
+	UE_LOG(LogTemp, Display, TEXT("No path found"));
 	return {};// No path found
 }
