@@ -71,7 +71,7 @@ namespace GameAI
         return ToId;
     }
 
-    float Connection::GetWeight() const
+float Connection::GetWeight() const
     {
         return Weight;
     }
@@ -83,7 +83,9 @@ namespace GameAI
 
     Connection Connection::GetInverseCopy() const
     {
-        return Connection{ToId, FromId};
+        Connection connection{ToId, FromId};
+        connection.SetWeight(this->Weight);
+        return connection;
     }
 
     bool Connection::operator==(const Connection& Other) const

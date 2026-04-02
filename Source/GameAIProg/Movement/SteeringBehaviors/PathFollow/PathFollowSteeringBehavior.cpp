@@ -47,7 +47,8 @@ void PathFollow::GotoNextPathPoint()
 {
 	++currentPathIndex;
 	if (currentPathIndex >= static_cast<int>(pathVec.size())) return;
-	
+
+	// TODO: Fix Arrive having slow speed on respawn
 	// if (currentPathIndex == pathVec.size() -1)
 	// {
 	// 	FTargetData PathTarget{pathVec[currentPathIndex]};
