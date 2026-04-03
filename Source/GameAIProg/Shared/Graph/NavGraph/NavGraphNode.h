@@ -3,7 +3,7 @@
 
 namespace GameAI
 {
-    class NavGraphNode : public Node
+    class NavGraphNode final : public Node 
     {
     public:
         NavGraphNode(FVector2D const& Position, int NavPolyEdgeIdx)
