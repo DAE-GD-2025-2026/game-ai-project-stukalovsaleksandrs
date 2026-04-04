@@ -65,34 +65,67 @@ public:
         return portals;
     }
 
-    static std::vector<FVector2D> OptimizePortals( std::vector<NavLine> const & Portals, TriPolygon const & NavPoly)
+    static std::vector<FVector2D> OptimizePortals( std::vector<NavLine> const & portals, TriPolygon const & navPoly)
     {
-        std::vector<FVector2D> Path{};
-        //P1 == right point of portal, P2 == left point of portal
+        std::vector<FVector2D> path;
+
+        if (portals.empty()) return {};
         
+        // Adding the first point
+        FVector2D apex{ portals.front().P1 };// P1 = P2
+        path.push_back(apex);
+        //P1 == right point of portal, P2 == left point of portal
+        FVector2D rightLeg{ portals.front().P1 - apex }, leftLeg{ portals.front().P2 - apex };
+        for (size_t portalIdx{ 1 }; portalIdx < portals.size(); ++portalIdx)// The first portal is already processed
+        {
+            NavLine const& portal{ portals.at(portalIdx) };
             //--- RIGHT CHECK ---
             //1. See if moving funnel inwards - RIGHT
-            
+            FVector2D const newRight{ portal.P1 - apex };
+            if (FVector2D::CrossProduct(rightLeg, newRight) <= 0.f)
+            {
                 //2. See if new line degenerates a line segment - RIGHT
-                
+                if (FVector2D::CrossProduct(rightLeg, leftLeg) < 0.f)
+                {
                     //Leftleg becomes new apex point
-
+                    apex = leftLeg;
+                    path.push_back(apex);
                     //Calculate new legs (if not the end)
-
+                    if (portalIdx < portals.size() - 1)
+                    {
+                        rightLeg = portals.at(portalIdx).P1 - apex;
+                        leftLeg = portals.at(portalIdx).P2 - apex;
+                        continue;
+                    }
+                }
+            }
 
             //--- LEFT CHECK ---
             //1. See if moving funnel inwards - LEFT
-
+            FVector2D const newLeft{ portal.P2 - apex };
+            if (FVector2D::CrossProduct(leftLeg, newLeft) <= 0.f)
+            {
                 //2. See if new line degenerates a line segment - LEFT
-
+                if (FVector2D::CrossProduct(leftLeg, rightLeg) < 0.f)
+                {
                     //Rightleg becomes new apex point
-
+                    apex = rightLeg;
+                    path.push_back(apex);
                     //Calculate new legs (if not the end)
-
-
+                    if (portalIdx < portals.size() - 1)
+                    {
+                        rightLeg = portals.at(portalIdx).P1 - apex;
+                        leftLeg = portals.at(portalIdx).P2 - apex;
+                        continue;
+                    }
+                }
+            }
+        }
+        
         // Add last path point
+        path.push_back(portals.back().P1);
 
-        return Path;
+        return path;
     }
 private:
     SSFA() {};
