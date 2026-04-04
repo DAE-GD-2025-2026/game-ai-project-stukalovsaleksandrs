@@ -38,7 +38,8 @@ int GameAI::NavGraph::GetNodeIdFromEdgeIndex(int EdgeIdx) const
     {
         for (auto const & pNode : Nodes)
         {
-            if (reinterpret_cast<NavGraphNode*>(pNode.get())->GetEdgeIdx() == EdgeIdx)
+            int32_t const currentEdgeIdx{ reinterpret_cast<NavGraphNode*>(pNode.get())->GetEdgeIdx() };
+            if (currentEdgeIdx == EdgeIdx)
             {
                 return pNode->GetId();
             }
@@ -55,14 +56,16 @@ void GameAI::NavGraph::CreateNavigationGraph()
     for (TriPolygon::Edge const& edge : m_pNavPolygon->GetEdges())
     {
         auto const edgeIdx{ m_pNavPolygon->FindEdgeIndex(edge) };
-        assert(edgeIdx.has_value() && "CreateNavigationGraph: Edge is found in GetEdges() but not in FindEdgeIndex()");
+        check(edgeIdx.has_value() && "CreateNavigationGraph: Edge is found in GetEdges() but not in FindEdgeIndex()");
         if (IsEdgeShared(edgeIdx.value()))
         {
             // Edge shared -> add node
             FVector2D const location{
                 0.5f * (edge.GetP1(*m_pNavPolygon.get()) + edge.GetP2(*m_pNavPolygon.get()))
             };
-            AddNode(std::make_unique<Node>(location));
+            // NOTE: NavGraphNode and not just node!!! When trying to access edgeIdx,
+            // it will give no error, but just UB thanks to reinterpret_cast
+            AddNode(std::make_unique<NavGraphNode>(location, edgeIdx.value()));
         }
     }
     
@@ -75,38 +78,38 @@ void GameAI::NavGraph::CreateNavigationGraph()
     for (auto const& triangle : m_pNavPolygon->GetTriangles())
     {
         // Populating node ids
-        for (TriPolygon::Edge const& edge : triangle.GetEdges())
+        for (auto const& edge : triangle.GetEdges())
         {
             auto const edgeIdx{ m_pNavPolygon->FindEdgeIndex(edge) };
-            assert(edgeIdx.has_value() && "CreateNavigationGraph: Edge is found in GetEdges() but not in FindEdgeIndex()");
-            auto const nodeId{ GetNodeIdFromEdgeIndex(edgeIdx.value()) };
-            assert(nodeId != Graphs::InvalidNodeId);
-            nodeIdPool[nodeCount++] = nodeId;
+            check(edgeIdx.has_value() && "CreateNavigationGraph: Edge is found in GetEdges() but not in FindEdgeIndex()");
+            int const nodeId{ GetNodeIdFromEdgeIndex(edgeIdx.value()) };
+            if (nodeId != Graphs::InvalidNodeId)
+            {
+                nodeIdPool[nodeCount] = nodeId;
+                ++nodeCount;
+            }
         }
         
         // Adding the connections between all the nodes
-        switch (nodeCount)
+        if (nodeCount == 2)
         {
-        case 2: 
             AddConnection(nodeIdPool[0], nodeIdPool[1]);
-            break;
-        case 3:
+        }
+        else if (nodeCount == 3)
+        {
             AddConnection(nodeIdPool[0], nodeIdPool[1]);
             AddConnection(nodeIdPool[1], nodeIdPool[2]);
             AddConnection(nodeIdPool[2], nodeIdPool[0]);
-            break;
-        default:
-            assert(false && "CreateNavigationGraph: Invalid node count");
         }
         
         nodeCount = 0;
     }
     
-    //3. Set the connections cost to the actual distance
+    //3. Set the connections' costs to the actual distances
     for (auto const& pConnection : Connections)
     {
         Node const &nodeFrom{ *GetNode(pConnection->GetFromId()) }, &nodeTo{ *GetNode(pConnection->GetToId()) };
-        double const distance{ std::abs((nodeFrom.GetPosition() - nodeTo.GetPosition()).Length()) };
+        double const distance{ FVector2D::Distance(nodeFrom.GetPosition(), nodeTo.GetPosition()) };
         pConnection->SetWeight(distance);
     }
 }

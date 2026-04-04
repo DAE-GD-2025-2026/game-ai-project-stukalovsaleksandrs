@@ -8,7 +8,7 @@ public class GameAIProg : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		bUseRTTI = false;// Disabling, because Linux versions of UE do not support RTTI :/
+		bUseRTTI = true;// because Linux versions of UE do not support RTTI :/
 		
 		PublicDependencyModuleNames.AddRange(new string[] {
 			"Core",

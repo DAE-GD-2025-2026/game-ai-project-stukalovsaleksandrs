@@ -38,7 +38,7 @@ std::vector<FVector2D> FCell::GetRectPoints() const
 
 // --- Partitioned Space ---
 // -------------------------
-FCellSpace::FCellSpace(UWorld* const World, float const Width, float const Height, uint32_t const Rows, uint32_t const Cols, int const MaxEntities)
+FCellSpace::FCellSpace(UWorld* const World, float const Width, float const Height, int32_t const Rows, int32_t const Cols, int const MaxEntities)
 	: World{World}
 	, GridBottomLeft(-0.5f * Width, -0.5f * Height)
 	, SpaceWidth{Width}
@@ -53,9 +53,9 @@ FCellSpace::FCellSpace(UWorld* const World, float const Width, float const Heigh
 	// Creating cells
 	Cells.reserve(Rows * Cols);
 	// NOTE: Storing the cells in row-major order
-	for (int Row{}; Row < Rows; ++Row)
+	for (size_t Row{}; Row < Rows; ++Row)
 	{
-		for (int Col{}; Col < Cols; ++Col)
+		for (size_t Col{}; Col < Cols; ++Col)
 		{
 			// GridBottomLeft + Width * 
 			Cells.emplace_back(
@@ -102,21 +102,21 @@ void FCellSpace::RegisterNeighbors(ASteeringAgent const & Agent, float const Que
 	// 1. Getting the bottom left cell
 	FVector2D const QueryRadii{ FVector2D(QueryRadius, QueryRadius) },
 		BottomLeft{ Agent.GetLocation() - QueryRadii };
-	uint32_t const BottomLeftCol{ GetCellCollFromX(BottomLeft.X) },
+	int32_t const BottomLeftCol{ GetCellCollFromX(BottomLeft.X) },
 		BottomLeftRow{ GetCellRowFromY(BottomLeft.Y) };
 	
 	// 2. Getting the width and height in cells of the area of the square to check
-	uint32_t const AreaCellWidth{ static_cast<uint32_t>(2.f * QueryRadius / CellWidth) },
-		AreaCellHeight{ static_cast<uint32_t>(2.f * QueryRadius / CellHeight) };
+	int32_t const AreaCellWidth{ static_cast<int32_t>(2.f * QueryRadius / CellWidth) },
+		AreaCellHeight{ static_cast<int32_t>(2.f * QueryRadius / CellHeight) };
 	
 	// 3. Getting the circumscribed AABB around the circle with QueryRadius
 	FRect const CircumscribedAABB( BottomLeft, Agent.GetLocation() + QueryRadii );
 	
 	// 4. Iterating over all the cells in the area
 	std::vector<FCell*> CellsToCheck;
-	for (uint32_t Col{ BottomLeftCol }; Col < BottomLeftCol + AreaCellWidth; ++Col)
+	for (int32_t Col{ BottomLeftCol }; Col < BottomLeftCol + AreaCellWidth; ++Col)
 	{
-		for (uint32_t Row{ BottomLeftRow }; Row < BottomLeftRow + AreaCellHeight; ++Row)
+		for (int32_t Row{ BottomLeftRow }; Row < BottomLeftRow + AreaCellHeight; ++Row)
 		{
 			// 5. Checking if every cell is within the circumscribed square
 			if (FCell& Cell{ GetCell(Col, Row) };
@@ -157,7 +157,7 @@ void FCellSpace::RenderCells() const
 		, GridRight{ GridBottomLeft.X + SpaceWidth }
 		, LineZ{ 50.f };
 	// 2.1. Rendering vertical lines
-	for (uint32_t ColIdx{}; ColIdx < ColCount; ++ColIdx)
+	for (int32_t ColIdx{}; ColIdx < ColCount; ++ColIdx)
 	{
 		float const LineX{ GridLeft + ColIdx * CellWidth };
 		FVector const LineStart{ LineX, GridTop, LineZ }
@@ -166,7 +166,7 @@ void FCellSpace::RenderCells() const
 		DrawDebugLine(World, LineStart, LineEnd, FColor::Black, true);
 	}
 	// 2.2. Rendering horizontal lines
-	for (uint32_t RowIdx{}; RowIdx < RowCount; ++RowIdx)
+	for (int32_t RowIdx{}; RowIdx < RowCount; ++RowIdx)
 	{
 		float const LineY{ GridBottom + RowIdx * CellHeight };
 		FVector const LineStart{ GridLeft, LineY, LineZ }
@@ -193,27 +193,27 @@ void FCellSpace::RenderCells() const
 	}
 }
 
-uint32_t FCellSpace::GetCellCollFromX(float const X) const
+int32_t FCellSpace::GetCellCollFromX(float const X) const
 {
 	// NOTE: Clamping to the valid column and row values to avoid reading outside of bounds
 	return std::clamp(
-		static_cast<uint32_t>((X + 0.5f * SpaceWidth) / CellWidth),
-		0u,
+		static_cast<int32_t>((X + 0.5f * SpaceWidth) / CellWidth),
+		0,
 		ColCount - 1
 	);
 }
 
-uint32_t FCellSpace::GetCellRowFromY(float const Y) const
+int32_t FCellSpace::GetCellRowFromY(float const Y) const
 {
 	return std::clamp(
 		// static_cast<uint32_t>((Y - GridBottomLeft.Y) / CellHeight),
-		static_cast<uint32_t>((Y + 0.5f * SpaceHeight) / CellHeight),
-		0u,
+		static_cast<int32_t>((Y + 0.5f * SpaceHeight) / CellHeight),
+		0,
 		RowCount - 1
 	);
 }
 
-uint32_t FCellSpace::GetCellIndexFromLocation(FVector2D const & Location) const
+int32_t FCellSpace::GetCellIndexFromLocation(FVector2D const & Location) const
 {
 	return GetCellRowFromY(Location.Y) * ColCount + GetCellCollFromX(Location.X);
 }

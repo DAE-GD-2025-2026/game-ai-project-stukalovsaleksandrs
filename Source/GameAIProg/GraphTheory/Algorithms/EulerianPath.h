@@ -1,6 +1,7 @@
 #pragma once
-#include <avx512fintrin.h>
 #include <stack>
+#include <stdexcept>
+
 #include "Shared/Graph/Graph.h"
 
 namespace GameAI

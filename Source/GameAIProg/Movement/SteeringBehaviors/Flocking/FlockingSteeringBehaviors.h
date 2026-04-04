@@ -35,7 +35,7 @@ public:
 	virtual SteeringOutput CalculateSteering(float DeltaTime, ASteeringAgent& Agent) override;
 
 	[[nodiscard]] float GetSeparationFactor() const { return SeparationFactor; }
-	void SetSeparationFactor(float const SeparationFactor) { this->SeparationFactor = SeparationFactor; };
+	void SetSeparationFactor(float const separationFactor) { this->SeparationFactor = separationFactor; };
 
 	static void DebugDraw(ASteeringAgent const& Agent, float const NeighborhoodRadius);
 	

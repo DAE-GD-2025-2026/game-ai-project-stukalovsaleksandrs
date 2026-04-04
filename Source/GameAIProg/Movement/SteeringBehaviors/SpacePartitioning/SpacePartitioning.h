@@ -32,7 +32,7 @@ struct FCell final
 class FCellSpace final
 {
 public:
-	FCellSpace(UWorld* World, float Width, float Height, uint32_t Rows, uint32_t Cols, int MaxEntities);
+	FCellSpace(UWorld* World, float Width, float Height, int32_t Rows, int32_t Cols, int MaxEntities);
 
 	void AddAgent(ASteeringAgent* Agent);
 	// Moves agent from one cell to another if necessary
@@ -56,7 +56,7 @@ private:
 	
 	float SpaceWidth, SpaceHeight;// Dimensions of the grid containing all the cells
 
-	uint32_t RowCount, ColCount;
+	int32_t RowCount, ColCount;
 
 	float CellWidth, CellHeight;
 
@@ -65,10 +65,10 @@ private:
 	int NeighborCount{};
 
 	// Helper functions
-	FCell& GetCell(uint32_t const Col, uint32_t const Row) { return Cells[Row * ColCount + Col]; }
-	uint32_t GetCellCollFromX(float X) const;
-	uint32_t GetCellRowFromY(float Y) const;
-	uint32_t GetCellIndexFromLocation(FVector2D const &) const;
+	FCell& GetCell(int32_t const Col, int32_t const Row) { return Cells[Row * ColCount + Col]; }
+	int32_t GetCellCollFromX(float X) const;
+	int32_t GetCellRowFromY(float Y) const;
+	int32_t GetCellIndexFromLocation(FVector2D const &) const;
 
 	static bool DoRectsOverlap(FRect const& RectA, FRect const& RectB);
 };

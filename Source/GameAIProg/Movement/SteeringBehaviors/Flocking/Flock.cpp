@@ -200,7 +200,7 @@ void FFlock::RenderNeighborhood(ASteeringAgent const& Agent)
 {
 	RegisterNeighbors(Agent);
 	UE_LOG(LogTemp, Warning, TEXT("Neighbor count: %u"), NeighborCount);
-	for (uint32_t NeighborIdx{}; NeighborIdx < NeighborCount; ++NeighborIdx)// Memory pool might not be full
+	for (int32_t NeighborIdx{}; NeighborIdx < NeighborCount; ++NeighborIdx)// Memory pool might not be full
 	{
 		auto const Neighbor{ GetNeighbors()[NeighborIdx] };
 		DrawDebugCircle(
@@ -253,7 +253,7 @@ std::optional<FVector2D> FFlock::GetAverageNeighborLocation() const
 	if (NeighborCount == 0) return std::nullopt;
 	auto const& Neighbors{ GetNeighbors() };
 	FVector2D AverageLocation{};
-	for (int32_t NeighborIdx{}; NeighborIdx < NeighborCount; ++NeighborIdx)
+	for (uint32_t NeighborIdx{}; NeighborIdx < NeighborCount; ++NeighborIdx)
 	{
 		AverageLocation += Neighbors[NeighborIdx]->GetLocation();
 	}
@@ -267,7 +267,7 @@ std::optional<FVector2D> FFlock::GetAverageNeighborLocation() const
 FVector2D FFlock::GetAverageNeighborVelocity() const
 {
 	FVector2D AverageVelocity{};
-	for (int32_t NeighborIdx{}; NeighborIdx < NeighborCount; ++NeighborIdx)
+	for (size_t NeighborIdx{}; NeighborIdx < NeighborCount; ++NeighborIdx)
 	{
 		AverageVelocity += GetNeighbors()[NeighborIdx]->GetLocation();
 	}

@@ -87,7 +87,7 @@ private:
 
 	// Radius of the furthest distance between boids for them to get considered neighbors.
 	float NeighborhoodRadius{ 300.f };
-	int NeighborCount{};
+	size_t NeighborCount{};
 
 	ASteeringAgent* AgentToEvade{};
 	
