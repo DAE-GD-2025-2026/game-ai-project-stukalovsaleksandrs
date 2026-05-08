@@ -8,7 +8,7 @@ public class GameAIProg : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		bUseRTTI = true;// because Linux versions of UE do not support RTTI :/
+		bUseRTTI = true;
 		
 		PublicDependencyModuleNames.AddRange(new string[] {
 			"Core",
@@ -27,7 +27,7 @@ public class GameAIProg : ModuleRules
 			"Navmesh",
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
+		PrivateDependencyModuleNames.AddRange(new string[] { "EnhancedInput" });
 
 		PublicIncludePaths.AddRange(new string[] {
 			"GameAIProg",
