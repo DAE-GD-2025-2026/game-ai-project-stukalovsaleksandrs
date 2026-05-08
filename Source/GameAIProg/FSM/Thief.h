@@ -22,8 +22,14 @@ private:
 	bool bMoving{};
 
 	// Distance at which agent is considered to arrive at destination
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float AcceptanceRadius{ 50.f };
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float DegreesPerSec{ 100.f };
+
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+
+	void EnableRotationTowardsMovementDirection();
 };
