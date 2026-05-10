@@ -4,15 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Thief.generated.h"
+#include "Agent.generated.h"
 
 UCLASS()
-class GAMEAIPROG_API AThief final : public ACharacter
+class GAMEAIPROG_API AAgent final : public ACharacter
 {
 	GENERATED_BODY()
 	
 public:	
-	AThief();
+	AAgent();
 
 	// Defines a location that the actor will go to
 	void SetTargetLocation(FVector const& Location);

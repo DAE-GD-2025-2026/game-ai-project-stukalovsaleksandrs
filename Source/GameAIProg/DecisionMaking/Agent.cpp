@@ -1,29 +1,29 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 // Game
-#include "FSM/Thief.h"
+#include "Agent.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
-AThief::AThief()
+AAgent::AAgent()
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-void AThief::SetTargetLocation(FVector const& Location)
+void AAgent::SetTargetLocation(FVector const& Location)
 {
 	TargetLocation = Location;
 	bMoving = true;
 }
 
-void AThief::BeginPlay()
+void AAgent::BeginPlay()
 {
 	Super::BeginPlay();
 	EnableRotationTowardsMovementDirection();
 }
 
-void AThief::Tick(float const DeltaTime)
+void AAgent::Tick(float const DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (!bMoving) return;
@@ -39,7 +39,7 @@ void AThief::Tick(float const DeltaTime)
 	AddMovementInput(ToTarget.GetSafeNormal(), 1.f);
 }
 
-void AThief::EnableRotationTowardsMovementDirection()
+void AAgent::EnableRotationTowardsMovementDirection()
 {
 	auto* const MovementComponent{ GetCharacterMovement() };
 	check(MovementComponent);
