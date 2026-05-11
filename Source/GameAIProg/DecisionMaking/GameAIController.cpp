@@ -32,8 +32,8 @@ void AGameAIController::Tick(float DeltaTime)
 
 void AGameAIController::InitFiniteStateMachine()
 {
-	UFSMComponent* FSMComp = FindComponentByClass<UFSMComponent>();
-	if (ensure(FSMComp) && FSMBlackboardAsset)
+	if (UFSMComponent const * const FSMComp = FindComponentByClass<UFSMComponent>();
+		ensure(FSMComp) && FSMBlackboardAsset)
 	{
 		UBlackboardComponent* BlackboardComp = Blackboard;
 		UseBlackboard(FSMBlackboardAsset, BlackboardComp);
@@ -41,7 +41,7 @@ void AGameAIController::InitFiniteStateMachine()
 	}
 }
 
-void AGameAIController::RunFiniteStateMachine()
+void AGameAIController::RunFiniteStateMachine() const
 {
 	UFSMComponent* FSMComp = FindComponentByClass<UFSMComponent>();
 	if (ensure(FSMComp))

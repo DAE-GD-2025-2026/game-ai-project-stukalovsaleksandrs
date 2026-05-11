@@ -11,7 +11,12 @@ namespace GameAI::FSM
 			: ControlledAgent{ ControlledAgent }
 			, PatrolPoints{ PatrolPoints }
 		{}
-		
+
+		virtual void SetBlackboard(TObjectPtr<UBlackboardComponent> const Blackboard) override
+		{
+			BlackboardComponent = Blackboard;
+		}
+
 		virtual void OnEnter() override
 		{
 			ControlledAgent.SetTargetLocation( PatrolPoints[CurrentPatrolPointIdx] );
@@ -35,16 +40,20 @@ namespace GameAI::FSM
 			}
 
 			// Debug rendering patrol points
+#ifdef ENABLE_DEBUGGING
 			for (auto PatrolPoint: PatrolPoints)
 			{
 				DrawDebugSphere(ControlledAgent.GetWorld(), PatrolPoint, 100, 10, FColor::Red, false, -1, 0, 8);
 			}
+#endif// ENABLE_DEBUGGING
 		}
 
 	private:
 		AAgent& ControlledAgent;
 		TArray<FVector> PatrolPoints;
 		int32_t CurrentPatrolPointIdx{};
+
+		TObjectPtr<UBlackboardComponent> BlackboardComponent{};
 		
 	};
 

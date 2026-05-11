@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BehaviorTree/BlackboardData.h"
 #include "Shared/Level_Base.h"
 #include "Level_FSM.generated.h"
 
@@ -32,4 +33,5 @@ private:
 	AAgent* Guard{};
 	
 	TArray<FVector> GetPatrolPoints() const;
+	UBlackboardData* Blackboard{};
 };

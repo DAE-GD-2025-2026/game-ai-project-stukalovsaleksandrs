@@ -19,9 +19,12 @@ void UFSMComponent::AddState(std::unique_ptr<GameAI::FSM::IState>&& NewState)
 	// NOTE: Not using std::unordered_set, because it does not work with the non-copyable types
 	if (!std::ranges::binary_search(States.begin(), States.end(), NewState))
 	{
+		// 1. Adding the state
 		States.push_back(std::move(NewState));
+		// 2. Passing blackboard to the state
+		States.back()->SetBlackboard(BlackboardComp);
 	}
-
+	
 	// The first state added is the starting state
 	if (!CurrentState) CurrentState = States.begin()->get();
 }
@@ -45,6 +48,7 @@ void UFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	if (CurrentState) CurrentState->Update(DeltaTime);
 
 	// TODO: Process transitions
+	BlackBoardComp
 }
 
 void UFSMComponent::StartLogic()

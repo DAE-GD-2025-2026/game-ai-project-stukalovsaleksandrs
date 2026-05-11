@@ -46,5 +46,6 @@ private:
 		GameAI::FSM::FTransition,
 		GameAI::FSM::TransitionHash,
 		GameAI::FSM::TransitionEqual> Transitions;
-	
+
+	UBlackboardComponent* Blackboard{};
 };

@@ -7,6 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "States/PatrolState.h"
 #include "Algo/Transform.h"
+#include "BehaviorTree/BlackboardData.h"
+#include "States/ChaseState.h"
 
 // Sets default values
 ALevel_FSM::ALevel_FSM()
@@ -30,9 +32,34 @@ void ALevel_FSM::BeginPlay()
 	// 2. Setting up the guard's state machine & patrolPoints
 	if (AGameAIController* AIController = Cast<AGameAIController>(Guard->GetController()))
 	{
+		Blackboard = AIController->FSMBlackboardAsset.Get();
 		if (UFSMComponent* FSM = Cast<UFSMComponent>(AIController->GetBrainComponent()))
 		{
-			FSM->AddState(std::make_unique<GameAI::FSM::FPatrolState>(*Guard, PatrolPoints));
+			// 1. Creating states
+			auto PatrolState{
+				std::make_unique<GameAI::FSM::FPatrolState>(*Guard, PatrolPoints)
+			};
+
+			auto ChaseState{
+				std::make_unique<GameAI::FSM::FChaseState>(*Guard)
+			};
+
+			// 2. Adding transitions
+			FSM->AddTransition({PatrolState.get(), ChaseState.get(), [AIController]
+			{
+				auto BB{ AIController->FSMBlackboardAsset.Get() };
+
+				auto key = BB->Keys[1];
+
+								
+				
+				return false;
+			}});
+
+			// 3. Adding states
+			FSM->AddState(std::move(PatrolState));
+
+			// 4. Running FSM
 			AIController->RunFiniteStateMachine();
 		}
 	}
@@ -59,5 +86,10 @@ TArray<FVector> ALevel_FSM::GetPatrolPoints() const
 void ALevel_FSM::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (Blackboard)
+	{
+		// Blackboard->
+	}
 }
 
