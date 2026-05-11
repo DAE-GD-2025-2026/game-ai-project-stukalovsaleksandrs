@@ -43,12 +43,15 @@ void UFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	if (!bRunning) return;
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if (CurrentState) CurrentState->Update(DeltaTime);
+
+	// TODO: Process transitions
 }
 
 void UFSMComponent::StartLogic()
 {
 	Super::StartLogic();
 
+	CurrentState->OnEnter();
 	bRunning = true;
 }
 

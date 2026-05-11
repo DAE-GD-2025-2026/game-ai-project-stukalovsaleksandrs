@@ -30,4 +30,6 @@ protected:
 private:
 	UPROPERTY()
 	AAgent* Guard{};
+	
+	TArray<FVector> GetPatrolPoints() const;
 };

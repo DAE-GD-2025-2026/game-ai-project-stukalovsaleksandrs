@@ -21,10 +21,6 @@ private:
 	FVector TargetLocation{};
 	bool bMoving{};
 
-	// Distance at which agent is considered to arrive at destination
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	float AcceptanceRadius{ 50.f };
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float DegreesPerSec{ 200.f };
 

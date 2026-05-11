@@ -30,7 +30,7 @@ void AAgent::Tick(float const DeltaTime)
 
 	FVector const ToTarget{ TargetLocation - GetActorLocation() };
 
-	if (ToTarget.SizeSquared() < FMath::Square(AcceptanceRadius))
+	if (ToTarget.SizeSquared() < FMath::Square(KINDA_SMALL_NUMBER))
 	{
 		bMoving = false;
 		return;

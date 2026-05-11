@@ -4,8 +4,9 @@
 #include "FSMComponent.h"
 #include "DecisionMaking/GameAIController.h"
 #include "DecisionMaking/Agent.h"
-#include "States/MoveForwardState.h"
-
+#include "Kismet/GameplayStatics.h"
+#include "States/PatrolState.h"
+#include "Algo/Transform.h"
 
 // Sets default values
 ALevel_FSM::ALevel_FSM()
@@ -23,15 +24,35 @@ void ALevel_FSM::BeginPlay()
 	Guard = GetWorld()->SpawnActor<AAgent>(GuardClass, 
 	FVector{0,0,90}, FRotator::ZeroRotator);
 	
-	// 2. Setting up the guard's state machine
+	// 3. Finding all the patrol points and assigning them to the guard
+	auto PatrolPoints{ GetPatrolPoints() };
+	
+	// 2. Setting up the guard's state machine & patrolPoints
 	if (AGameAIController* AIController = Cast<AGameAIController>(Guard->GetController()))
 	{
 		if (UFSMComponent* FSM = Cast<UFSMComponent>(AIController->GetBrainComponent()))
 		{
-			FSM->AddState(std::make_unique<GameAI::FSM::FMoveForwardState>(*Guard));
+			FSM->AddState(std::make_unique<GameAI::FSM::FPatrolState>(*Guard, PatrolPoints));
 			AIController->RunFiniteStateMachine();
 		}
 	}
+
+}
+
+TArray<FVector> ALevel_FSM::GetPatrolPoints() const
+{
+	// Getting the patrol point actors
+	TArray<AActor*> PatrolPointActors;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName(TEXT("PatrolPoint")), PatrolPointActors);
+	
+	// Extracting locations	
+	TArray<FVector> PatrolPoints;
+	PatrolPoints.Reserve(PatrolPointActors.Num());
+	Algo::Transform(PatrolPointActors, PatrolPoints,
+		[](AActor const* Actor){ return Actor->GetActorLocation(); }
+	);
+
+	return PatrolPoints;
 }
 
 // Called every frame
