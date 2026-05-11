@@ -26,7 +26,7 @@ private:
 	float AcceptanceRadius{ 50.f };
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	float DegreesPerSec{ 100.f };
+	float DegreesPerSec{ 200.f };
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
