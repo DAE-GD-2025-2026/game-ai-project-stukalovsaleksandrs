@@ -25,9 +25,7 @@ namespace GameAI::FSM
 			FVector const ToCurrentPoint = PatrolPoints[CurrentPatrolPointIdx] - ControlledAgent.GetActorLocation();
 			// TODO: See if it'll work without squaring the right one
 			// NOTE: Not considering the height
-			double const Dist{ FVector2D(ToCurrentPoint.X, ToCurrentPoint.Y).SizeSquared() };
-			UE_LOG(LogTemp, Display, TEXT("%f"), Dist);
-			if (Dist < FMath::Square(KINDA_SMALL_NUMBER) + 1)
+			if (FVector2D(ToCurrentPoint.X, ToCurrentPoint.Y).SizeSquared() < KINDA_SMALL_NUMBER)
 			{
 				// TODO: Stay idle for a few seconds
 				// Changing the point
