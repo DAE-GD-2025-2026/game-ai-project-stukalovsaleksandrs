@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "FSMComponent.h"
+
+#include "FSM.h"
 
 
 // Sets default values for this component's properties
@@ -10,21 +11,24 @@ UFSMComponent::UFSMComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// TODO Setup FSM
-	
 }
-
 
 void UFSMComponent::AddState(std::unique_ptr<GameAI::FSM::IState>&& NewState)
 {
-	// TODO
-		
+	// Adding only non-repeating states
+	// NOTE: Not using std::unordered_set, because it does not work with the non-copyable types
+	if (!std::ranges::binary_search(States.begin(), States.end(), NewState))
+	{
+		States.push_back(std::move(NewState));
+	}
+
+	// The first state added is the starting state
+	if (!CurrentState) CurrentState = States.begin()->get();
 }
 
-void UFSMComponent::AddTransition(GameAI::FSM::IState* From, GameAI::FSM::IState* To, std::function<bool()> EvalFunc) const
+void UFSMComponent::AddTransition(GameAI::FSM::FTransition const& Transition)
 {
-	
+	Transitions.insert(Transition);
 }
 
 // Called when the game starts
@@ -33,28 +37,28 @@ void UFSMComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-
 // Called every frame
 void UFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
+	if (!bRunning) return;
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	// TODO
+	if (CurrentState) CurrentState->Update(DeltaTime);
 }
 
 void UFSMComponent::StartLogic()
 {
 	Super::StartLogic();
 
-	
+	bRunning = true;
 }
 
 void UFSMComponent::StopLogic(const FString& Reason)
 {
-	// TODO
+	bRunning = false;
 }
 
 bool UFSMComponent::IsRunning() const
 {
-	return bIsRunning;
+	return bRunning;
 }
 

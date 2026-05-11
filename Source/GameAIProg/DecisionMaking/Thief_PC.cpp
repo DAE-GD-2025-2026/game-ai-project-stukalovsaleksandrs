@@ -4,7 +4,7 @@
 // Engine
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "Thief.h"
+#include "Agent.h"
 #include "Engine/LocalPlayer.h"
 
 void AThief_PC::SetupInputComponent()
@@ -30,12 +30,11 @@ void AThief_PC::SetupInputComponent()
 	}
 }
 
-
 // Disabling the warning, because BindAction() does not work with const functions
 // ReSharper disable once CppMemberFunctionMayBeConst
 void AThief_PC::MoveThiefToMouseLocation(FInputActionInstance const&)
 {
-	AThief* const Thief{ Cast<AThief>(GetPawn()) };
+	AAgent* const Thief{ Cast<AAgent>(GetPawn()) };
 	if (!Thief) return;
 	FHitResult hitResult{};
 	GetHitResultUnderCursor(ECC_Visibility, false, hitResult);

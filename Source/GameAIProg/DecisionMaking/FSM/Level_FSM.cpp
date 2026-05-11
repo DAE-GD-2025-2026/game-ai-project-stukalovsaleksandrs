@@ -1,12 +1,10 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Level_FSM.h"
-
 #include "FSMComponent.h"
 #include "DecisionMaking/GameAIController.h"
 #include "DecisionMaking/Agent.h"
-#include "States/PatrolState.h"
+#include "States/MoveForwardState.h"
 
 
 // Sets default values
@@ -20,17 +18,17 @@ ALevel_FSM::ALevel_FSM()
 void ALevel_FSM::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	Guard = GetWorld()->SpawnActor<AAgent>(SteeringAgentClass, 
+
+	// 1. Creating a guard actor
+	Guard = GetWorld()->SpawnActor<AAgent>(GuardClass, 
 	FVector{0,0,90}, FRotator::ZeroRotator);
-	// Agent->SetDebugRenderingEnabled(false);
 	
-	// TODO
+	// 2. Setting up the guard's state machine
 	if (AGameAIController* AIController = Cast<AGameAIController>(Guard->GetController()))
 	{
 		if (UFSMComponent* FSM = Cast<UFSMComponent>(AIController->GetBrainComponent()))
 		{
-			FSM->AddState(std::make_unique<GameAI::FSM::FPatrolState>());
+			FSM->AddState(std::make_unique<GameAI::FSM::FMoveForwardState>(*Guard));
 			AIController->RunFiniteStateMachine();
 		}
 	}

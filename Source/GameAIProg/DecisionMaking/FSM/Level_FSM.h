@@ -6,8 +6,10 @@
 #include "Shared/Level_Base.h"
 #include "Level_FSM.generated.h"
 
+class AAgent;
+
 UCLASS()
-class GAMEAIPROG_API ALevel_FSM : public ALevel_Base
+class GAMEAIPROG_API ALevel_FSM : public ALevelScriptActor
 {
 	GENERATED_BODY()
 
@@ -19,10 +21,13 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<AAgent> GuardClass{};
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 private:
 	UPROPERTY()
-	AAgent* Guard{nullptr}; // ref
+	AAgent* Guard{};
 };
