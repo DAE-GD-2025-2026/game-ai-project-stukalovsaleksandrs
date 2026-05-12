@@ -4,7 +4,6 @@
 
 #include "FSM.h"
 
-
 // Sets default values for this component's properties
 UFSMComponent::UFSMComponent()
 {
@@ -38,6 +37,14 @@ void UFSMComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
+void UFSMComponent::ChangeState(GameAI::FSM::IState* NewState)
+{
+	if (NewState == CurrentState) return;
+	CurrentState->OnExit();
+	CurrentState = NewState;
+	CurrentState->OnEnter();
+}
+
 // Called every frame
 void UFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -46,6 +53,16 @@ void UFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	if (CurrentState) CurrentState->Update(DeltaTime);
 
 	// TODO: Process transitions
+	for (auto const& Transition : Transitions)
+	{
+		// 1. Skipping all the transitions not from current state
+		if (Transition.From != CurrentState) continue;
+		// 2. Trying to change state
+		if (Transition.EvalFunc())
+		{
+			ChangeState(Transition.To);
+		}
+	}
 }
 
 void UFSMComponent::StartLogic()
@@ -65,4 +82,3 @@ bool UFSMComponent::IsRunning() const
 {
 	return bRunning;
 }
-

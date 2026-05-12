@@ -48,4 +48,6 @@ private:
 		GameAI::FSM::TransitionEqual> Transitions;
 
 	UBlackboardComponent* Blackboard{};
+	
+	void ChangeState(GameAI::FSM::IState* NewState);
 };

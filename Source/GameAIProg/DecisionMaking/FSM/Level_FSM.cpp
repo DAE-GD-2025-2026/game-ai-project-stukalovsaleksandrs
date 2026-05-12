@@ -31,9 +31,11 @@ void ALevel_FSM::BeginPlay()
 	// 2. Setting up the guard's state machine & patrolPoints
 	if (AGameAIController* AIController = Cast<AGameAIController>(Guard->GetController()))
 	{
-		Blackboard = AIController->FSMBlackboardAsset.Get();
 		if (UFSMComponent* FSM = Cast<UFSMComponent>(AIController->GetBrainComponent()))
 		{
+			// 0. Initializing guard blackboard component
+			GuardBlackboardComponent = FSM->GetBlackboardComponent();
+			
 			// 1. Creating states
 			auto PatrolState{
 				std::make_unique<GameAI::FSM::FPatrolState>(*Guard, PatrolPoints)
@@ -44,26 +46,19 @@ void ALevel_FSM::BeginPlay()
 			};
 
 			// 2. Adding transitions
-			// FSM->AddTransition({PatrolState.get(), ChaseState.get(), [AIController]
-			// {
-			// 	auto BB{ AIController->FSMBlackboardAsset.Get() };
-			//
-			// 	auto key = BB->Keys[1];
-			//
-			// 					
-			// 	
-			// 	return false;
-			// }});
-			//
+			FSM->AddTransition(
+				{PatrolState.get(), ChaseState.get(), 
+				std::bind(&ALevel_FSM::DoesGuardSeePlayerCharacter, this)}
+			);
 			
 			// 3. Adding states
+			FSM->AddState(std::move(PatrolState));
 			FSM->AddState(std::move(ChaseState));
-
+			
 			// 4. Running FSM
 			AIController->RunFiniteStateMachine();
 		}
 	}
-
 }
 
 TArray<FVector> ALevel_FSM::GetPatrolPoints() const
@@ -82,23 +77,49 @@ TArray<FVector> ALevel_FSM::GetPatrolPoints() const
 	return PatrolPoints;
 }
 
+bool ALevel_FSM::DoesGuardSeePlayerCharacter() const
+{
+	FVector const PlayerLocation{ GuardBlackboardComponent->GetValueAsVector(Guard->TargetLocationKeyName) };
+	float const DetectionRadius{ GuardBlackboardComponent->GetValueAsFloat(Guard->DetectionRadiusKeyName) };
+	FVector const GuardLocation{ Guard->GetActorLocation() };
+	
+	double const DistanceSq{ (PlayerLocation - GuardLocation).SizeSquared() };
+	double const TargetDistanceSq{ DetectionRadius * DetectionRadius };
+	UE_LOG(LogTemp, Display, TEXT("Distance: %f/%f"), std::sqrt(DistanceSq), std::sqrt(TargetDistanceSq));
+	return DistanceSq < TargetDistanceSq;
+}
+
 // Called every frame
 void ALevel_FSM::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Setting the player location in the blackboard
-	auto BlackboardComponent{
-		Cast<AGameAIController>(Guard->GetController())->GetBrainComponent()->GetBlackboardComponent()
-	};
-
 	if (auto const* const PlayerCharacter{ UGameplayStatics::GetPlayerPawn(GetWorld(), 0) };
 		PlayerCharacter)
 	{
-		BlackboardComponent->SetValueAsVector(
+		GuardBlackboardComponent->SetValueAsVector(
 			Guard->TargetLocationKeyName,
 			PlayerCharacter->GetActorLocation()
 		);
 	}
+	
+	float const DetectionRadius{
+		GuardBlackboardComponent->GetValueAsFloat(Guard->DetectionRadiusKeyName)
+	};
+	// Debug rendering
+	DrawDebugCircle(
+		GetWorld(),
+		Guard->GetActorLocation(),
+		DetectionRadius,
+		64,
+		FColor::Green,
+		false,
+		0,
+		0,
+		5,
+		FVector(0, 1, 0),
+		FVector(1, 0, 0),
+		false
+	);
 }
 

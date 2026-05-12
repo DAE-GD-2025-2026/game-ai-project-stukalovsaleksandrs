@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Shared/Level_Base.h"
 #include "DecisionMaking/Guard.h"
 #include "Level_FSM.generated.h"
@@ -31,6 +32,8 @@ private:
 	AGuard* Guard{};
 	
 	TArray<FVector> GetPatrolPoints() const;
-	UBlackboardData* Blackboard{};
+	// Setting the player location in the blackboard
+	UBlackboardComponent* GuardBlackboardComponent{};
 	
+	[[nodiscard]] bool DoesGuardSeePlayerCharacter() const;
 };
