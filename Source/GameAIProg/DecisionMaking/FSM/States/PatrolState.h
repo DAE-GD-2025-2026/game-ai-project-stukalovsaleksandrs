@@ -10,12 +10,10 @@ namespace GameAI::FSM
 		explicit FPatrolState(AAgent& ControlledAgent, TArray<FVector> PatrolPoints)
 			: ControlledAgent{ ControlledAgent }
 			, PatrolPoints{ PatrolPoints }
+			, BlackboardComponent{
+				Cast<AGameAIController>(ControlledAgent.GetController())->GetBrainComponent()->GetBlackboardComponent()
+			}
 		{}
-
-		virtual void SetBlackboard(TObjectPtr<UBlackboardComponent> const Blackboard) override
-		{
-			BlackboardComponent = Blackboard;
-		}
 
 		virtual void OnEnter() override
 		{

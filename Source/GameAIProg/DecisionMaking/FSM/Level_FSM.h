@@ -3,11 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BlackboardData.h"
 #include "Shared/Level_Base.h"
+#include "DecisionMaking/Guard.h"
 #include "Level_FSM.generated.h"
-
-class AAgent;
 
 UCLASS()
 class GAMEAIPROG_API ALevel_FSM : public ALevelScriptActor
@@ -23,15 +21,16 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSubclassOf<AAgent> GuardClass{};
+	TSubclassOf<AGuard> GuardClass{};
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 private:
 	UPROPERTY()
-	AAgent* Guard{};
+	AGuard* Guard{};
 	
 	TArray<FVector> GetPatrolPoints() const;
 	UBlackboardData* Blackboard{};
+	
 };

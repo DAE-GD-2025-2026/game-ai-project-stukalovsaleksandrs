@@ -11,8 +11,6 @@ namespace GameAI::FSM
 		virtual void OnEnter() = 0;
 		virtual void OnExit() = 0;
 		virtual void Update(float DeltaTime) = 0;
-		// Possibly redundant
-		virtual void SetBlackboard(TObjectPtr<UBlackboardComponent>);
 	};
 
 	struct FTransition final

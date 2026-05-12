@@ -7,12 +7,13 @@
 #include "Agent.generated.h"
 
 UCLASS()
-class GAMEAIPROG_API AAgent final : public ACharacter
+class GAMEAIPROG_API AAgent : public ACharacter
 {
 	GENERATED_BODY()
 	
 public:	
 	AAgent();
+	virtual ~AAgent() = default;
 
 	// Defines a location that the actor will go to
 	void SetTargetLocation(FVector const& Location);

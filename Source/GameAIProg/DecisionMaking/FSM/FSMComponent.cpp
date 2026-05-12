@@ -21,8 +21,6 @@ void UFSMComponent::AddState(std::unique_ptr<GameAI::FSM::IState>&& NewState)
 	{
 		// 1. Adding the state
 		States.push_back(std::move(NewState));
-		// 2. Passing blackboard to the state
-		States.back()->SetBlackboard(BlackboardComp);
 	}
 	
 	// The first state added is the starting state
@@ -48,7 +46,6 @@ void UFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	if (CurrentState) CurrentState->Update(DeltaTime);
 
 	// TODO: Process transitions
-	BlackBoardComp
 }
 
 void UFSMComponent::StartLogic()

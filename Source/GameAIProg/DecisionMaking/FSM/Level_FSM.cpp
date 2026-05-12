@@ -3,7 +3,6 @@
 #include "Level_FSM.h"
 #include "FSMComponent.h"
 #include "DecisionMaking/GameAIController.h"
-#include "DecisionMaking/Agent.h"
 #include "Kismet/GameplayStatics.h"
 #include "States/PatrolState.h"
 #include "Algo/Transform.h"
@@ -23,7 +22,7 @@ void ALevel_FSM::BeginPlay()
 	Super::BeginPlay();
 
 	// 1. Creating a guard actor
-	Guard = GetWorld()->SpawnActor<AAgent>(GuardClass, 
+	Guard = GetWorld()->SpawnActor<AGuard>(GuardClass, 
 	FVector{0,0,90}, FRotator::ZeroRotator);
 	
 	// 3. Finding all the patrol points and assigning them to the guard
@@ -45,19 +44,20 @@ void ALevel_FSM::BeginPlay()
 			};
 
 			// 2. Adding transitions
-			FSM->AddTransition({PatrolState.get(), ChaseState.get(), [AIController]
-			{
-				auto BB{ AIController->FSMBlackboardAsset.Get() };
-
-				auto key = BB->Keys[1];
-
-								
-				
-				return false;
-			}});
-
+			// FSM->AddTransition({PatrolState.get(), ChaseState.get(), [AIController]
+			// {
+			// 	auto BB{ AIController->FSMBlackboardAsset.Get() };
+			//
+			// 	auto key = BB->Keys[1];
+			//
+			// 					
+			// 	
+			// 	return false;
+			// }});
+			//
+			
 			// 3. Adding states
-			FSM->AddState(std::move(PatrolState));
+			FSM->AddState(std::move(ChaseState));
 
 			// 4. Running FSM
 			AIController->RunFiniteStateMachine();
@@ -87,9 +87,18 @@ void ALevel_FSM::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (Blackboard)
+	// Setting the player location in the blackboard
+	auto BlackboardComponent{
+		Cast<AGameAIController>(Guard->GetController())->GetBrainComponent()->GetBlackboardComponent()
+	};
+
+	if (auto const* const PlayerCharacter{ UGameplayStatics::GetPlayerPawn(GetWorld(), 0) };
+		PlayerCharacter)
 	{
-		// Blackboard->
+		BlackboardComponent->SetValueAsVector(
+			Guard->TargetLocationKeyName,
+			PlayerCharacter->GetActorLocation()
+		);
 	}
 }
 
