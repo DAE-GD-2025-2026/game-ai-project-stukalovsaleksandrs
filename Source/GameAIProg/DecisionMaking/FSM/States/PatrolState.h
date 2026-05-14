@@ -3,7 +3,7 @@
 #define ENABLE_DEBUGGING
 
 // Game
-#include "DecisionMaking/Agent.h"
+#include "DecisionMaking/Guard.h"
 #include "DecisionMaking/FSM/FSM.h"
 #include "DecisionMaking/FSM/Constants.h"
 #include "DecisionMaking/GameAIController.h"
@@ -15,17 +15,17 @@ namespace GameAI::FSM
 	class FPatrolState final : public IState
 	{
 	public:
-		explicit FPatrolState(AAgent& ControlledAgent, TArray<FVector> PatrolPoints)
-			: ControlledAgent{ ControlledAgent }
+		explicit FPatrolState(AGuard& ControlledGuard, TArray<FVector> PatrolPoints)
+			: Guard{ ControlledGuard }
 			, PatrolPoints{ PatrolPoints }
 			, BlackboardComponent{
-				Cast<AGameAIController>(ControlledAgent.GetController())->GetBrainComponent()->GetBlackboardComponent()
+				Cast<AGameAIController>(ControlledGuard.GetController())->GetBrainComponent()->GetBlackboardComponent()
 			}
 		{}
 
 		virtual void OnEnter() override
 		{
-			ControlledAgent.SetTargetLocation( PatrolPoints[CurrentPatrolPointIdx] );
+			Guard.SetTargetLocation( PatrolPoints[CurrentPatrolPointIdx] );
 		}
 		
 		virtual void OnExit() override{}
@@ -33,7 +33,7 @@ namespace GameAI::FSM
 		virtual void Tick(float DeltaTime) override
 		{
 			if (PatrolPoints.IsEmpty()) return;
-			FVector const ToCurrentPoint = PatrolPoints[CurrentPatrolPointIdx] - ControlledAgent.GetActorLocation();
+			FVector const ToCurrentPoint = PatrolPoints[CurrentPatrolPointIdx] - Guard.GetActorLocation();
 			// TODO: See if it'll work without squaring the right one
 			// NOTE: Not considering the height
 			if (FVector2D(ToCurrentPoint.X, ToCurrentPoint.Y).SizeSquared() < Epsilon)
@@ -42,20 +42,20 @@ namespace GameAI::FSM
 				// Changing the point
 				CurrentPatrolPointIdx = (CurrentPatrolPointIdx + 1) % PatrolPoints.Num();
 
-				ControlledAgent.SetTargetLocation( PatrolPoints[CurrentPatrolPointIdx] );
+				Guard.SetTargetLocation( PatrolPoints[CurrentPatrolPointIdx] );
 			}
 
 			// Debug rendering patrol points
 #ifdef ENABLE_DEBUGGING
 			for (auto PatrolPoint: PatrolPoints)
 			{
-				DrawDebugSphere(ControlledAgent.GetWorld(), PatrolPoint, 100, 10, FColor::Red, false, -1, 0, 8);
+				DrawDebugSphere(Guard.GetWorld(), PatrolPoint, 100, 10, FColor::Red, false, -1, 0, 8);
 			}
 #endif// ENABLE_DEBUGGING
 		}
 
 	private:
-		AAgent& ControlledAgent;
+		AGuard& Guard;
 		TArray<FVector> PatrolPoints;
 		int32_t CurrentPatrolPointIdx{};
 

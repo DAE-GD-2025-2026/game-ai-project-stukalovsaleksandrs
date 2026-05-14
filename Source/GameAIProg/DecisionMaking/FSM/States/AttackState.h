@@ -12,7 +12,7 @@ namespace GameAI::FSM
 		
 		explicit FAttackState(AGuard& ControlledGuard);
 		virtual void OnEnter() override;
-		virtual void OnExit() override{};
+		virtual void OnExit() override;
 		virtual void Tick(float DeltaTime) override;
 
 	private:

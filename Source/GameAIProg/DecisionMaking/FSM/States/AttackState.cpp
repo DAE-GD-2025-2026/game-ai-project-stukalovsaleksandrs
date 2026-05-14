@@ -7,8 +7,14 @@ GameAI::FSM::FAttackState::FAttackState(AGuard& ControlledGuard)
 
 void GameAI::FSM::FAttackState::OnEnter()
 {
+	Guard.SetSubstateText("Attack");
 	Guard.Attack();
 	CurrentAttackSec = 0.f;
+}
+
+void GameAI::FSM::FAttackState::OnExit()
+{
+	Guard.SetSubstateText("");
 }
 
 void GameAI::FSM::FAttackState::Tick(float DeltaTime)

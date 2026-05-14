@@ -37,6 +37,9 @@ void ALevel_FSM::BeginPlay()
 	{
 		if (UFSMComponent* FSM = Cast<UFSMComponent>(AIController->GetBrainComponent()))
 		{
+			// -1. Setting guard's initial state text
+			Guard->SetStateText("Patrol");
+			
 			// 0. Initializing guard blackboard component
 			GuardBlackboardComponent = FSM->GetBlackboardComponent();
 			

@@ -18,7 +18,13 @@ GameAI::FSM::FReloadState::FReloadState(AGuard& ControlledGuard)
 
 void GameAI::FSM::FReloadState::OnEnter()
 {
+	Guard.SetSubstateText("Reload");
 	CurrentReloadSec = 0.f;
+}
+
+void GameAI::FSM::FReloadState::OnExit()
+{
+	Guard.SetSubstateText("");
 }
 
 void GameAI::FSM::FReloadState::Tick(float const DeltaTime)

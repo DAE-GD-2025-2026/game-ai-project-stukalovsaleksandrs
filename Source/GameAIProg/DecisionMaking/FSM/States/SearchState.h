@@ -21,7 +21,7 @@ namespace GameAI::FSM
 		virtual void Tick(float DeltaTime) override;
 
 	private:
-		AGuard& ControlledGuard;
+		AGuard& Guard;
 
 		FSM FSM;
 

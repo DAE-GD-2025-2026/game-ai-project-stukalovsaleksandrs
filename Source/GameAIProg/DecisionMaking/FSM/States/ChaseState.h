@@ -12,30 +12,36 @@ namespace GameAI::FSM
 	{
 	public:
 		explicit FChaseState(AGuard& ControlledGuard)
-			: ControlledGuard{ ControlledGuard }
+			: Guard{ ControlledGuard }
 			, BlackboardComponent{ 
 				Cast<AGameAIController>(ControlledGuard.GetController())->GetBrainComponent()->GetBlackboardComponent()
 			}
 		{}
 		
-		virtual void OnEnter() override {}
+		virtual void OnEnter() override
+		{
+			Guard.SetSubstateText("Chase");
+		}
 		
-		virtual void OnExit() override {}
+		virtual void OnExit() override
+		{
+			Guard.SetSubstateText("Chase");
+		}
 		
 		virtual void Tick(float DeltaTime) override
 		{
 			FVector const TargetLocation{ GetTargetLocation() };
 			
-			ControlledGuard.SetTargetLocation(TargetLocation);
+			Guard.SetTargetLocation(TargetLocation);
 		}
 
 	private:
-		AGuard& ControlledGuard;
+		AGuard& Guard;
 		UBlackboardComponent* BlackboardComponent{};
 		
 		[[nodiscard]] FVector GetTargetLocation() const
 		{
-			return BlackboardComponent->GetValueAsVector(ControlledGuard.TargetLocationKeyName);
+			return BlackboardComponent->GetValueAsVector(Guard.TargetLocationKeyName);
 		}
 	};	
 }

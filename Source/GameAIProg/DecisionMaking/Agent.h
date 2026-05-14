@@ -18,6 +18,9 @@ public:
 	// Defines a location that the actor will go to
 	void SetTargetLocation(FVector const& Location);
 
+protected:
+	virtual void BeginPlay() override;
+	
 private:
 	FVector TargetLocation{};
 	bool bMoving{};
@@ -25,7 +28,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float DegreesPerSec{ 200.f };
 
-	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
 	void EnableRotationTowardsMovementDirection();

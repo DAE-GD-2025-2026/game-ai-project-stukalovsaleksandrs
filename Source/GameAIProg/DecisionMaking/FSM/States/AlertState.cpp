@@ -15,6 +15,9 @@ GameAI::FSM::FAlertState::FAlertState(AGuard& ControlledGuard)
 
 void GameAI::FSM::FAlertState::OnEnter()
 {
+	// Setting guard's text
+	Guard.SetStateText("Alert");
+	
 	// Creating states
 	auto ChaseState{ std::make_unique<FChaseState>(
 		Guard 
@@ -72,10 +75,12 @@ bool GameAI::FSM::FAlertState::IsWithinAttackReach() const
 	}
 	
 	FVector const GuardLocation{ Guard.GetActorLocation() };
+#ifdef ENABLE_ALERT_DEBUGGING
 	UE_LOG(LogTemp, Display, TEXT("Distance/Attack radius: %f/%f"),
 		(PlayerLocation - GuardLocation).Length(),
 		AttackRadius
 	);
+#endif
 
 	return (PlayerLocation - GuardLocation).SquaredLength() < AttackRadius * AttackRadius;
 }

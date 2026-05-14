@@ -8,22 +8,26 @@
 #include <ranges>
 
 GameAI::FSM::FSearchState::FSearchState(AGuard& ControlledGuard)
-	: ControlledGuard{ ControlledGuard }
+	: Guard{ ControlledGuard }
 {}
 
 void GameAI::FSM::FSearchState::OnEnter()
 {
+	Guard.SetStateText("Search");
+	Guard.SetSubstateText("Patrol");
 	RemainingSeconds = MaxSeconds;
 	
 	// Searching is patrolling random points around the target's last location
 	FSM.AddState(std::make_unique<FPatrolState>(
-		ControlledGuard, GetRandomPointsAroundTarget(3)
+		Guard, GetRandomPointsAroundTarget(3)
 	));
 	FSM.Start();
 }
 
 void GameAI::FSM::FSearchState::OnExit()
 {
+	Guard.SetStateText("Patrol");
+	Guard.SetSubstateText("");
 	FSM.Reset();
 }
 
@@ -43,12 +47,12 @@ TArray<FVector> GameAI::FSM::FSearchState::GetRandomPointsAroundTarget(int32_t c
 {
 	// 1. Getting the blackboard
 	auto const* const BlackboardComponent{
-		Cast<AGameAIController>(ControlledGuard.GetController())->GetBrainComponent()->GetBlackboardComponent()
+		Cast<AGameAIController>(Guard.GetController())->GetBrainComponent()->GetBlackboardComponent()
 	};
 	ensureAlways(BlackboardComponent);
 	
 	// 2. Getting the player location
-	FVector const PlayerLocation{ BlackboardComponent->GetValueAsVector(ControlledGuard.TargetLocationKeyName) };
+	FVector const PlayerLocation{ BlackboardComponent->GetValueAsVector(Guard.TargetLocationKeyName) };
 	
 	// 3. Spawning the points around
 	TArray<FVector> Points;
