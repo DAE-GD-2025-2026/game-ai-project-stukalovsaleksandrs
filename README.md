@@ -2,6 +2,11 @@
 Implementation of steering behaviors for autonomous agents, progressing from basic behaviors to flocking, optimized with spatial partitioning.
 Now also includes A* pathfinding based on nav mesh.
 
+## Extra assignment - Hierarchical state machine(week 7)
+Thief is controlled by clicking LMB on the map\
+Guard is controlled by the following state machine:
+![HierarhicalStateMachineDiagram](Media/Diagram.png)
+
 ## Flocking
 
 ### Basic Steering Behaviors
