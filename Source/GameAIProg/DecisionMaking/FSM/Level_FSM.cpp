@@ -11,6 +11,7 @@
 // Engine
 #include "Kismet/GameplayStatics.h"
 #include "Algo/Transform.h"
+#include "States/AlertState.h"
 
 // Sets default values
 ALevel_FSM::ALevel_FSM()
@@ -44,8 +45,8 @@ void ALevel_FSM::BeginPlay()
 				std::make_unique<GameAI::FSM::FPatrolState>(*Guard, PatrolPoints)
 			};
 
-			auto ChaseState{
-				std::make_unique<GameAI::FSM::FChaseState>(*Guard)
+			auto AlertState{
+				std::make_unique<GameAI::FSM::FAlertState>(*Guard)
 			};
 
 			auto SearchState{
@@ -54,29 +55,29 @@ void ALevel_FSM::BeginPlay()
 
 			// 2. Adding transitions
 			FSM->AddTransition(
-				{PatrolState.get(), ChaseState.get(), 
+				{PatrolState.get(), AlertState.get(), 
 				std::bind(&ALevel_FSM::DoesGuardSeeTarget, this)}
 			);
 			FSM->AddTransition(
-				{ChaseState.get(), SearchState.get(), 
+				{AlertState.get(), SearchState.get(), 
 				std::bind(&ALevel_FSM::DoesGuardNotSeeTarget, this)}
 			);
 			FSM->AddTransition(
-				{SearchState.get(), ChaseState.get(), 
+				{SearchState.get(), AlertState.get(), 
 				std::bind(&ALevel_FSM::DoesGuardSeeTarget, this)}
 			);
 
-			auto* RawPatrolState{ PatrolState.get() };
-			auto SwitchToPatrol = [this, FSM, RawPatrolState]()
-			{
-				FSM->TryChangingFSMState(RawPatrolState);
-			};
-			SearchState->OnTimerOut.AddLambda(SwitchToPatrol);
+			SearchState->OnTimerOut.AddLambda(
+				[this, FSM, RawPatrolState = PatrolState.get()]
+				{
+					FSM->TryChangingFSMState(RawPatrolState);
+				}
+			);
 			
 			// 3. Adding states
 			// NOTE: Underlying pointers stay the same, so transitions do not break
 			FSM->AddState(std::move(PatrolState));
-			FSM->AddState(std::move(ChaseState));
+			FSM->AddState(std::move(AlertState));
 			FSM->AddState(std::move(SearchState));
 			
 			// 4. Running FSM
@@ -134,7 +135,6 @@ TArray<FVector> ALevel_FSM::GetPatrolPoints() const
 	return PatrolPoints;
 }
 
-
 bool ALevel_FSM::DoesGuardSeeTarget() const
 {
 	FVector const PlayerLocation{ GuardBlackboardComponent->GetValueAsVector(Guard->TargetLocationKeyName) };
@@ -143,7 +143,9 @@ bool ALevel_FSM::DoesGuardSeeTarget() const
 	
 	double const DistanceSq{ (PlayerLocation - GuardLocation).SizeSquared() };
 	double const TargetDistanceSq{ DetectionRadius * DetectionRadius };
+#ifdef ENABLE_CHASING_DEBUGGING
 	UE_LOG(LogTemp, Display, TEXT("Distance: %f/%f"), std::sqrt(DistanceSq), std::sqrt(TargetDistanceSq));
+#endif
 	return DistanceSq < TargetDistanceSq;
 }
 

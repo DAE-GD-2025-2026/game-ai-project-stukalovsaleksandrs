@@ -69,7 +69,7 @@ namespace GameAI::FSM
 		
 		void Tick(float DeltaTime);
 
-		void ChangeFSMState(IState* ToState);
+		void TryChangingState(IState* ToState);
 		
 	private:
 		bool bRunning{};

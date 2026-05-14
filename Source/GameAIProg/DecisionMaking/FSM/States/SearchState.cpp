@@ -63,7 +63,7 @@ TArray<FVector> GameAI::FSM::FSearchState::GetRandomPointsAroundTarget(int32_t c
 
 FVector GameAI::FSM::FSearchState::GetRandomPointAround(FVector const& Origin)
 {
-	float constexpr MinCentimeters{ 100.f }, MaxCentimeters{ 1000.f };
+	float constexpr MinCentimeters{ 100.f }, MaxCentimeters{ 500.f };
 	float constexpr MinRadians{ 0.f }, MaxRadians{ 360.f };
 	float const RandomCentimeters{ FMath::RandRange(MinCentimeters, MaxCentimeters) };
 	float const RandomRadians{ FMath::RandRange(MinRadians, MaxRadians) };

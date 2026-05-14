@@ -46,12 +46,12 @@ void GameAI::FSM::FSM::Tick(float const DeltaTime)
 		// 2. Trying to change state
 		if (Transition.EvalFunc())
 		{
-			ChangeFSMState(Transition.To);
+			TryChangingState(Transition.To);
 		}
 	}
 }
 
-void GameAI::FSM::FSM::ChangeFSMState(IState* ToState)
+void GameAI::FSM::FSM::TryChangingState(IState* ToState)
 {
 	if (ToState == CurrentState) return;
 	if (!HasState(ToState)) return;

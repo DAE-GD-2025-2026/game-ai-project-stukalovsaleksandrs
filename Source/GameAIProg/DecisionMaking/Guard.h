@@ -16,5 +16,13 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName DetectionRadiusKeyName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName AttackRadiusKeyName;
+
+	static void Attack()
+	{
+		UE_LOG(LogTemp, Display, TEXT("Attacking"));
+	}
 	
 };

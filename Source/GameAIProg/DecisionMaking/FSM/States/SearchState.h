@@ -25,7 +25,7 @@ namespace GameAI::FSM
 
 		FSM FSM;
 
-		float const MaxSeconds{10.f};
+		float const MaxSeconds{ 10.f };
 		float RemainingSeconds{};
 
 		[[nodiscard]] TArray<FVector> GetRandomPointsAroundTarget(int32_t const Count) const;

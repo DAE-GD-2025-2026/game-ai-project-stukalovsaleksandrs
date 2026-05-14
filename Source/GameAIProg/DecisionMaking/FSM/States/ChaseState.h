@@ -4,6 +4,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "DecisionMaking/Guard.h"
 #include "DecisionMaking/FSM/FSM.h"
+#include "DecisionMaking/GameAIController.h"
 
 namespace GameAI::FSM
 {
