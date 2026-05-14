@@ -3,6 +3,7 @@
 // Game
 #include "Agent.h"
 
+#include "FSM/Constants.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -30,7 +31,7 @@ void AAgent::Tick(float const DeltaTime)
 
 	FVector const ToTarget{ TargetLocation - GetActorLocation() };
 
-	if (ToTarget.SizeSquared() < KINDA_SMALL_NUMBER)
+	if (ToTarget.SizeSquared() < GameAI::FSM::Epsilon)
 	{
 		bMoving = false;
 		return;

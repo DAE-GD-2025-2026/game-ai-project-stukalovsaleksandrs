@@ -5,9 +5,8 @@
 // Engine
 #include "CoreMinimal.h"
 #include "BrainComponent.h"
+// Game
 #include "FSM.h"
-#include <memory>
-#include <unordered_set>
 #include "FSMComponent.generated.h"
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -24,6 +23,7 @@ public:
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 	
 	virtual void StartLogic() override;
+	
 	virtual void StopLogic(const FString& Reason) override;
 	
 	virtual bool IsRunning() const override; 
@@ -33,21 +33,9 @@ public:
 	void AddTransition(GameAI::FSM::FTransition const&);
 		
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 
 private:
-	bool bRunning{};
+	GameAI::FSM::FSM FSM; 
 
-	// NOTE: Not using a set, because sets do not work with move-only types
-	std::vector<std::unique_ptr<GameAI::FSM::IState>> States;
-	GameAI::FSM::IState* CurrentState{};
-	std::unordered_set<
-		GameAI::FSM::FTransition,
-		GameAI::FSM::TransitionHash,
-		GameAI::FSM::TransitionEqual> Transitions;
-
-	UBlackboardComponent* Blackboard{};
-	
-	void ChangeState(GameAI::FSM::IState* NewState);
 };

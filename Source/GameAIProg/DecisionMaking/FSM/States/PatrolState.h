@@ -1,6 +1,10 @@
 ﻿#pragma once
 
+// #define ENABLE_DEBUGGING
+
 #include "FSM.h"
+#include "Constants.h"
+#include "DecisionMaking/FSM/Constants.h"
 
 namespace GameAI::FSM
 {
@@ -28,7 +32,7 @@ namespace GameAI::FSM
 			FVector const ToCurrentPoint = PatrolPoints[CurrentPatrolPointIdx] - ControlledAgent.GetActorLocation();
 			// TODO: See if it'll work without squaring the right one
 			// NOTE: Not considering the height
-			if (FVector2D(ToCurrentPoint.X, ToCurrentPoint.Y).SizeSquared() < KINDA_SMALL_NUMBER)
+			if (FVector2D(ToCurrentPoint.X, ToCurrentPoint.Y).SizeSquared() < Epsilon)
 			{
 				// TODO: Stay idle for a few seconds
 				// Changing the point
