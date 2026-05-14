@@ -1,13 +1,16 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
+// Game
 #include "Level_FSM.h"
+#include "FSM.h"
 #include "FSMComponent.h"
 #include "DecisionMaking/GameAIController.h"
-#include "Kismet/GameplayStatics.h"
 #include "States/PatrolState.h"
-#include "Algo/Transform.h"
-#include "BehaviorTree/BlackboardData.h"
 #include "States/ChaseState.h"
+#include "States/SearchState.h"
+// Engine
+#include "Kismet/GameplayStatics.h"
+#include "Algo/Transform.h"
 
 // Sets default values
 ALevel_FSM::ALevel_FSM()
@@ -45,52 +48,44 @@ void ALevel_FSM::BeginPlay()
 				std::make_unique<GameAI::FSM::FChaseState>(*Guard)
 			};
 
+			auto SearchState{
+				std::make_unique<GameAI::FSM::FSearchState>(*Guard)
+			};
+
 			// 2. Adding transitions
 			FSM->AddTransition(
 				{PatrolState.get(), ChaseState.get(), 
-				std::bind(&ALevel_FSM::DoesGuardSeePlayerCharacter, this)}
+				std::bind(&ALevel_FSM::DoesGuardSeeTarget, this)}
 			);
+			FSM->AddTransition(
+				{ChaseState.get(), SearchState.get(), 
+				std::bind(&ALevel_FSM::DoesGuardNotSeeTarget, this)}
+			);
+			FSM->AddTransition(
+				{SearchState.get(), ChaseState.get(), 
+				std::bind(&ALevel_FSM::DoesGuardSeeTarget, this)}
+			);
+
+			auto* RawPatrolState{ PatrolState.get() };
+			auto SwitchToPatrol = [this, FSM, RawPatrolState]()
+			{
+				FSM->TryChangingFSMState(RawPatrolState);
+			};
+			SearchState->OnTimerOut.AddLambda(SwitchToPatrol);
 			
 			// 3. Adding states
+			// NOTE: Underlying pointers stay the same, so transitions do not break
 			FSM->AddState(std::move(PatrolState));
 			FSM->AddState(std::move(ChaseState));
+			FSM->AddState(std::move(SearchState));
 			
 			// 4. Running FSM
-			AIController->RunFiniteStateMachine();
+			AIController->RunFSM();
 		}
 	}
 }
 
-TArray<FVector> ALevel_FSM::GetPatrolPoints() const
-{
-	// Getting the patrol point actors
-	TArray<AActor*> PatrolPointActors;
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName(TEXT("PatrolPoint")), PatrolPointActors);
-	
-	// Extracting locations	
-	TArray<FVector> PatrolPoints;
-	PatrolPoints.Reserve(PatrolPointActors.Num());
-	Algo::Transform(PatrolPointActors, PatrolPoints,
-		[](AActor const* Actor){ return Actor->GetActorLocation(); }
-	);
-
-	return PatrolPoints;
-}
-
-bool ALevel_FSM::DoesGuardSeePlayerCharacter() const
-{
-	FVector const PlayerLocation{ GuardBlackboardComponent->GetValueAsVector(Guard->TargetLocationKeyName) };
-	float const DetectionRadius{ GuardBlackboardComponent->GetValueAsFloat(Guard->DetectionRadiusKeyName) };
-	FVector const GuardLocation{ Guard->GetActorLocation() };
-	
-	double const DistanceSq{ (PlayerLocation - GuardLocation).SizeSquared() };
-	double const TargetDistanceSq{ DetectionRadius * DetectionRadius };
-	UE_LOG(LogTemp, Display, TEXT("Distance: %f/%f"), std::sqrt(DistanceSq), std::sqrt(TargetDistanceSq));
-	return DistanceSq < TargetDistanceSq;
-}
-
-// Called every frame
-void ALevel_FSM::Tick(float DeltaTime)
+void ALevel_FSM::Tick(float const DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
@@ -123,3 +118,36 @@ void ALevel_FSM::Tick(float DeltaTime)
 	);
 }
 
+TArray<FVector> ALevel_FSM::GetPatrolPoints() const
+{
+	// Getting the patrol point actors
+	TArray<AActor*> PatrolPointActors;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName(TEXT("PatrolPoint")), PatrolPointActors);
+	
+	// Extracting locations	
+	TArray<FVector> PatrolPoints;
+	PatrolPoints.Reserve(PatrolPointActors.Num());
+	Algo::Transform(PatrolPointActors, PatrolPoints,
+		[](AActor const* Actor){ return Actor->GetActorLocation(); }
+	);
+
+	return PatrolPoints;
+}
+
+
+bool ALevel_FSM::DoesGuardSeeTarget() const
+{
+	FVector const PlayerLocation{ GuardBlackboardComponent->GetValueAsVector(Guard->TargetLocationKeyName) };
+	float const DetectionRadius{ GuardBlackboardComponent->GetValueAsFloat(Guard->DetectionRadiusKeyName) };
+	FVector const GuardLocation{ Guard->GetActorLocation() };
+	
+	double const DistanceSq{ (PlayerLocation - GuardLocation).SizeSquared() };
+	double const TargetDistanceSq{ DetectionRadius * DetectionRadius };
+	UE_LOG(LogTemp, Display, TEXT("Distance: %f/%f"), std::sqrt(DistanceSq), std::sqrt(TargetDistanceSq));
+	return DistanceSq < TargetDistanceSq;
+}
+
+bool ALevel_FSM::DoesGuardNotSeeTarget() const
+{
+	return !DoesGuardSeeTarget();
+}

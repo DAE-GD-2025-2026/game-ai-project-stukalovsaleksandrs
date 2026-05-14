@@ -20,7 +20,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
-	void RunFiniteStateMachine() const;
+	void RunFSM() const;
 	
 protected:
 	// Called when the game starts or when spawned

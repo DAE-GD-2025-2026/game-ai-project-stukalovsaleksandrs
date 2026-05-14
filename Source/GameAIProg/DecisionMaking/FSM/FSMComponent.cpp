@@ -22,6 +22,11 @@ void UFSMComponent::AddTransition(GameAI::FSM::FTransition const& Transition)
 	FSM.AddTransition(Transition);
 }
 
+void UFSMComponent::TryChangingFSMState(GameAI::FSM::IState* State)
+{
+	FSM.ChangeFSMState(State);
+}
+
 void UFSMComponent::BeginPlay()
 {
 	Super::BeginPlay();

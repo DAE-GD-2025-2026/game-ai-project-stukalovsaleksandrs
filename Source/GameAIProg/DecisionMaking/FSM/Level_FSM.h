@@ -2,10 +2,12 @@
 
 #pragma once
 
+// Game
+#include "DecisionMaking/Guard.h"
+// Engine
 #include "CoreMinimal.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Shared/Level_Base.h"
-#include "DecisionMaking/Guard.h"
 #include "Level_FSM.generated.h"
 
 UCLASS()
@@ -34,6 +36,8 @@ private:
 	TArray<FVector> GetPatrolPoints() const;
 	// Setting the player location in the blackboard
 	UBlackboardComponent* GuardBlackboardComponent{};
-	
-	[[nodiscard]] bool DoesGuardSeePlayerCharacter() const;
+
+	// Predicates
+	[[nodiscard]] bool DoesGuardSeeTarget() const;
+	[[nodiscard]] bool DoesGuardNotSeeTarget() const;
 };

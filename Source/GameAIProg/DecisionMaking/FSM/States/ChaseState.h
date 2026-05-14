@@ -21,7 +21,7 @@ namespace GameAI::FSM
 		
 		virtual void OnExit() override {}
 		
-		virtual void Update(float DeltaTime) override
+		virtual void Tick(float DeltaTime) override
 		{
 			FVector const TargetLocation{ GetTargetLocation() };
 			

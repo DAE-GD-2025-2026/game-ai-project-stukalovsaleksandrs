@@ -41,7 +41,7 @@ void AGameAIController::InitFiniteStateMachine()
 	}
 }
 
-void AGameAIController::RunFiniteStateMachine() const
+void AGameAIController::RunFSM() const
 {
 	UFSMComponent* FSMComp = FindComponentByClass<UFSMComponent>();
 	if (ensure(FSMComp))

@@ -16,7 +16,7 @@ namespace GameAI::FSM
 		virtual ~IState() = default;
 		virtual void OnEnter() = 0;
 		virtual void OnExit() = 0;
-		virtual void Update(float DeltaTime) = 0;
+		virtual void Tick(float DeltaTime) = 0;
 	};
 #pragma endregion State
 	
@@ -65,9 +65,12 @@ namespace GameAI::FSM
 		void Start();
 		void Stop(){ bRunning = false; };
 		[[nodiscard]] bool IsRunning() const { return bRunning; }
+		void Reset();
 		
 		void Tick(float DeltaTime);
 
+		void ChangeFSMState(IState* ToState);
+		
 	private:
 		bool bRunning{};
 		// NOTE: Not using a set, because sets do not work with move-only types
@@ -80,8 +83,7 @@ namespace GameAI::FSM
 
 		UBlackboardComponent* Blackboard{};
 
-		void ChangeState(IState* NewState);
-		
+		[[nodiscard]] bool HasState(IState const * State) const;
 	};
 #pragma endregion FSM
 	

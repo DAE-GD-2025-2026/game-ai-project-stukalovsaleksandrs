@@ -1,10 +1,14 @@
 ﻿#pragma once
 
-// #define ENABLE_DEBUGGING
+#define ENABLE_DEBUGGING
 
-#include "FSM.h"
-#include "Constants.h"
+// Game
+#include "DecisionMaking/Agent.h"
+#include "DecisionMaking/FSM/FSM.h"
 #include "DecisionMaking/FSM/Constants.h"
+#include "DecisionMaking/GameAIController.h"
+// Engine
+#include "BrainComponent.h"
 
 namespace GameAI::FSM
 {
@@ -26,7 +30,7 @@ namespace GameAI::FSM
 		
 		virtual void OnExit() override{}
 		
-		virtual void Update(float DeltaTime) override
+		virtual void Tick(float DeltaTime) override
 		{
 			if (PatrolPoints.IsEmpty()) return;
 			FVector const ToCurrentPoint = PatrolPoints[CurrentPatrolPointIdx] - ControlledAgent.GetActorLocation();

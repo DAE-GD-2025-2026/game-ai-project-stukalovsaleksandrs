@@ -4,7 +4,7 @@ void GameAI::FSM::FSM::AddState(std::unique_ptr<IState>&& NewState)
 {
 	// Adding only non-repeating states
 	// NOTE: Not using std::unordered_set, because it does not work with the non-copyable types
-	if (!std::ranges::binary_search(States.begin(), States.end(), NewState))
+	if (!HasState(NewState.get()))
 	{
 		// 1. Adding the state
 		States.push_back(std::move(NewState));
@@ -25,28 +25,48 @@ void GameAI::FSM::FSM::Start()
 	bRunning = true;
 }
 
+void GameAI::FSM::FSM::Reset()
+{
+	Stop();
+	States.clear();
+	Transitions.clear();
+	CurrentState = nullptr;
+}
+
 void GameAI::FSM::FSM::Tick(float const DeltaTime)
 {
 	if (!bRunning) return;
-	if (CurrentState) CurrentState->Update(DeltaTime);
+	if (CurrentState) CurrentState->Tick(DeltaTime);
 
 	// TODO: Process transitions
 	for (auto const& Transition : Transitions)
 	{
-		// 1. Skipping all the transitions not from current state
+		// 1. Skipping all the transitions not from the current state
 		if (Transition.From != CurrentState) continue;
 		// 2. Trying to change state
 		if (Transition.EvalFunc())
 		{
-			ChangeState(Transition.To);
+			ChangeFSMState(Transition.To);
 		}
 	}
 }
 
-void GameAI::FSM::FSM::ChangeState(IState* NewState)
+void GameAI::FSM::FSM::ChangeFSMState(IState* ToState)
 {
-	if (NewState == CurrentState) return;
-	CurrentState->OnExit();
-	CurrentState = NewState;
+	if (ToState == CurrentState) return;
+	if (!HasState(ToState)) return;
+	if (CurrentState) CurrentState->OnExit();
+	CurrentState = ToState;
 	CurrentState->OnEnter();
 }
+
+bool GameAI::FSM::FSM::HasState(IState const * const StateToCheck) const
+{
+	for (auto const& State : States)
+	{
+		if (State.get() == StateToCheck) return true;
+	}
+	return false;
+}
+
+

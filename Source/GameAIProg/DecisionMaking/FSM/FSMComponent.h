@@ -7,6 +7,7 @@
 #include "BrainComponent.h"
 // Game
 #include "FSM.h"
+#include "States/PatrolState.h"
 #include "FSMComponent.generated.h"
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -31,7 +32,9 @@ public:
 	void AddState(std::unique_ptr<GameAI::FSM::IState>&& NewState);
 
 	void AddTransition(GameAI::FSM::FTransition const&);
-		
+	
+	void TryChangingFSMState(GameAI::FSM::IState*);
+
 protected:
 	virtual void BeginPlay() override;
 
